@@ -74,6 +74,21 @@ export function computeGeodesicAreaHectares(coords: number[][]): number {
 }
 
 /**
+ * Sorts polygon coordinates in clockwise perimeter order around centroid
+ * to prevent diagonal criss-crossing lines and self-intersecting hourglass shapes.
+ */
+export function sortVerticesClockwise(coords: number[][]): number[][] {
+  if (!coords || coords.length < 3) return coords;
+  const centerLat = coords.reduce((sum, p) => sum + p[0], 0) / coords.length;
+  const centerLon = coords.reduce((sum, p) => sum + p[1], 0) / coords.length;
+  return [...coords].sort((a, b) => {
+    const angleA = Math.atan2(a[0] - centerLat, a[1] - centerLon);
+    const angleB = Math.atan2(b[0] - centerLat, b[1] - centerLon);
+    return angleB - angleA;
+  });
+}
+
+/**
  * Perpendicular distance from a point to a line segment (in degrees)
  */
 function perpendicularDistance(
@@ -419,6 +434,13 @@ export default function FullscreenFieldDrawer({
     }
   };
 
+  // Untangle criss-cross / hourglass shapes
+  const handleUntangle = () => {
+    if (boundary.length < 3) return;
+    setHistory((h) => [...h, boundary]);
+    setBoundary(sortVerticesClockwise(boundary));
+  };
+
   // Clear all points
   const handleClear = () => {
     if (boundary.length > 0) {
@@ -761,6 +783,18 @@ export default function FullscreenFieldDrawer({
             <RotateCcw className="w-4 h-4 text-slate-300" />
             <span>Clear</span>
           </button>
+
+          {boundary.length >= 4 && (
+            <button
+              type="button"
+              onClick={handleUntangle}
+              className="px-3.5 py-2.5 rounded-xl bg-black/80 hover:bg-black/95 text-cyan-300 border border-cyan-500/40 backdrop-blur-md shadow-xl transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+              title="Untangle criss-crossing edges into clean perimeter order"
+            >
+              <Sparkles className="w-4 h-4 text-cyan-400" />
+              <span>Fix Shape</span>
+            </button>
+          )}
 
           {boundary.length >= 3 && (
             <button

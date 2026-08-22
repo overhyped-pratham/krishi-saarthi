@@ -109,6 +109,18 @@ function generateCadastralPolygon(lat: number, lon: number, areaHa: number = 5.0
   ];
 }
 
+/** Sorts vertices in perimeter order around centroid to prevent hourglass criss-cross shapes */
+export function sortVerticesClockwise(coords: number[][]): number[][] {
+  if (!coords || coords.length < 3) return coords;
+  const centerLat = coords.reduce((sum, p) => sum + p[0], 0) / coords.length;
+  const centerLon = coords.reduce((sum, p) => sum + p[1], 0) / coords.length;
+  return [...coords].sort((a, b) => {
+    const angleA = Math.atan2(a[0] - centerLat, a[1] - centerLon);
+    const angleB = Math.atan2(b[0] - centerLat, b[1] - centerLon);
+    return angleB - angleA;
+  });
+}
+
 /** Point-in-polygon ray-casting test to determine if farmer is inside the field */
 function isPointInPolygon(point: [number, number], polygon: number[][]): boolean {
   if (!polygon || polygon.length < 3) return false;
@@ -387,6 +399,16 @@ export default function FarmMap({
     if (onChange) onChange([]);
     if (farmId) {
       localStorage.removeItem(`agriproof:boundary:${farmId}`);
+    }
+  };
+
+  const handleUntanglePolygon = () => {
+    if (points.length < 3) return;
+    const sorted = sortVerticesClockwise(points);
+    setPoints(sorted);
+    if (onChange) onChange(sorted);
+    if (farmId) {
+      localStorage.setItem(`agriproof:boundary:${farmId}`, JSON.stringify(sorted));
     }
   };
 
@@ -706,6 +728,17 @@ export default function FarmMap({
               className="px-2 py-1 bg-dark-850 hover:bg-dark-800 text-slate-300 hover:text-white rounded border border-dark-700 flex items-center gap-1"
             >
               <Undo2 className="w-3 h-3" /> Undo
+            </button>
+          )}
+
+          {points.length >= 4 && (
+            <button
+              type="button"
+              onClick={handleUntanglePolygon}
+              className="px-2 py-1 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 rounded border border-emerald-600 flex items-center gap-1 font-semibold"
+              title="Untangle criss-cross lines into a clean polygon"
+            >
+              <Sparkles className="w-3 h-3 text-emerald-400" /> Untangle Shape
             </button>
           )}
 
