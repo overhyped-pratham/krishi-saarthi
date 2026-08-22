@@ -1,0 +1,48 @@
+﻿services:
+  # ── Python FastAPI Backend Web Service ────────────────────────────────────
+  - type: web
+    name: agriproof-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./agriproof.db
+      - key: SUPABASE_URL
+        value: https://fzqfczcwqnamvebvprtb.supabase.co
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: '["*"]'
+      - key: STORAGE_DIR
+        value: ./storage
+      - key: CIRCUITS_DIR
+        value: ./circuits
+      - key: OPEN_METEO_BASE_URL
+        value: https://api.open-meteo.com/v1
+      - key: PLANET_BASE_URL
+        value: https://api.planet.com/data/v1
+
+  # ── React / Vite Frontend Static Site ─────────────────────────────────────
+  - type: web
+    name: agriproof-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_SUPABASE_URL
+        value: https://fzqfczcwqnamvebvprtb.supabase.co
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_API_URL
+        value: https://agriproof-backend.onrender.com
