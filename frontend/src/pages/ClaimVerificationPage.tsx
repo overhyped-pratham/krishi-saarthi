@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { api, Claim, Farm, VerificationResult } from '../lib/api';
+import { api, Claim, Farm, VerificationResult, ClaimPayoutEstimate } from '../lib/api';
 import ZKProofCard from '../components/ZKProofCard';
 import { Copy, FileJson, RefreshCw, Hash, Database, ShieldCheck, ShieldX, Printer, CheckCircle, Award, Satellite, Sparkles, ChevronDown, ChevronUp, Coins } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
@@ -9,6 +9,7 @@ export default function ClaimVerificationPage() {
   const { claimId } = useParams<{ claimId: string }>();
   const [claim, setClaim]                         = useState<Claim | null>(null);
   const [farm, setFarm]                           = useState<Farm | null>(null);
+  const [estimate, setEstimate]                   = useState<ClaimPayoutEstimate | null>(null);
   const [verifying, setVerifying]                 = useState(false);
   const [verifyResult, setVerifyResult]           = useState<VerificationResult | null>(null);
   const [showJson, setShowJson]                   = useState(false);
@@ -23,6 +24,12 @@ export default function ClaimVerificationPage() {
         try {
           const farmRes = await api.farms.get(res.data.farm_id);
           setFarm(farmRes.data);
+          try {
+            const estRes = await api.claims.getEstimate(res.data.farm_id);
+            setEstimate(estRes.data);
+          } catch (estErr) {
+            console.warn('[ClaimVerificationPage] Dynamic estimate fallback:', estErr);
+          }
         } catch (farmErr) {
           console.warn('[ClaimVerificationPage] Failed to fetch farm details:', farmErr);
         }
@@ -75,14 +82,14 @@ export default function ClaimVerificationPage() {
     return <div className="p-8 text-center text-slate-400">Loading claim data…</div>;
   }
 
-  const areaHa = farm?.area_hectares || 2.84;
-  const yieldLossPct = claim.yield_loss_scaled
+  const areaHa = estimate?.area_hectares ?? farm?.area_hectares ?? 2.84;
+  const yieldLossPct = estimate?.ai_predicted_yield_loss_pct ?? (claim.yield_loss_scaled
     ? (claim.yield_loss_scaled > 100 ? claim.yield_loss_scaled / 100 : claim.yield_loss_scaled)
-    : 36.7;
+    : 36.7);
   const sumInsuredPerHa = 50000;
-  const totalMaxCoverage = Math.round(areaHa * sumInsuredPerHa);
+  const totalMaxCoverage = estimate?.total_insured_amount ?? Math.round(areaHa * sumInsuredPerHa);
   const calculatedPayoutInr = claim.eligible
-    ? (claim.payout_amount || Math.round(totalMaxCoverage * 0.85))
+    ? (estimate?.estimated_payout_amount ?? claim.payout_amount ?? Math.round(totalMaxCoverage * 0.85))
     : 0;
   const calculatedPayoutUsd = Math.round(calculatedPayoutInr / 83.2);
 
