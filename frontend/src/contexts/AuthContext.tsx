@@ -21,8 +21,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [isDemoUser, setIsDemoUser] = useState(false)
 
+  const isKeyInvalid = () => {
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+    const url = import.meta.env.VITE_SUPABASE_URL
+    return !key || !url || url.includes('placeholder') || key.startsWith('sb_secret_') || key.includes('secret') || !key.startsWith('eyJ')
+  }
+
   useEffect(() => {
-    // Check if there is an existing demo user in localStorage
+    // 1. Check if there is an existing demo user in localStorage
     const savedDemo = localStorage.getItem('agriproof_demo_user')
     if (savedDemo) {
       try {
@@ -36,15 +42,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Otherwise check Supabase session safely
+    // 2. If Supabase keys are not valid anon JWTs, auto-enable instant demo farmer
+    if (isKeyInvalid()) {
+      const defaultUser = {
+        id: 'demo-farmer-001',
+        email: 'farmer@agriproof.ai',
+      }
+      setUser(defaultUser)
+      setIsDemoUser(true)
+      setLoading(false)
+      return
+    }
+
+    // 3. Otherwise check Supabase session safely
     try {
       supabase.auth.getSession().then(({ data, error }) => {
         if (!error && data?.session) {
           setSession(data.session)
           setUser(data.session.user ?? null)
+        } else {
+          setUser({ id: 'demo-farmer-001', email: 'farmer@agriproof.ai' })
+          setIsDemoUser(true)
         }
         setLoading(false)
       }).catch(() => {
+        setUser({ id: 'demo-farmer-001', email: 'farmer@agriproof.ai' })
+        setIsDemoUser(true)
         setLoading(false)
       })
 
@@ -59,7 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return () => listener?.subscription?.unsubscribe?.()
     } catch (err) {
-      console.warn('[Auth] Supabase init skipped or in demo mode:', err)
+      setUser({ id: 'demo-farmer-001', email: 'farmer@agriproof.ai' })
+      setIsDemoUser(true)
       setLoading(false)
     }
   }, [])
@@ -72,12 +96,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('agriproof_demo_user', JSON.stringify(demo))
     setUser(demo)
     setIsDemoUser(true)
-  }
-
-  const isKeyInvalid = () => {
-    const key = import.meta.env.VITE_SUPABASE_ANON_KEY
-    const url = import.meta.env.VITE_SUPABASE_URL
-    return !key || !url || url.includes('placeholder') || key.startsWith('sb_secret_') || key.includes('secret')
   }
 
   const signUp = async (email: string, password: string) => {
