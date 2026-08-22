@@ -2024,10 +2024,27 @@ async function start() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
+    const possiblePaths = [
+      path.join(process.cwd(), 'frontend', 'dist'),
+      path.join(process.cwd(), 'dist'),
+      path.join(__dirname, 'frontend', 'dist'),
+      path.join(__dirname, '..', 'frontend', 'dist'),
+      path.join(__dirname, 'dist'),
+    ];
+    const distPath = possiblePaths.find((p) => fs.existsSync(path.join(p, 'index.html'))) || path.join(process.cwd(), 'frontend', 'dist');
+
     app.use(express.static(distPath));
+    app.use(express.static(path.join(process.cwd(), 'dist')));
+    app.use(express.static(path.join(process.cwd(), 'frontend', 'dist')));
+
     app.get('*', (_req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      for (const p of possiblePaths) {
+        const candidate = path.join(p, 'index.html');
+        if (fs.existsSync(candidate)) {
+          return res.sendFile(candidate);
+        }
+      }
+      res.status(200).send('AgriProof AI is initializing. Please refresh in a moment.');
     });
   }
 
