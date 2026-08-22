@@ -13,11 +13,9 @@ import {
   Radio, 
   Volume2, 
   VolumeX,
-  Compass,
-  Maximize2,
-  Minimize2
+  Compass
 } from 'lucide-react';
-import { playSatelliteBeep, playCinematicZoomSound } from '../lib/soundFx';
+import { playSatelliteBeep } from '../lib/soundFx';
 
 export type EarthViewMode = 'natural' | 'ndvi' | 'night' | 'moisture';
 
@@ -147,12 +145,10 @@ export default function InterstellarEarthScene({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [activeMode, setActiveMode] = useState<EarthViewMode>('natural');
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
-  const [showRings, setShowRings] = useState<boolean>(true);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [selectedHotspot, setSelectedHotspot] = useState<TelemetryHotspot | null>(null);
   const [hoveredHotspot, setHoveredHotspot] = useState<TelemetryHotspot | null>(null);
   const [orbitCadence, setOrbitCadence] = useState<number>(1.0);
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   // References
   const earthMeshRef = useRef<THREE.Mesh | null>(null);

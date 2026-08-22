@@ -3,13 +3,9 @@ import { Link } from 'react-router-dom';
 import {
   Bell,
   X,
-  ShieldAlert,
-  AlertTriangle,
-  Sparkles,
   Volume2,
   VolumeX,
   Send,
-  CheckCircle2,
   ExternalLink,
   RefreshCw,
   Bug,

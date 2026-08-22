@@ -9,13 +9,16 @@ import {
   Activity, 
   Cpu, 
   Scan,
-  Compass
+  Compass,
+  Globe
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import CinematicEarthBackground from '../components/CinematicEarthBackground';
+import InterstellarEarthScene from '../components/InterstellarEarthScene';
 import AnalysisPipelineSnapshots from '../components/AnalysisPipelineSnapshots';
 
 export default function LandingPage() {
+  const [earthStyle, setEarthStyle] = useState<'cinematic' | 'interstellar'>('cinematic');
   const [orbitSpeed, setOrbitSpeed] = useState<number>(1.0);
   const [orbitModeName, setOrbitModeName] = useState<string>('Orbit: Active');
 
@@ -34,8 +37,12 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-black text-white relative selection:bg-primary-container selection:text-white">
-      {/* 3D Cinematic Earth WebGL Background */}
-      <CinematicEarthBackground speedFactor={orbitSpeed} />
+      {/* 3D Earth Background: Switchable between Cinematic Horizon and Interstellar Globe */}
+      {earthStyle === 'cinematic' ? (
+        <CinematicEarthBackground speedFactor={orbitSpeed} />
+      ) : (
+        <InterstellarEarthScene className="fixed inset-0 z-0" isHeroMode={true} />
+      )}
 
       {/* Atmospheric Horizon Flare Backlight Effect */}
       <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_90%_40%_at_50%_100%,rgba(0,163,255,0.2)_0%,rgba(0,50,120,0.08)_45%,transparent_75%)]" />
@@ -70,6 +77,15 @@ export default function LandingPage() {
             >
               <Compass className="w-3.5 h-3.5" />
               {orbitModeName}
+            </button>
+            <span className="text-xs text-white/40">|</span>
+            <button 
+              onClick={() => setEarthStyle(prev => prev === 'cinematic' ? 'interstellar' : 'cinematic')} 
+              className="font-label-caps text-xs text-emerald-400 hover:text-white transition-colors flex items-center gap-1 font-bold"
+              title="Switch 3D Scene View"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              {earthStyle === 'cinematic' ? 'Switch: 3D Globe' : 'Switch: Horizon'}
             </button>
           </motion.div>
 

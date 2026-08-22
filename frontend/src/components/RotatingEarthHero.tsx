@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { playCinematicZoomSound, playSatelliteBeep } from '../lib/soundFx';
 import { Volume2, VolumeX, RotateCcw, Satellite, Compass, Play, Pause } from 'lucide-react';

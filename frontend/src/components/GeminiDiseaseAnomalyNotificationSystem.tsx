@@ -12,11 +12,9 @@ import {
   Activity,
   Droplets,
   Sprout,
-  HelpCircle,
   MessageSquare,
   RefreshCw,
   Flame,
-  FileSpreadsheet,
 } from 'lucide-react';
 import { api, VegetationHealthAnomalyReport, DiseaseRiskAssessment, HistoricalAnomalyMarker } from '../lib/api';
 
@@ -36,8 +34,8 @@ export const GeminiDiseaseAnomalyNotificationSystem: React.FC<GeminiDiseaseAnoma
   const [report, setReport] = useState<VegetationHealthAnomalyReport | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [scanning, setScanning] = useState<boolean>(false);
-  const [sensitivity, setSensitivity] = useState<'standard' | 'high'>('standard');
-  const [customPrompt, setCustomPrompt] = useState<string>('');
+  const sensitivity = 'standard';
+  const customPrompt = '';
   const [selectedDisease, setSelectedDisease] = useState<DiseaseRiskAssessment | null>(null);
   const [treatmentTab, setTreatmentTab] = useState<'chemical' | 'organic' | 'prevention'>('chemical');
   
@@ -51,7 +49,6 @@ export const GeminiDiseaseAnomalyNotificationSystem: React.FC<GeminiDiseaseAnoma
   const [dispatchSuccess, setDispatchSuccess] = useState<string | null>(null);
 
   // Quick ask follow-up state
-  const [askQuery, setAskQuery] = useState<string>('');
   const [askingAi, setAskingAi] = useState<boolean>(false);
   const [aiAnswer, setAiAnswer] = useState<{ answer: string; bulletPoints?: string[] } | null>(null);
 
@@ -159,7 +156,6 @@ export const GeminiDiseaseAnomalyNotificationSystem: React.FC<GeminiDiseaseAnoma
 
   // Quick Ask Gemini follow-up
   const handleQuickAsk = async (queryText: string) => {
-    setAskQuery(queryText);
     setAskingAi(true);
     try {
       const res = await api.ai.askAdvisor({
@@ -241,7 +237,7 @@ export const GeminiDiseaseAnomalyNotificationSystem: React.FC<GeminiDiseaseAnoma
             </div>
             <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-3xl leading-relaxed">
               Automated multi-spectral temporal reasoning flagging rapid canopy senescence, chlorophyll loss anomalies,
-              and crop pathogen vectors from Sentinel-2 MSI time-series data.
+              and crop pathogen vectors for <strong className="text-cyan-300 font-mono">{farmName}</strong> from Sentinel-2 MSI time-series data.
             </p>
           </div>
         </div>
