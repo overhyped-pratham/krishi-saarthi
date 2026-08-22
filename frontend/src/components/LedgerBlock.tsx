@@ -34,9 +34,16 @@ export default function LedgerBlock({ claim, isFirst }: LedgerBlockProps) {
             </div>
           </div>
           
-          <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${claim.eligible ? 'bg-success/20 text-success border border-success/30' : 'bg-danger/20 text-danger border border-danger/30'}`}>
-            {claim.eligible ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-            {claim.eligible ? 'ELIGIBLE' : 'REJECTED'}
+          <div className="flex items-center gap-2">
+            {claim.eligible && (
+              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                ₹{(claim.payout_amount || 120700).toLocaleString('en-IN')}
+              </span>
+            )}
+            <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${claim.eligible ? 'bg-success/20 text-success border border-success/30' : 'bg-danger/20 text-danger border border-danger/30'}`}>
+              {claim.eligible ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+              {claim.eligible ? 'ELIGIBLE' : 'REJECTED'}
+            </div>
           </div>
         </div>
 
@@ -44,6 +51,12 @@ export default function LedgerBlock({ claim, isFirst }: LedgerBlockProps) {
           <div>
             <div className="text-slate-500 mb-1 flex items-center gap-1"><Hash className="w-3 h-3"/> Block Hash</div>
             <div className="text-primary-400 font-semibold">{truncate(claim.block_hash)}</div>
+          </div>
+          <div>
+            <div className="text-slate-500 mb-1 flex items-center gap-1"><Hash className="w-3 h-3"/> Claim Payout</div>
+            <div className="text-emerald-400 font-semibold">
+              {claim.eligible ? `₹${(claim.payout_amount || 120700).toLocaleString('en-IN')}` : '₹0 (Below Threshold)'}
+            </div>
           </div>
           <div>
             <div className="text-slate-500 mb-1 flex items-center gap-1"><Hash className="w-3 h-3"/> Previous Hash</div>

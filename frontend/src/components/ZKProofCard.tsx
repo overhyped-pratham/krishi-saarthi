@@ -6,9 +6,10 @@ interface ZKProofCardProps {
   claimId: string;
   eligible: boolean;
   isVerifying: boolean;
+  predictedPayout?: number;
 }
 
-export default function ZKProofCard({ claimId, eligible, isVerifying }: ZKProofCardProps) {
+export default function ZKProofCard({ claimId, eligible, isVerifying, predictedPayout }: ZKProofCardProps) {
   const [step, setStep] = useState(0);
   const [showExplainer, setShowExplainer] = useState(false);
 
@@ -94,14 +95,23 @@ export default function ZKProofCard({ claimId, eligible, isVerifying }: ZKProofC
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className={`px-3 py-1.5 rounded-full font-bold text-xs flex items-center gap-1.5 ${
-                eligible
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.2)]'
-                  : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-              }`}
+              className="flex items-center gap-2"
             >
-              <span className={`w-2 h-2 rounded-full ${eligible ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
-              <span>{eligible ? 'PAYOUT APPROVED ✓' : 'BELOW THRESHOLD'}</span>
+              {predictedPayout && predictedPayout > 0 && eligible && (
+                <span className="px-3 py-1 rounded-xl font-mono font-black text-xs bg-emerald-500 text-black shadow-lg shadow-emerald-500/30">
+                  ₹{predictedPayout.toLocaleString('en-IN')}
+                </span>
+              )}
+              <div
+                className={`px-3 py-1.5 rounded-full font-bold text-xs flex items-center gap-1.5 ${
+                  eligible
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.2)]'
+                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${eligible ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+                <span>{eligible ? 'PAYOUT APPROVED ✓' : 'BELOW THRESHOLD'}</span>
+              </div>
             </motion.div>
           )}
         </div>
@@ -227,7 +237,7 @@ export default function ZKProofCard({ claimId, eligible, isVerifying }: ZKProofC
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-emerald-950/40 border-t border-emerald-500/30 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left"
+          className="bg-emerald-950/60 border-t border-emerald-500/30 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left"
         >
           <div className="flex items-center gap-2.5 text-emerald-300 text-xs">
             <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
@@ -235,9 +245,16 @@ export default function ZKProofCard({ claimId, eligible, isVerifying }: ZKProofC
               <strong>Zero-Knowledge Proof Validated:</strong> 100% tamper-proof parametric claim ready for instant disbursement.
             </span>
           </div>
-          <span className="px-3 py-1 bg-emerald-500 text-dark-950 font-bold text-xs rounded-lg shadow-sm whitespace-nowrap">
-            Payout Cleared
-          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            {predictedPayout && predictedPayout > 0 && (
+              <span className="text-xs font-mono font-extrabold text-emerald-300">
+                ₹{predictedPayout.toLocaleString('en-IN')}
+              </span>
+            )}
+            <span className="px-3 py-1 bg-emerald-500 text-black font-bold text-xs rounded-lg shadow-sm whitespace-nowrap">
+              Payout Cleared
+            </span>
+          </div>
         </motion.div>
       )}
     </div>
