@@ -464,6 +464,71 @@ export default function ClaimVerificationPage() {
           )}
         </div>
 
+        {/* ── ASSURED CLAIM & FINANCIAL PAYOUT SETTLEMENT ──────────────── */}
+        <div className="border-2 border-emerald-700/80 bg-emerald-50/60 rounded-lg p-4 mb-6 shadow-sm">
+          <div className="flex justify-between items-center border-b border-emerald-200 pb-2 mb-3">
+            <h3 className="text-xs font-black uppercase text-emerald-900 tracking-wider flex items-center gap-1.5">
+              <span>💰</span> ASSURED CLAIM COMPENSATION & SETTLEMENT DISBURSEMENT
+            </h3>
+            <span className="inline-block px-2.5 py-0.5 bg-emerald-700 text-white font-mono text-[10px] font-bold rounded uppercase">
+              {claim.eligible ? 'PAYOUT APPROVED & CLEARED' : 'ZERO DISBURSEMENT'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
+            {/* Big Payout Amount */}
+            <div className="col-span-2 bg-white border border-emerald-300 rounded-lg p-3">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                Total Assured Claim Payout
+              </p>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className="text-2xl font-black text-emerald-800 font-mono">
+                  {claim.eligible ? `₹${calculatedPayoutInr.toLocaleString('en-IN')}` : '₹0'}
+                </span>
+                {claim.eligible && (
+                  <span className="text-xs font-bold text-slate-600 font-mono">
+                    (~${calculatedPayoutUsd.toLocaleString('en-US')} USD)
+                  </span>
+                )}
+              </div>
+              <p className="text-[10px] text-slate-600 mt-1">
+                {claim.eligible
+                  ? `Calculated at 85.0% payout factor on ${areaHa.toFixed(2)} Ha insured parcel.`
+                  : 'Claim did not breach policy deductible threshold.'}
+              </p>
+            </div>
+
+            {/* Total Sum Insured */}
+            <div className="bg-white border border-slate-200 rounded-lg p-3 text-xs">
+              <p className="text-slate-500 font-medium">Total Sum Insured</p>
+              <p className="text-base font-black text-slate-900 font-mono mt-0.5">
+                ₹{totalMaxCoverage.toLocaleString('en-IN')}
+              </p>
+              <p className="text-[10px] text-slate-500 mt-0.5">₹50,000 / Hectare base</p>
+            </div>
+
+            {/* Assessed Crop Loss */}
+            <div className="bg-white border border-slate-200 rounded-lg p-3 text-xs">
+              <p className="text-slate-500 font-medium">Assessed Crop Loss</p>
+              <p className="text-base font-black text-red-600 font-mono mt-0.5">
+                {yieldLossPct.toFixed(1)}%
+              </p>
+              <p className="text-[10px] text-slate-500 mt-0.5">Trigger: &gt; 20%</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 text-xs mt-3 pt-2 border-t border-emerald-200/80">
+            <div>
+              <span className="text-slate-600 font-medium">Disbursement Channel: </span>
+              <span className="font-bold text-slate-900">Autonomous Smart Contract (Zero-Knowledge Parametric Oracle)</span>
+            </div>
+            <div className="text-right">
+              <span className="text-slate-600 font-medium">Settlement Guarantee: </span>
+              <span className="font-bold text-emerald-800">100% Guaranteed On-Chain (Groth16 BN128)</span>
+            </div>
+          </div>
+        </div>
+
         {/* Parametric Multi-Spectral Assessment */}
         <div className="border border-slate-300 rounded-lg p-4 mb-6">
           <h3 className="text-xs font-black uppercase text-slate-700 tracking-wider mb-3 border-b border-slate-200 pb-1">
