@@ -24,7 +24,10 @@ import {
   Droplets,
   Sprout,
   ShieldAlert,
+  Bug,
+  Sparkles,
 } from 'lucide-react';
+import { HistoricalAnomalyMarker } from '../lib/api';
 
 export interface TimeSeriesPoint {
   date: string;
@@ -44,6 +47,7 @@ interface HistoricalVegetationHealthChartProps {
   farmName?: string;
   stressThreshold?: number;
   currentDropPct?: number;
+  anomalies?: HistoricalAnomalyMarker[];
 }
 
 type MetricMode = 'all' | 'ndvi' | 'evi' | 'ndwi' | 'water_stress';
@@ -56,11 +60,13 @@ export const HistoricalVegetationHealthChart: React.FC<HistoricalVegetationHealt
   farmName = 'Registered Parcel',
   stressThreshold = 0.30,
   currentDropPct: _currentDropPct = 35.0,
+  anomalies = [],
 }) => {
   const [selectedMetric, setSelectedMetric] = useState<MetricMode>('all');
   const [timeRange, setTimeRange] = useState<TimeRange>('6M');
   const [showBaselineBand, setShowBaselineBand] = useState<boolean>(true);
   const [showRainfall, setShowRainfall] = useState<boolean>(true);
+  const [showAnomalyOverlay, setShowAnomalyOverlay] = useState<boolean>(true);
 
   // Generate complete, enriched 6-month historical Sentinel-2 data points
   const enrichedData = useMemo(() => {
@@ -79,11 +85,11 @@ export const HistoricalVegetationHealthChart: React.FC<HistoricalVegetationHealt
           ndvi: Math.round(ndviVal * 100) / 100,
         });
       }
-      return enrichPoints(points, baseline, stressThreshold);
+      return enrichPoints(points, baseline, stressThreshold, anomalies);
     }
 
-    return enrichPoints(data, baseline, stressThreshold);
-  }, [data, baseline, stressThreshold]);
+    return enrichPoints(data, baseline, stressThreshold, anomalies);
+  }, [data, baseline, stressThreshold, anomalies]);
 
   // Filter based on selected time range
   const filteredData = useMemo(() => {
@@ -264,7 +270,7 @@ export const HistoricalVegetationHealthChart: React.FC<HistoricalVegetationHealt
         </div>
 
         {/* Visibility Toggles */}
-        <div className="flex items-center gap-3 text-xs font-mono text-slate-400">
+        <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-400">
           <label className="flex items-center gap-1.5 cursor-pointer hover:text-slate-200 select-none">
             <input
               type="checkbox"
@@ -283,6 +289,17 @@ export const HistoricalVegetationHealthChart: React.FC<HistoricalVegetationHealt
               className="rounded border-dark-600 bg-dark-900 text-primary-500 focus:ring-0 focus:ring-offset-0"
             />
             <span>Precipitation (mm)</span>
+          </label>
+
+          <label className="flex items-center gap-1.5 cursor-pointer hover:text-cyan-300 select-none text-cyan-400 font-semibold">
+            <input
+              type="checkbox"
+              checked={showAnomalyOverlay}
+              onChange={(e) => setShowAnomalyOverlay(e.target.checked)}
+              className="rounded border-dark-600 bg-dark-900 text-cyan-400 focus:ring-0 focus:ring-offset-0"
+            />
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Gemini AI Anomaly Markers</span>
           </label>
         </div>
       </div>
@@ -489,21 +506,57 @@ export const HistoricalVegetationHealthChart: React.FC<HistoricalVegetationHealt
                 dot={(props: any) => {
                   const { cx, cy, payload } = props;
                   const isSevere = payload.ndvi < stressThreshold;
+                  const hasAnomaly = showAnomalyOverlay && Boolean(payload.anomalyFlag);
                   return (
-                    <circle
-                      key={`dot-${payload.date}`}
-                      cx={cx}
-                      cy={cy}
-                      r={isSevere ? 5 : 3.5}
-                      fill={isSevere ? '#ef4444' : '#10b981'}
-                      stroke="#0f172a"
-                      strokeWidth={2}
-                    />
+                    <g key={`dot-group-${payload.date}`}>
+                      {hasAnomaly && (
+                        <circle
+                          cx={cx}
+                          cy={cy}
+                          r={9}
+                          fill="none"
+                          stroke="#f59e0b"
+                          strokeWidth={2}
+                          strokeDasharray="2 2"
+                          className="animate-spin"
+                        />
+                      )}
+                      <circle
+                        cx={cx}
+                        cy={cy}
+                        r={hasAnomaly ? 6 : isSevere ? 5 : 3.5}
+                        fill={hasAnomaly ? '#f59e0b' : isSevere ? '#ef4444' : '#10b981'}
+                        stroke="#0f172a"
+                        strokeWidth={2}
+                      />
+                    </g>
                   );
                 }}
-                activeDot={{ r: 7, fill: '#10b981', stroke: '#ffffff', strokeWidth: 2.5 }}
+                activeDot={{ r: 8, fill: '#10b981', stroke: '#ffffff', strokeWidth: 2.5 }}
               />
             )}
+
+            {/* Anomaly Vertical Reference Lines */}
+            {showAnomalyOverlay &&
+              anomalies?.map((anom, idx) => {
+                const matchedPoint = filteredData.find((p) => p.date === anom.date);
+                if (!matchedPoint) return null;
+                return (
+                  <ReferenceLine
+                    key={`anom-ref-${idx}`}
+                    x={matchedPoint.formattedDate}
+                    stroke="#f59e0b"
+                    strokeDasharray="3 3"
+                    strokeWidth={1.5}
+                    label={{
+                      value: `Anomaly: -${anom.drop_pct}%`,
+                      position: 'top',
+                      fill: '#fbbf24',
+                      fontSize: 9,
+                    }}
+                  />
+                );
+              })}
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -597,6 +650,7 @@ const CustomHealthTooltip = ({ active, payload, label: _label, baseline, stressT
     const data = payload[0].payload;
     const isCritical = data.ndvi < stressThreshold;
     const ndviDiff = Math.round(((data.ndvi - baseline) / baseline) * 100);
+    const anomaly = data.anomalyFlag as HistoricalAnomalyMarker | undefined;
 
     return (
       <div className="bg-slate-900/95 border border-slate-700 rounded-xl p-3.5 shadow-2xl backdrop-blur text-xs font-mono max-w-xs z-50">
@@ -609,6 +663,25 @@ const CustomHealthTooltip = ({ active, payload, label: _label, baseline, stressT
             {data.sensor}
           </span>
         </div>
+
+        {/* Gemini Flagged Anomaly Card if present */}
+        {anomaly && (
+          <div className="mb-2 p-2 rounded-lg bg-amber-500/15 border border-amber-500/40 text-[11px] space-y-1">
+            <div className="flex items-center justify-between text-amber-300 font-bold">
+              <span className="flex items-center gap-1">
+                <Bug className="w-3.5 h-3.5 text-amber-400" />
+                <span>{anomaly.anomaly_type.replace(/_/g, ' ')}</span>
+              </span>
+              <span className="text-[10px] uppercase font-mono px-1 py-0.2 rounded bg-amber-400/20 text-amber-200">
+                {anomaly.severity}
+              </span>
+            </div>
+            <p className="text-slate-300 text-[10px] leading-tight">{anomaly.description}</p>
+            <div className="text-cyan-300 text-[10px] font-semibold">
+              Action: {anomaly.recommended_action}
+            </div>
+          </div>
+        )}
 
         <div className="space-y-1.5 text-slate-300">
           <div className="flex items-center justify-between">
@@ -660,7 +733,7 @@ const CustomHealthTooltip = ({ active, payload, label: _label, baseline, stressT
             <span className="text-[10px] font-semibold text-primary-300">{data.stage}</span>
           </div>
 
-          {isCritical && (
+          {isCritical && !anomaly && (
             <div className="mt-1.5 p-1.5 rounded bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[10px] flex items-center gap-1">
               <AlertTriangle className="w-3 h-3 text-rose-400 shrink-0" />
               <span>Breaches Parametric Loss Trigger</span>
@@ -674,7 +747,12 @@ const CustomHealthTooltip = ({ active, payload, label: _label, baseline, stressT
 };
 
 // Helper: Enrich base time points with realistic multi-spectral and meteorological data
-function enrichPoints(points: TimeSeriesPoint[], baselineVal: number, _threshold: number) {
+function enrichPoints(
+  points: TimeSeriesPoint[],
+  baselineVal: number,
+  _threshold: number,
+  anomalies: HistoricalAnomalyMarker[] = []
+) {
   const stages = [
     'Sowing & Emergence',
     'Early Tillering',
@@ -690,6 +768,12 @@ function enrichPoints(points: TimeSeriesPoint[], baselineVal: number, _threshold
     'Terminal Desiccation',
   ];
 
+  // Map anomaly by ISO date string or formatted date
+  const anomalyMap = new Map<string, HistoricalAnomalyMarker>();
+  anomalies.forEach((a) => {
+    anomalyMap.set(a.date, a);
+  });
+
   return points.map((item, index) => {
     let parsedDate: Date;
     try {
@@ -701,6 +785,9 @@ function enrichPoints(points: TimeSeriesPoint[], baselineVal: number, _threshold
     const formattedDate = format(parsedDate, 'MMM dd');
     const stageIdx = Math.min(index, stages.length - 1);
     const stage = stages[stageIdx];
+
+    // Check if anomaly matches item.date
+    const anomalyFlag = anomalyMap.get(item.date);
 
     // Compute correlated EVI & NDWI
     const evi = Math.round(item.ndvi * 0.78 * 100) / 100;
@@ -714,7 +801,6 @@ function enrichPoints(points: TimeSeriesPoint[], baselineVal: number, _threshold
     const baselineLower = Math.round((pointBaseline - 0.06) * 100) / 100;
 
     // Simulated rainfall in mm for each 14-day orbital cycle
-    // In later drought stages rainfall drops to near zero
     const isLateStage = index >= points.length - 4;
     const rainfall = isLateStage ? Math.floor(Math.random() * 4) : Math.floor(18 + Math.random() * 42);
 
@@ -729,6 +815,7 @@ function enrichPoints(points: TimeSeriesPoint[], baselineVal: number, _threshold
       baselineLower,
       stage,
       rainfall,
+      anomalyFlag,
       sensor: index % 2 === 0 ? 'Sentinel-2A MSI' : 'Sentinel-2B MSI',
     };
   });

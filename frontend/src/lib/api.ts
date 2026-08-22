@@ -6,6 +6,7 @@ export interface Farm {
   id: string
   name: string
   commitment_hash: string
+  polygon_hash?: string
   crop_type: string
   sowing_date: string
   policy_id: string
@@ -22,13 +23,18 @@ export interface AnalysisResult {
   farm_id: string
   crop_health_score: number
   damage_probability: number
+  damage_prob?: number
+  claim_eligible?: boolean
   stress_level: string
   ndvi_current: number
   ndvi_baseline: number
   ndvi_drop_pct: number
   evi_current: number
+  evi?: number
   ndwi_current: number
+  ndwi?: number
   ndmi_current: number
+  cloud_cover_pct?: number
   rainfall_mm_30d: number
   rainfall_anomaly_pct: number
   temperature_mean: number
@@ -138,6 +144,7 @@ export interface VerificationResult {
   ledger_valid: boolean
   overall_valid: boolean
   payout_eligible?: boolean
+  payout_amount?: number
   block_hash?: string
 }
 
@@ -229,6 +236,64 @@ export interface ClaimPayoutEstimate {
   }
 }
 
+export interface HistoricalAnomalyMarker {
+  date: string
+  severity: 'CRITICAL' | 'WARNING' | 'ADVISORY' | 'NORMAL'
+  ndvi_observed: number
+  expected_baseline: number
+  drop_pct: number
+  anomaly_type: string
+  flagged_disease_risk?: string
+  description: string
+  recommended_action: string
+}
+
+export interface DiseaseRiskAssessment {
+  id: string
+  disease_name: string
+  pathogen: string
+  risk_level: 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW'
+  probability_pct: number
+  incubation_window_days: number
+  progression_stage: string
+  primary_symptoms: string[]
+  spectral_signature_match: string
+  potential_yield_loss_pct: number
+  organic_treatments: string[]
+  chemical_prescriptions: Array<{
+    name: string
+    active_ingredient: string
+    dosage_per_ha: string
+    application_method: string
+  }>
+  preventive_measures: string[]
+  irrigation_advisory: string
+}
+
+export interface VegetationHealthAnomalyReport {
+  farm_id: string
+  farm_name: string
+  crop_type: string
+  analyzed_points_count: number
+  overall_health_status: 'CRITICAL_ANOMALIES' | 'MODERATE_RISK' | 'STABLE_VIGOR'
+  headline: string
+  executive_summary: string
+  disease_risks: DiseaseRiskAssessment[]
+  historical_anomalies: HistoricalAnomalyMarker[]
+  environmental_triggers: {
+    temperature_anomaly_c: number
+    rainfall_deficit_pct: number
+    humidity_pressure: string
+    canopy_moisture_stress: string
+  }
+  audio_briefing_text: string
+  sms_alert_payload: string
+  whatsapp_alert_payload: string
+  generated_at: string
+  model_used: string
+  confidence_score: number
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 
 const client = axios.create({ baseURL: BASE_URL })
@@ -244,6 +309,16 @@ export const api = {
     getLandAnalysis: (id: string) => client.get<LandAnalysisResult>(`/api/farms/${id}/land-analysis`),
     getAIExplanation: (id: string, params: { language?: string; tone?: string; prompt?: string; weather?: any }) =>
       client.post<AIExplanationResult>(`/api/farms/${id}/ai-explain`, params),
+  },
+  diseaseAnomalies: {
+    analyze: (farmId: string, params?: { sensitivity?: string; customPrompt?: string; language?: string }) =>
+      client.post<VegetationHealthAnomalyReport>(`/api/farms/${farmId}/ai-disease-anomalies`, params || {}),
+    getLatest: (farmId: string) =>
+      client.get<VegetationHealthAnomalyReport>(`/api/farms/${farmId}/ai-disease-anomalies`),
+    dispatchAlert: (data: { farmId: string; phoneNumber: string; channel: 'sms' | 'whatsapp'; alertId?: string; customMessage?: string }) =>
+      client.post<{ success: boolean; mode: string; status: string; delivery_receipt: string; timestamp: string }>('/api/notifications/dispatch-disease-alert', data),
+    getAllActiveAlerts: () =>
+      client.get<Array<{ farmId: string; farmName: string; report: VegetationHealthAnomalyReport }>>('/api/notifications/active-disease-alerts'),
   },
   claims: {
     create:      (data: any)   => client.post<Claim>('/api/claims', data),

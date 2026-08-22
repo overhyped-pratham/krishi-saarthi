@@ -1,7 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Satellite, Plus, Zap } from 'lucide-react';
-import { useState } from 'react';
+import { Menu, X, Satellite, Plus, Zap, Bell } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import clsx from 'clsx';
+import NotificationCenterModal from './NotificationCenterModal';
+import { api } from '../lib/api';
 
 const NAV_LINKS = [
   { to: '/', label: 'Overview', icon: 'dashboard' },
@@ -15,7 +17,21 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [activeAlertCount, setActiveAlertCount] = useState(2);
   const location = useLocation();
+
+  useEffect(() => {
+    // Poll or fetch active disease anomaly count
+    api.diseaseAnomalies
+      .getAllActiveAlerts()
+      .then((res) => {
+        if (res.data) {
+          setActiveAlertCount(res.data.length);
+        }
+      })
+      .catch(() => {});
+  }, [location.pathname]);
 
   return (
     <>
@@ -62,6 +78,20 @@ export default function Navbar() {
 
             {/* Right CTA */}
             <div className="hidden md:flex items-center gap-3">
+              {/* Disease Anomaly Notification Bell */}
+              <button
+                onClick={() => setIsNotifOpen(true)}
+                title="AI Disease & Anomaly Notifications"
+                className="relative p-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-white/70 hover:text-white transition-all group"
+              >
+                <Bell className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+                {activeAlertCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white ring-2 ring-black">
+                    {activeAlertCount}
+                  </span>
+                )}
+              </button>
+
               {/* Live Orbit Indicator */}
               <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] font-mono text-white/40">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
@@ -87,7 +117,18 @@ export default function Navbar() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="flex items-center gap-3 md:hidden">
+            <div className="flex items-center gap-2 md:hidden">
+              <button
+                onClick={() => setIsNotifOpen(true)}
+                className="relative p-1.5 rounded-lg bg-white/[0.04] text-white/70 hover:text-white"
+              >
+                <Bell className="w-4 h-4 text-cyan-400" />
+                {activeAlertCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
+                    {activeAlertCount}
+                  </span>
+                )}
+              </button>
               <div className="w-7 h-7 rounded-full border border-cyan-500/30 overflow-hidden shrink-0">
                 <img
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkOja07M3e2a_VQPc0xXDFLISczngZDv1yUdIxNJi994WdlKEAR5F4B2cRYEo-qgAJ-X-Z7IDmyrmmhr4trh9T8m8MdQ7wtc-e14sXV81o4YDchTp79VQAhLxTR02fBnx9qKnA5E4cXWAYkEZC_HpDmcceap6xGhIksa6ny96NfI8xMRnOXZUhvDDawPJJrkY8nv9hb_yv8bpaq1s3ljCaGq_2p2ChORvGIww9Q-P1cVGNGhbuWeBDyQ"
@@ -170,6 +211,9 @@ export default function Navbar() {
           );
         })}
       </nav>
+
+      {/* AI Disease & Anomaly Notification Center Modal */}
+      <NotificationCenterModal isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
     </>
   );
 }

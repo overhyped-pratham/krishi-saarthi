@@ -11,9 +11,10 @@ import LandSatelliteAnalysis from '../components/LandSatelliteAnalysis';
 import PrecisionSatelliteGISConsole from '../components/PrecisionSatelliteGISConsole';
 import FarmerAlertsDrawer from '../components/FarmerAlertsDrawer';
 import LiveWeatherForecastWidget from '../components/LiveWeatherForecastWidget';
+import GeminiDiseaseAnomalyNotificationSystem from '../components/GeminiDiseaseAnomalyNotificationSystem';
 import { FarmAIExplainer } from '../components/FarmAIExplainer';
 import { useAnalysis } from '../hooks/useAnalysis';
-import { api, Farm } from '../lib/api';
+import { api, Farm, HistoricalAnomalyMarker } from '../lib/api';
 import { OfflineStatusBanner } from '../components/OfflineStatusBanner';
 
 export default function DashboardPage() {
@@ -23,6 +24,7 @@ export default function DashboardPage() {
   const [farm, setFarm] = useState<Farm | null>(null);
   const [isGeneratingClaim, setIsGeneratingClaim] = useState(false);
   const [pipelineRunning, setPipelineRunning]     = useState(false);
+  const [detectedAnomalies, setDetectedAnomalies] = useState<HistoricalAnomalyMarker[]>([]);
 
   useEffect(() => {
     if (!farmId) return;
@@ -206,6 +208,16 @@ export default function DashboardPage() {
         isProcessing={false}
       />
 
+      {/* AI Disease Anomaly & Sentinel Remote Sensing Notification System */}
+      {farmId && (
+        <GeminiDiseaseAnomalyNotificationSystem
+          farmId={farmId}
+          farmName={farm?.name || 'Registered Farm Parcel'}
+          cropType={farm?.crop_type || 'Agricultural Crop'}
+          onAnomaliesDetected={(anomalies) => setDetectedAnomalies(anomalies)}
+        />
+      )}
+
       {/* Historical 6-Month Vegetation Health & Spectral Trajectory Section */}
       <HistoricalVegetationHealthChart
         data={analysis.ndvi_time_series}
@@ -214,6 +226,7 @@ export default function DashboardPage() {
         farmName={farm?.name || 'Farm Parcel'}
         stressThreshold={0.30}
         currentDropPct={analysis.ndvi_drop_pct * 100}
+        anomalies={detectedAnomalies}
       />
 
       {/* Main Content */}
