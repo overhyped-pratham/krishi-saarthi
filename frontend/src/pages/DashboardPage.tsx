@@ -81,8 +81,16 @@ export default function DashboardPage() {
     );
   }
 
-  const isEligible  = (analysis.risk_score ?? 0) > 60 || (analysis.expected_loss_pct ?? 0) > 0.2;
-  const healthScore = Math.round((analysis.crop_health_score ?? (1 - (analysis.damage_probability ?? 0.3))) * 100);
+  const normNdviDropPct = analysis.ndvi_drop_pct != null
+    ? (Math.abs(analysis.ndvi_drop_pct) > 1.0 ? analysis.ndvi_drop_pct : analysis.ndvi_drop_pct * 100)
+    : 36.7;
+
+  const normLossPct = analysis.expected_loss_pct != null
+    ? (Math.abs(analysis.expected_loss_pct) > 1.0 ? analysis.expected_loss_pct : analysis.expected_loss_pct * 100)
+    : (analysis.damage_probability != null ? (Math.abs(analysis.damage_probability) > 1.0 ? analysis.damage_probability : analysis.damage_probability * 100) : 35.0);
+
+  const isEligible  = (analysis.risk_score ?? 0) > 60 || normLossPct > 20;
+  const healthScore = Math.round((analysis.crop_health_score ?? (1 - (normLossPct / 100))) * 100);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -125,11 +133,11 @@ export default function DashboardPage() {
           areaHa={farm?.area_hectares}
           ndviCurrent={analysis.ndvi_current}
           ndviBaseline={analysis.ndvi_baseline}
-          ndviDropPct={analysis.ndvi_drop_pct}
+          ndviDropPct={normNdviDropPct}
           evi={analysis.evi_current}
           ndwi={analysis.ndwi_current}
           cloudCover={4.2}
-          damageProb={analysis.damage_probability}
+          damageProb={analysis.damage_probability != null ? (analysis.damage_probability > 1.0 ? analysis.damage_probability / 100 : analysis.damage_probability) : 0.35}
           riskCategory={analysis.risk_category || 'MODERATE'}
           allowDemoRun={true}
         />
@@ -142,7 +150,7 @@ export default function DashboardPage() {
           value={`${healthScore}%`}
           icon={<Activity className="w-6 h-6" />}
           variant={healthScore > 70 ? 'green' : healthScore > 40 ? 'yellow' : 'red'}
-          trend={{ value: -analysis.ndvi_drop_pct * 100, label: 'vs baseline' }}
+          trend={{ value: -parseFloat(normNdviDropPct.toFixed(1)), label: 'vs baseline' }}
         />
         <div className="bg-dark-800 rounded-xl border border-dark-700 p-6 flex flex-col items-center justify-center shadow-sm">
           <p className="text-sm font-medium text-slate-400 mb-2 w-full">Risk Assessment</p>
@@ -150,10 +158,10 @@ export default function DashboardPage() {
         </div>
         <StatCard
           title="Predicted Loss"
-          value={`${((analysis.expected_loss_pct ?? (analysis.damage_probability ?? 0.35)) * 100).toFixed(1)}%`}
+          value={`${normLossPct.toFixed(1)}%`}
           subtitle={`Exp. Yield: ${(analysis.expected_yield ?? 2.8).toFixed(1)} tons/ha`}
           icon={<AlertTriangle className="w-6 h-6" />}
-          variant={(analysis.expected_loss_pct ?? 0.35) > 0.2 ? 'red' : 'yellow'}
+          variant={normLossPct > 20 ? 'red' : 'yellow'}
         />
         <div className={`rounded-xl border p-6 flex flex-col justify-center shadow-sm ${isEligible ? 'bg-success/10 border-success/30' : 'bg-dark-800 border-dark-700'}`}>
           <div className="flex items-center gap-3 mb-2">
