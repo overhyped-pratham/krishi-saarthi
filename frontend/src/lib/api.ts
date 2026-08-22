@@ -3,16 +3,8 @@ import { supabase } from './supabase'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
-// Attach Supabase JWT to every request so the backend can identify the user
-axios.interceptors.request.use(async (config) => {
-  const { data } = await supabase.auth.getSession()
-  const token = data.session?.access_token
-  if (token) {
-    config.headers = config.headers ?? {}
-    config.headers['Authorization'] = `Bearer ${token}`
-  }
-  return config
-})
+// Base API URL
+
 
 export interface Farm {
   id: string
@@ -309,6 +301,20 @@ export interface VegetationHealthAnomalyReport {
 // ────────────────────────────────────────────────────────────────────────────
 
 const client = axios.create({ baseURL: BASE_URL })
+
+client.interceptors.request.use(async (config) => {
+  try {
+    const { data } = await supabase.auth.getSession()
+    const token = data?.session?.access_token
+    if (token) {
+      config.headers = config.headers ?? {}
+      config.headers['Authorization'] = `Bearer ${token}`
+    }
+  } catch (err) {
+    // Ignore auth session error so API requests still proceed
+  }
+  return config
+})
 
 export const api = {
   farms: {
