@@ -53,7 +53,8 @@ export default function DashboardPage() {
     setIsGeneratingClaim(true);
     try {
       const res = await api.claims.create({ farm_id: farmId });
-      navigate(`/claim/${res.data.id}`);
+      const targetId = res.data.claim_id || res.data.id;
+      navigate(`/claim/${targetId}`);
     } catch (err) {
       console.error(err);
       alert('Failed to generate claim. Please try again.');
