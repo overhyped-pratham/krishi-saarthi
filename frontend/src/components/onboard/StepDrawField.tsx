@@ -9,6 +9,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import FarmMap from '../FarmMap';
+import FullscreenFieldDrawer from '../FullscreenFieldDrawer';
 import { FarmerLocation } from '../../lib/onboardService';
 import { api, Farm } from '../../lib/api';
 import {
@@ -23,6 +24,8 @@ import {
   Search,
   Compass,
   Globe2,
+  Maximize2,
+  Hand,
 } from 'lucide-react';
 
 interface Props {
@@ -58,6 +61,7 @@ export function StepDrawField({ location: initialLocation, onNext, onBack }: Pro
   });
 
   const [boundary, setBoundary] = useState<number[][]>([]);
+  const [showFullscreenDrawer, setShowFullscreenDrawer] = useState<boolean>(false);
   const [fieldName, setFieldName] = useState<string>(
     activeLocation.label ? `${activeLocation.label.split(',')[0]} Field` : 'My Agricultural Parcel'
   );
@@ -377,15 +381,16 @@ export function StepDrawField({ location: initialLocation, onNext, onBack }: Pro
               setSelectedExistingFarmId(null);
               setBoundary([]);
               setFieldName(`${activeLocation.label.split(',')[0]} Custom Plot`);
+              setShowFullscreenDrawer(true);
             }}
-            className={`px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 transition-all border shrink-0 ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition-all border shrink-0 cursor-pointer ${
               selectedExistingFarmId === null
-                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-md shadow-emerald-950/40'
-                : 'bg-dark-800 hover:bg-dark-700 border-dark-600 text-slate-300'
+                ? 'bg-emerald-500 text-black border-emerald-400 shadow-lg shadow-emerald-500/30'
+                : 'bg-emerald-500/20 hover:bg-emerald-500/30 border-emerald-500/40 text-emerald-300'
             }`}
           >
-            <span className="text-emerald-400 font-bold">+</span>
-            <span>Draw New Field</span>
+            <Hand className="w-3.5 h-3.5" />
+            <span>+ Draw New Field (Fullscreen)</span>
           </button>
 
           {existingFarms.map((farm) => {
@@ -426,8 +431,8 @@ export function StepDrawField({ location: initialLocation, onNext, onBack }: Pro
         />
       </div>
 
-      {/* ── Interactive Satellite Map (Clean True-Color, No Orange Tint) ─── */}
-      <div className="w-full h-80 rounded-2xl border border-dark-700 overflow-hidden relative shadow-inner">
+      {/* ── Interactive Satellite Map Container with Fullscreen Trigger ─── */}
+      <div className="w-full h-80 rounded-2xl border border-dark-700 overflow-hidden relative shadow-inner group">
         <FarmMap
           key={`farmmap-${activeLocation.lat.toFixed(5)}-${activeLocation.lon.toFixed(5)}`}
           onChange={(coords) => setBoundary(coords)}
@@ -442,12 +447,24 @@ export function StepDrawField({ location: initialLocation, onNext, onBack }: Pro
           showDamageOverlay={false}
         />
 
+        {/* Floating Fullscreen Trigger Overlay */}
+        <div className="absolute top-3 right-3 z-[1000]">
+          <button
+            type="button"
+            onClick={() => setShowFullscreenDrawer(true)}
+            className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs flex items-center gap-1.5 shadow-xl shadow-emerald-500/30 transition-all hover:scale-105 cursor-pointer"
+          >
+            <Maximize2 className="w-3.5 h-3.5" />
+            <span>Fullscreen Draw Mode</span>
+          </button>
+        </div>
+
         {/* Map Floating Status Chip */}
         <div className="absolute top-3 left-3 z-[1000] bg-dark-900/95 backdrop-blur-md border border-dark-700 rounded-xl px-3 py-1.5 shadow-lg flex items-center gap-2 text-xs">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="font-mono text-emerald-300 font-bold">
             {boundary.length === 0
-              ? 'Click map to mark corners'
+              ? 'Click Fullscreen Draw Mode to trace boundary'
               : `${boundary.length} Corners · ${computedAreaHa} ha (${(computedAreaHa * 2.471).toFixed(2)} ac)`}
           </span>
         </div>
@@ -456,6 +473,15 @@ export function StepDrawField({ location: initialLocation, onNext, onBack }: Pro
       {/* ── Drawing Actions Toolbar ──────────────────────────────────────── */}
       <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowFullscreenDrawer(true)}
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow cursor-pointer"
+          >
+            <Hand className="w-3.5 h-3.5" />
+            <span>Trace Field (Fullscreen)</span>
+          </button>
+
           <button
             type="button"
             onClick={() => {
@@ -488,6 +514,21 @@ export function StepDrawField({ location: initialLocation, onNext, onBack }: Pro
           <span>Auto 2.5 ha Parcel</span>
         </button>
       </div>
+
+      {/* ── FULLSCREEN FIELD DRAWER MODAL ───────────────────────────────── */}
+      <FullscreenFieldDrawer
+        isOpen={showFullscreenDrawer}
+        initialBoundary={boundary}
+        centerLat={activeLocation.lat}
+        centerLon={activeLocation.lon}
+        farmerLocation={activeLocation}
+        farmName={fieldName}
+        onConfirm={(coords) => {
+          setBoundary(coords);
+          setShowFullscreenDrawer(false);
+        }}
+        onClose={() => setShowFullscreenDrawer(false)}
+      />
 
       {/* ── Error Message ────────────────────────────────────────────────── */}
       {errorMsg && (

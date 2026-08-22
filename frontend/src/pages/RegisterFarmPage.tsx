@@ -10,6 +10,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FarmMap from '../components/FarmMap';
+import FullscreenFieldDrawer from '../components/FullscreenFieldDrawer';
 import { api } from '../lib/api';
 import {
   MapPin,
@@ -23,6 +24,8 @@ import {
   Sparkles,
   ArrowRight,
   Wheat,
+  Maximize2,
+  Hand,
 } from 'lucide-react';
 
 interface CityPreset {
@@ -53,6 +56,7 @@ export default function RegisterFarmPage() {
 
   // Boundary Drawing State
   const [boundary, setBoundary] = useState<number[][]>([]);
+  const [showFullscreenDrawer, setShowFullscreenDrawer] = useState<boolean>(false);
   const [_isDrawingActive, setIsDrawingActive] = useState<boolean>(false);
 
   // Form Details
@@ -307,7 +311,16 @@ export default function RegisterFarmPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 w-full md:w-auto">
+              <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowFullscreenDrawer(true)}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Hand className="w-3.5 h-3.5" />
+                  <span>Trace Field (Fullscreen)</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -319,7 +332,7 @@ export default function RegisterFarmPage() {
                   className="px-3.5 py-2 bg-white dark:bg-dark-800 disabled:opacity-40 border border-[#e3e3de] dark:border-dark-600 rounded-xl text-xs font-bold text-[#1a1c19] dark:text-white flex items-center gap-1.5 shadow-sm"
                 >
                   <Undo2 className="w-3.5 h-3.5" />
-                  <span>Undo Point</span>
+                  <span>Undo</span>
                 </button>
 
                 <button
@@ -350,7 +363,7 @@ export default function RegisterFarmPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* Interactive Map (8 Cols) */}
-          <div className="lg:col-span-8 bg-white dark:bg-dark-800 rounded-3xl border border-[#e3e3de] dark:border-dark-700 shadow-xl overflow-hidden flex flex-col h-[560px] relative">
+          <div className="lg:col-span-8 bg-white dark:bg-dark-800 rounded-3xl border border-[#e3e3de] dark:border-dark-700 shadow-xl overflow-hidden flex flex-col h-[560px] relative group">
             <FarmMap
               onChange={(coords) => setBoundary(coords)}
               existingBoundary={boundary}
@@ -361,6 +374,18 @@ export default function RegisterFarmPage() {
               farmerLocation={farmerCoords}
               showTelemetryBar={true}
             />
+
+            {/* Floating Fullscreen Trigger Button */}
+            <div className="absolute top-4 right-4 z-[1000]">
+              <button
+                type="button"
+                onClick={() => setShowFullscreenDrawer(true)}
+                className="px-4 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center gap-2 shadow-2xl shadow-emerald-500/40 transition-all hover:scale-105 cursor-pointer"
+              >
+                <Maximize2 className="w-4 h-4" />
+                <span>Fullscreen Draw Mode</span>
+              </button>
+            </div>
           </div>
 
           {/* Configuration Form (4 Cols) */}
@@ -481,6 +506,22 @@ export default function RegisterFarmPage() {
         </div>
 
       </main>
+
+      {/* ── FULLSCREEN FIELD DRAWER MODAL ───────────────────────────────── */}
+      <FullscreenFieldDrawer
+        isOpen={showFullscreenDrawer}
+        initialBoundary={boundary}
+        centerLat={farmerCoords?.lat || 23.1765}
+        centerLon={farmerCoords?.lon || 75.7885}
+        farmerLocation={farmerCoords}
+        farmName={farmName}
+        onConfirm={(coords) => {
+          setBoundary(coords);
+          setShowFullscreenDrawer(false);
+          setActiveStep(2);
+        }}
+        onClose={() => setShowFullscreenDrawer(false)}
+      />
     </div>
   );
 }

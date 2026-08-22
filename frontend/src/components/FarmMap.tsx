@@ -44,8 +44,10 @@ import {
   Minimize2,
   Sprout,
   Info,
+  Hand,
 } from 'lucide-react';
 
+import FullscreenFieldDrawer from './FullscreenFieldDrawer';
 import { generateSatelliteRaster, RasterMode } from '../lib/satelliteRasterGenerator';
 import { AnalysisResult } from '../lib/api';
 
@@ -268,6 +270,7 @@ export default function FarmMap({
 
   // Drawing & Boundary State — Auto-enable drawing when allowDraw is true
   const [isDrawingMode, setIsDrawingMode] = useState<boolean>(allowDraw && !readOnly);
+  const [showFullscreenDrawer, setShowFullscreenDrawer] = useState<boolean>(false);
   const [points, setPoints] = useState<number[][]>(() => {
     if (existingBoundary && existingBoundary.length > 0) return existingBoundary;
     if (farmId) {
@@ -643,23 +646,35 @@ export default function FarmMap({
             </span>
           </button>
 
-          {/* Draw / Edit Boundary Toggle */}
+          {/* Draw / Edit Boundary Toggle & Fullscreen Draw Mode */}
           {allowDraw && !readOnly && (
-            <button
-              type="button"
-              onClick={() => setIsDrawingMode(!isDrawingMode)}
-              className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 transition-colors ${
-                isDrawingMode
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                  : 'text-slate-300 hover:text-white bg-dark-850 hover:bg-dark-800 border-dark-700'
-              }`}
-              title="Draw or modify field boundary polygon"
-            >
-              <Edit3 className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline text-[11px] font-medium">
-                {isDrawingMode ? 'Editing Field' : 'Draw Boundary'}
-              </span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => setShowFullscreenDrawer(true)}
+                className="p-1.5 rounded-lg border text-xs flex items-center gap-1.5 transition-all bg-emerald-500 hover:bg-emerald-400 text-black font-bold shadow-lg shadow-emerald-500/20 cursor-pointer"
+                title="Open Immersive Fullscreen Field Drawing Studio"
+              >
+                <Hand className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline text-[11px]">Trace Field</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsDrawingMode(!isDrawingMode)}
+                className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 transition-colors ${
+                  isDrawingMode
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                    : 'text-slate-300 hover:text-white bg-dark-850 hover:bg-dark-800 border-dark-700'
+                }`}
+                title="Draw or modify field boundary polygon"
+              >
+                <Edit3 className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline text-[11px] font-medium">
+                  {isDrawingMode ? 'Editing' : 'Points'}
+                </span>
+              </button>
+            </>
           )}
 
           {/* Fullscreen Toggle */}
@@ -1048,6 +1063,26 @@ export default function FarmMap({
           </div>
         </div>
       )}
+
+      {/* ── IMMERSIVE FULLSCREEN FIELD DRAWING STUDIO ──────────────────────── */}
+      <FullscreenFieldDrawer
+        isOpen={showFullscreenDrawer}
+        initialBoundary={points}
+        centerLat={centerLat || (points[0] ? points[0][0] : 22.63497)}
+        centerLon={centerLon || (points[0] ? points[0][1] : 75.84983)}
+        farmerLocation={propFarmerLoc}
+        farmName={farmName}
+        onConfirm={(coords) => {
+          setPoints(coords);
+          if (onChange) onChange(coords);
+          if (farmId) {
+            localStorage.setItem(`agriproof:boundary:${farmId}`, JSON.stringify(coords));
+          }
+          setShowFullscreenDrawer(false);
+          setFitTriggerKey((prev) => prev + 1);
+        }}
+        onClose={() => setShowFullscreenDrawer(false)}
+      />
     </div>
   );
 }
