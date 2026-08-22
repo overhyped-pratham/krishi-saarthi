@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.staticfiles import StaticFiles
 
-from app.api.routes import farms, claims, ledger, insurer, farmer_alerts, diagnostics
+from app.api.routes import farms, claims, ledger, insurer, farmer_alerts, diagnostics, auth as auth_routes
 from app.api.websocket import router as ws_router
 from app.database import init_db
 from app.config import get_settings
@@ -60,6 +60,7 @@ app.include_router(ledger.router, prefix="/api", tags=["Ledger"])
 app.include_router(insurer.router, prefix="/api", tags=["Insurer"])
 app.include_router(farmer_alerts.router, prefix="/api", tags=["Farmer Alerts"])
 app.include_router(diagnostics.router, prefix="/api", tags=["Crop Diagnostics & Doctor"])
+app.include_router(auth_routes.router, tags=["Auth"])
 app.include_router(ws_router, tags=["Websocket"])
 
 @app.get("/health", tags=["Health"])

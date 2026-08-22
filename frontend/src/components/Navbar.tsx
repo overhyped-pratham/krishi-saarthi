@@ -1,9 +1,10 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Satellite, Plus, Zap, Bell } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, Satellite, Plus, Zap, Bell, LogOut, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import NotificationCenterModal from './NotificationCenterModal';
 import { api } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const NAV_LINKS = [
   { to: '/', label: 'Overview', icon: 'dashboard' },
@@ -20,6 +21,13 @@ export default function Navbar() {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [activeAlertCount, setActiveAlertCount] = useState(2);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   useEffect(() => {
     // Poll or fetch active disease anomaly count
@@ -106,14 +114,31 @@ export default function Navbar() {
                 <span>ANALYZE FIELD</span>
               </Link>
 
-              {/* Farmer Avatar */}
-              <div className="w-8 h-8 rounded-full border border-cyan-500/30 overflow-hidden shrink-0 ring-1 ring-cyan-500/10">
-                <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkOja07M3e2a_VQPc0xXDFLISczngZDv1yUdIxNJi994WdlKEAR5F4B2cRYEo-qgAJ-X-Z7IDmyrmmhr4trh9T8m8MdQ7wtc-e14sXV81o4YDchTp79VQAhLxTR02fBnx9qKnA5E4cXWAYkEZC_HpDmcceap6xGhIksa6ny96NfI8xMRnOXZUhvDDawPJJrkY8nv9hb_yv8bpaq1s3ljCaGq_2p2ChORvGIww9Q-P1cVGNGhbuWeBDyQ"
-                  alt="Farmer"
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              {/* User + Sign Out */}
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08]">
+                    <User className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="text-[11px] font-mono text-white/60 max-w-[120px] truncate">
+                      {user.email}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    title="Sign out"
+                    className="p-2 rounded-lg bg-white/[0.04] hover:bg-red-500/10 border border-white/[0.08] hover:border-red-500/30 text-white/50 hover:text-red-400 transition-all"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="px-4 py-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-semibold transition-all"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
 
             {/* Mobile menu button */}

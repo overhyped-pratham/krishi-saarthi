@@ -5,6 +5,9 @@ import json
 
 class Settings(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///./agriproof.db"
+    supabase_url: str = ""
+    supabase_anon_key: str = ""
+    supabase_service_role_key: str = ""
     planet_user_id: str = ""
     planet_api_key: str = ""
     planet_base_url: str = "https://api.planet.com/data/v1"

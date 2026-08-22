@@ -1,6 +1,18 @@
 import axios from 'axios'
+import { supabase } from './supabase'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
+
+// Attach Supabase JWT to every request so the backend can identify the user
+axios.interceptors.request.use(async (config) => {
+  const { data } = await supabase.auth.getSession()
+  const token = data.session?.access_token
+  if (token) {
+    config.headers = config.headers ?? {}
+    config.headers['Authorization'] = `Bearer ${token}`
+  }
+  return config
+})
 
 export interface Farm {
   id: string

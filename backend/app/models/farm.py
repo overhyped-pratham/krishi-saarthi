@@ -8,6 +8,7 @@ class Farm(Base):
     __tablename__ = "farms"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String, nullable=True, index=True)  # Supabase auth user UUID
     name = Column(String, nullable=False)
     commitment_hash = Column(String, nullable=False)
     crop_type = Column(String, nullable=False)

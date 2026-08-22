@@ -4,7 +4,7 @@ import math
 from datetime import datetime, date, timezone
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Header
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -14,6 +14,7 @@ from app.models.farm import Farm
 from app.models.claim import AnalysisResult
 from app.services.pipeline import execute_farm_analysis
 from app.services.weather.risk_engine import WeatherRiskEngine
+from app.api.routes.auth import get_user_id_from_token
 
 router = APIRouter()
 
@@ -67,8 +68,13 @@ def calculate_polygon_area_ha(coordinates: List[List[float]]) -> float:
 
 
 @router.get("/farms", response_model=List[FarmResponse])
-async def list_farms(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Farm).order_by(Farm.created_at.desc()))
+async def list_farms(authorization: Optional[str] = Header(None), db: AsyncSession = Depends(get_db)):
+    user_id = get_user_id_from_token(authorization)
+    if user_id:
+        query = select(Farm).where((Farm.user_id == user_id) | (Farm.user_id == None)).order_by(Farm.created_at.desc())
+    else:
+        query = select(Farm).order_by(Farm.created_at.desc())
+    result = await db.execute(query)
     farms = result.scalars().all()
     return [
         FarmResponse(
@@ -89,7 +95,8 @@ async def list_farms(db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/farms", response_model=FarmResponse)
-async def register_farm(farm_data: FarmCreateRequest, db: AsyncSession = Depends(get_db)):
+async def register_farm(farm_data: FarmCreateRequest, authorization: Optional[str] = Header(None), db: AsyncSession = Depends(get_db)):
+    user_id = get_user_id_from_token(authorization)
     if farm_data.polygon_coordinates and len(farm_data.polygon_coordinates) > 0:
         lats = [c[0] for c in farm_data.polygon_coordinates]
         lons = [c[1] for c in farm_data.polygon_coordinates]
@@ -119,6 +126,7 @@ async def register_farm(farm_data: FarmCreateRequest, db: AsyncSession = Depends
     )
 
     farm = Farm(
+        user_id=user_id,
         name=farm_name,
         commitment_hash=commitment_hash,
         crop_type=farm_data.crop_type,
