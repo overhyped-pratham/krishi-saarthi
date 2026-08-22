@@ -29,6 +29,17 @@ async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
 
+from sqlalchemy import text
+
 async def init_db():
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        if "sqlite" in settings.database_url:
+            try:
+                res = await conn.execute(text("PRAGMA table_info(farms);"))
+                cols = [row[1] for row in res.fetchall()]
+                if cols and "user_id" not in cols:
+                    await conn.execute(text("ALTER TABLE farms ADD COLUMN user_id VARCHAR;"))
+            except Exception:
+                pass
+

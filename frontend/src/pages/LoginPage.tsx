@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { Satellite, Shield, Leaf, Eye, EyeOff, Loader2, CheckCircle2 } from 'lucide-react'
+import { Satellite, Shield, Leaf, Eye, EyeOff, Loader2, CheckCircle2, Zap, Sparkles } from 'lucide-react'
 
 export default function LoginPage() {
-  const { user, signIn, signUp, loading } = useAuth()
+  const { user, signIn, signUp, loginAsDemo, loading } = useAuth()
   const navigate = useNavigate()
 
   const [mode, setMode] = useState<'login' | 'signup'>('login')
@@ -16,6 +16,11 @@ export default function LoginPage() {
   const [signupSuccess, setSignupSuccess] = useState(false)
 
   if (!loading && user) return <Navigate to="/farms" replace />
+
+  const handleDemoLogin = () => {
+    loginAsDemo('demo.farmer@agriproof.ai')
+    navigate('/farms')
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -164,12 +169,30 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:bg-emerald-900 disabled:text-emerald-300 text-black font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 text-sm"
+                className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:bg-emerald-900 disabled:text-emerald-300 text-black font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 text-sm cursor-pointer"
               >
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 {submitting
                   ? (mode === 'login' ? 'Signing in…' : 'Creating account…')
                   : (mode === 'login' ? 'Sign In' : 'Create Account')}
+              </button>
+
+              {/* Or separator */}
+              <div className="relative flex items-center justify-center py-1">
+                <div className="border-t border-dark-700 w-full" />
+                <span className="bg-dark-800 px-3 text-[11px] font-mono text-slate-500 uppercase tracking-wider absolute">
+                  or
+                </span>
+              </div>
+
+              {/* Instant Demo Access Button */}
+              <button
+                type="button"
+                onClick={handleDemoLogin}
+                className="w-full bg-dark-900 hover:bg-dark-700 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md text-sm cursor-pointer group"
+              >
+                <Zap className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                <span>⚡ Continue with Demo Farmer Account</span>
               </button>
             </form>
           )}
