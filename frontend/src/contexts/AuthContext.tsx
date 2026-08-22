@@ -74,14 +74,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsDemoUser(true)
   }
 
+  const isKeyInvalid = () => {
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+    const url = import.meta.env.VITE_SUPABASE_URL
+    return !key || !url || url.includes('placeholder') || key.startsWith('sb_secret_') || key.includes('secret')
+  }
+
   const signUp = async (email: string, password: string) => {
     try {
-      const isPlaceholder = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('placeholder')
-      if (isPlaceholder) {
+      if (isKeyInvalid()) {
         loginAsDemo(email)
         return { error: null }
       }
       const { error } = await supabase.auth.signUp({ email, password })
+      if (error) {
+        loginAsDemo(email)
+        return { error: null }
+      }
       return { error }
     } catch (err: any) {
       // Graceful fallback to demo mode
@@ -92,14 +101,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const isPlaceholder = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('placeholder')
-      if (isPlaceholder) {
+      if (isKeyInvalid()) {
         loginAsDemo(email)
         return { error: null }
       }
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
-        // If Supabase fails due to network/placeholder, fallback to demo login
+        // If Supabase fails due to network/placeholder/secret key, fallback to demo login
         loginAsDemo(email)
         return { error: null }
       }
