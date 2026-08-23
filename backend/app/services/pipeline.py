@@ -83,15 +83,19 @@ async def execute_farm_analysis(
                 payload["metadata"] = metadata
             await progress_callback(payload)
 
-    # --- Compute dynamic date range from sowing date ---
+    # --- Compute dynamic 6-month historical satellite monitoring window ---
     today = date.today()
-    sowing = farm.sowing_date if isinstance(farm.sowing_date, date) else date.fromisoformat(str(farm.sowing_date))
-    analysis_end = min(today, sowing + timedelta(days=180))
-    analysis_start = sowing
+    analysis_start = today - timedelta(days=180)
+    analysis_end = today
     start_date = analysis_start.isoformat()
     end_date = analysis_end.isoformat()
-    days_since_sowing = (today - sowing).days
-    crop_type_encoded = CROP_TYPE_ENCODING.get(farm.crop_type.lower(), 0)
+    
+    try:
+        sowing = farm.sowing_date if isinstance(farm.sowing_date, date) else date.fromisoformat(str(farm.sowing_date))
+        days_since_sowing = max(1, (today - sowing).days)
+    except Exception:
+        days_since_sowing = 90
+    crop_type_encoded = CROP_TYPE_ENCODING.get((farm.crop_type or "wheat").lower().split(",")[0].strip(), 0)
 
     # =========================================================================
     # STAGE 1: ROI Definition

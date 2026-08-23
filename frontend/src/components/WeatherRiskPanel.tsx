@@ -9,14 +9,20 @@ interface WeatherRiskPanelProps {
   rainfall_anomaly_pct: number;
 }
 
+const normalizeRisk = (val?: number) => {
+  if (val == null) return 0;
+  return Math.abs(val) <= 1.0 ? val * 100 : val;
+};
+
 const RiskBar = ({ label, value, icon, max = 100 }: { label: string, value: number, icon: React.ReactNode, max?: number }) => {
-  const percent = Math.min((value / max) * 100, 100);
+  const normalized = Math.max(0, Math.min(100, normalizeRisk(value)));
+  const percent = (normalized / max) * 100;
   
   let colorClass = "bg-success";
   let textClass = "text-success";
-  if (percent > 30) { colorClass = "bg-warning"; textClass = "text-warning"; }
-  if (percent > 60) { colorClass = "bg-orange-500"; textClass = "text-orange-500"; }
-  if (percent > 80) { colorClass = "bg-danger"; textClass = "text-danger"; }
+  if (percent > 25) { colorClass = "bg-warning"; textClass = "text-warning"; }
+  if (percent > 55) { colorClass = "bg-orange-500"; textClass = "text-orange-500"; }
+  if (percent > 75) { colorClass = "bg-danger"; textClass = "text-danger"; }
 
   return (
     <div className="mb-4 last:mb-0">
@@ -24,7 +30,7 @@ const RiskBar = ({ label, value, icon, max = 100 }: { label: string, value: numb
         <div className="flex items-center gap-2 text-slate-300 text-sm font-medium">
           {icon} {label}
         </div>
-        <span className={`font-bold ${textClass}`}>{value.toFixed(1)}</span>
+        <span className={`font-bold ${textClass}`}>{normalized.toFixed(1)}%</span>
       </div>
       <div className="w-full h-2 bg-dark-900 rounded-full overflow-hidden">
         <motion.div 
@@ -46,17 +52,17 @@ export default function WeatherRiskPanel(props: WeatherRiskPanelProps) {
       <div className="space-y-6">
         <RiskBar 
           label="Drought Risk" 
-          value={props.drought_risk * 100} 
+          value={props.drought_risk} 
           icon={<Droplets className="w-4 h-4 text-warning" />} 
         />
         <RiskBar 
           label="Flood Risk" 
-          value={props.flood_risk * 100} 
+          value={props.flood_risk} 
           icon={<Waves className="w-4 h-4 text-blue-500" />} 
         />
         <RiskBar 
           label="Heat Stress" 
-          value={props.heat_stress * 100} 
+          value={props.heat_stress} 
           icon={<ThermometerSun className="w-4 h-4 text-orange-500" />} 
         />
         
