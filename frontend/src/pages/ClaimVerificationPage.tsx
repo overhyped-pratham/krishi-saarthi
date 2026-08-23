@@ -116,16 +116,31 @@ export default function ClaimVerificationPage() {
     return <div className="p-8 text-center text-slate-400">Loading claim data…</div>;
   }
 
-  const areaHa = estimate?.area_hectares ?? farm?.area_hectares ?? 2.84;
+  const areaHa = estimate?.area_hectares ?? farm?.area_hectares ?? 1.0;
   const yieldLossPct = estimate?.ai_predicted_yield_loss_pct ?? (claim.yield_loss_scaled
     ? (claim.yield_loss_scaled > 100 ? claim.yield_loss_scaled / 100 : claim.yield_loss_scaled)
-    : 36.7);
-  const sumInsuredPerHa = 50000;
+    : 30.0);
+
+  
+  const cropRates: Record<string, number> = {
+    wheat: 50000,
+    rice: 60000,
+    soybean: 52000,
+    corn: 45000,
+    maize: 45000,
+    cotton: 65000,
+    sugarcane: 75000,
+  };
+  const cropKey = (farm?.crop_type || 'wheat').toLowerCase().trim();
+  const sumInsuredPerHa = cropRates[cropKey] || 50000;
   const totalMaxCoverage = estimate?.total_insured_amount ?? Math.round(areaHa * sumInsuredPerHa);
+  
+  const deductible = 10.0;
+  const dynamicLossRatio = Math.max(0.25, Math.min(1.0, (yieldLossPct - deductible) / (100.0 - deductible)));
   const calculatedPayoutInr = claim.eligible
-    ? (estimate?.estimated_payout_amount ?? claim.payout_amount ?? Math.round(totalMaxCoverage * 0.85))
+    ? (estimate?.estimated_payout_amount ?? claim.payout_amount ?? Math.round(totalMaxCoverage * dynamicLossRatio))
     : 0;
-  const calculatedPayoutUsd = Math.round(calculatedPayoutInr / 83.2);
+  const calculatedPayoutUsd = Math.round(calculatedPayoutInr / 83.5);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 print:p-0 print:m-0 print:max-w-full">
@@ -295,7 +310,7 @@ export default function ClaimVerificationPage() {
               </div>
               <p className="text-[11px] text-slate-400 pt-1">
                 {claim.eligible
-                  ? `Calculated at 85.0% payout rate on ${areaHa.toFixed(2)} ha insured parcel.`
+                  ? `Calculated at ${(dynamicLossRatio * 100).toFixed(1)}% payout rate on ${areaHa.toFixed(2)} ha insured parcel.`
                   : 'Parametric damage index did not breach the policy trigger threshold.'}
               </p>
             </div>
@@ -493,7 +508,7 @@ export default function ClaimVerificationPage() {
               </div>
               <p className="text-[10px] text-slate-600 mt-1">
                 {claim.eligible
-                  ? `Calculated at 85.0% payout factor on ${areaHa.toFixed(2)} Ha insured parcel.`
+                  ? `Calculated at ${(dynamicLossRatio * 100).toFixed(1)}% payout factor on ${areaHa.toFixed(2)} Ha insured parcel.`
                   : 'Claim did not breach policy deductible threshold.'}
               </p>
             </div>
