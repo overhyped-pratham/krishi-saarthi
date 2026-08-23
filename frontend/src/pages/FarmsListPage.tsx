@@ -73,19 +73,19 @@ export default function FarmsListPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <Tractor className="text-primary-500" /> My Farms
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+            <Tractor className="text-primary-500 shrink-0" /> My Farms
           </h1>
-          <p className="text-slate-400 mt-2">
-            Monitor registered parcels, inspect satellite spectral telemetry, or compare performance across fields.
+          <p className="text-slate-400 mt-1 text-sm">
+            Monitor registered parcels, inspect satellite telemetry, or compare fields.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* View Mode Toggle */}
           {farms.length >= 2 && (
             <div className="flex items-center bg-dark-800 border border-dark-700 rounded-lg p-1">
@@ -98,7 +98,7 @@ export default function FarmsListPage() {
                 }`}
               >
                 <List className="w-3.5 h-3.5" />
-                List View
+                List
               </button>
               <button
                 onClick={() => setViewMode('compare')}
@@ -109,14 +109,14 @@ export default function FarmsListPage() {
                 }`}
               >
                 <Scale className="w-3.5 h-3.5" />
-                Split-View Compare
+                Compare
               </button>
             </div>
           )}
 
           <Link
             to="/register"
-            className="bg-primary-600 hover:bg-primary-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors text-sm"
+            className="bg-primary-600 hover:bg-primary-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors text-sm active:scale-95"
           >
             <Plus className="w-4 h-4" /> Register New Farm
           </Link>
@@ -182,7 +182,7 @@ export default function FarmsListPage() {
               return (
                 <div
                   key={farm.id}
-                  className={`flex items-center gap-4 bg-dark-800 hover:bg-dark-750 border rounded-xl p-5 transition-all group relative ${
+                  className={`flex items-center gap-3 bg-dark-800 hover:bg-dark-750 border rounded-xl p-4 sm:p-5 transition-all group relative ${
                     isSelected
                       ? 'border-emerald-500/60 bg-emerald-950/10 shadow-lg shadow-emerald-500/5'
                       : 'border-dark-700 hover:border-dark-600'
@@ -207,42 +207,42 @@ export default function FarmsListPage() {
                     to={`/dashboard/${farm.id}`}
                     className="flex-1 min-w-0"
                   >
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-white font-semibold truncate group-hover:text-primary-400 transition-colors">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <h3 className="text-white font-semibold truncate group-hover:text-primary-400 transition-colors text-sm sm:text-base">
                         {farm.name}
                       </h3>
                       <span className={`px-2 py-0.5 text-xs rounded-full border capitalize font-medium shrink-0 ${STATUS_COLORS[farm.status] ?? STATUS_COLORS.registered}`}>
                         {farm.status}
                       </span>
                     </div>
-                    <div className="flex flex-wrap gap-4 text-sm text-slate-400">
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-400">
                       <span className="flex items-center gap-1">
-                        <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                        <Activity className="w-3 h-3 text-emerald-400" />
                         {(farm.crop_type || 'Crop').charAt(0).toUpperCase() + (farm.crop_type || 'Crop').slice(1)}
                       </span>
                       <span>{(farm.area_hectares ?? 0).toFixed(1)} ha</span>
-                      <span>{farm.policy_id || 'POLICY-001'}</span>
+                      <span className="hidden sm:inline">{farm.policy_id || 'POLICY-001'}</span>
                       <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" />
+                        <Clock className="w-3 h-3" />
                         {farm.created_at ? format(parseISO(farm.created_at), 'MMM dd, yyyy') : 'Recent'}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 font-mono mt-1 truncate">
-                      {farm.center_lat != null && farm.center_lon != null 
-                        ? `${farm.center_lat.toFixed(4)}°N, ${farm.center_lon.toFixed(4)}°E` 
+                    <p className="text-xs text-slate-500 font-mono mt-1 truncate hidden sm:block">
+                      {farm.center_lat != null && farm.center_lon != null
+                        ? `${farm.center_lat.toFixed(4)}°N, ${farm.center_lon.toFixed(4)}°E`
                         : 'Coordinates calibrated'} · {(farm.commitment_hash || '').substring(0, 16)}…
                     </p>
                   </Link>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     {farms.length >= 2 && (
                       <button
                         onClick={() => {
                           const otherFarm = farms.find(f => f.id !== farm.id);
                           handleOpenCompareWithSelection(farm.id, otherFarm?.id);
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-emerald-300 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors hidden sm:flex"
+                        className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-emerald-300 border border-slate-700 text-xs font-semibold flex items-center gap-1 transition-colors hidden sm:flex"
                       >
                         <Scale className="w-3.5 h-3.5 text-emerald-400" />
                         <span>Compare</span>

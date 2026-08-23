@@ -23,7 +23,7 @@ function App() {
       <AuthProvider>
         <div className="min-h-screen bg-black flex flex-col">
           <Navbar />
-          <main className="flex-1 w-full overflow-x-hidden pt-16">
+          <main className="flex-1 w-full overflow-x-hidden pt-16 pb-20 md:pb-0">
             <Routes>
               {/* Public routes */}
               <Route path="/"       element={<LandingPage />} />

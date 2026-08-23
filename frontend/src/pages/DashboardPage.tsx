@@ -96,25 +96,25 @@ export default function DashboardPage() {
   const healthScore = Math.round((analysis.crop_health_score ?? (1 - (normLossPct / 100))) * 100);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-10 space-y-6">
       {/* Top Title Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            {farm?.name || 'Farm Dashboard'}
-            <span className="px-3 py-1 bg-dark-800 text-slate-400 text-sm rounded-full font-mono font-normal border border-dark-700">
-              ID: {farmId}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex flex-wrap items-center gap-2">
+            <span className="truncate max-w-[180px] sm:max-w-none">{farm?.name || 'Farm Dashboard'}</span>
+            <span className="px-2 py-0.5 bg-dark-800 text-slate-400 text-xs rounded-full font-mono font-normal border border-dark-700 shrink-0">
+              {farmId?.substring(0, 12)}…
             </span>
           </h1>
-          <p className="text-slate-400 mt-2">
-            Real-time multi-spectral analysis, satellite land snapshots, and insurance eligibility overview.
+          <p className="text-slate-400 mt-1 text-sm">
+            Real-time satellite analysis &amp; insurance eligibility overview.
           </p>
         </div>
         <Link
           to={`/dashboard/${farmId}/satellite`}
-          className="bg-dark-800 hover:bg-dark-700 border border-dark-600 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 transition-colors font-medium text-sm shadow"
+          className="bg-dark-800 hover:bg-dark-700 border border-dark-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-sm shadow shrink-0"
         >
-          <Map className="w-4 h-4 text-primary-400" /> View High-Res Satellite Map
+          <Map className="w-4 h-4 text-primary-400" /> Satellite Map
         </Link>
       </div>
 
@@ -126,8 +126,8 @@ export default function DashboardPage() {
         onRefresh={refetch}
       />
 
-      {/* Multi-Spectral Processing Pipeline Visual Snapshots (Reference Diagram Feature) */}
-      <div className="bg-dark-800/90 rounded-2xl border border-dark-700 p-6 shadow-xl backdrop-blur">
+      {/* Multi-Spectral Processing Pipeline Visual Snapshots */}
+      <div className="bg-dark-800/90 rounded-2xl border border-dark-700 p-4 sm:p-6 shadow-xl backdrop-blur">
         <AnalysisPipelineSnapshots
           farmName={farm?.name}
           cropType={farm?.crop_type}
@@ -146,8 +146,8 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Top Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Top Stats — 2 cols on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <StatCard
           title="Crop Health"
           value={`${healthScore}%`}
@@ -155,30 +155,30 @@ export default function DashboardPage() {
           variant={healthScore > 70 ? 'green' : healthScore > 40 ? 'yellow' : 'red'}
           trend={{ value: -parseFloat(normNdviDropPct.toFixed(1)), label: 'vs baseline' }}
         />
-        <div className="bg-dark-800 rounded-xl border border-dark-700 p-6 flex flex-col items-center justify-center shadow-sm">
-          <p className="text-sm font-medium text-slate-400 mb-2 w-full">Risk Assessment</p>
+        <div className="bg-dark-800 rounded-xl border border-dark-700 p-4 sm:p-6 flex flex-col items-center justify-center shadow-sm">
+          <p className="text-xs sm:text-sm font-medium text-slate-400 mb-2 w-full">Risk Assessment</p>
           <RiskGauge score={analysis.risk_score ?? 50} category={analysis.risk_category || 'MODERATE'} label="Overall Risk" />
         </div>
         <StatCard
           title="Predicted Loss"
           value={`${normLossPct.toFixed(1)}%`}
-          subtitle={`Exp. Yield: ${(analysis.expected_yield ?? 2.8).toFixed(1)} tons/ha`}
+          subtitle={`Exp. Yield: ${(analysis.expected_yield ?? 2.8).toFixed(1)} t/ha`}
           icon={<AlertTriangle className="w-6 h-6" />}
           variant={normLossPct > 20 ? 'red' : 'yellow'}
         />
-        <div className={`rounded-xl border p-6 flex flex-col justify-center shadow-sm ${isEligible ? 'bg-success/10 border-success/30' : 'bg-dark-800 border-dark-700'}`}>
-          <div className="flex items-center gap-3 mb-2">
-            <ShieldCheck className={`w-8 h-8 ${isEligible ? 'text-success' : 'text-slate-500'}`} />
-            <h4 className="text-lg font-bold text-white">Insurance Status</h4>
+        <div className={`rounded-xl border p-4 sm:p-6 flex flex-col justify-center shadow-sm ${isEligible ? 'bg-success/10 border-success/30' : 'bg-dark-800 border-dark-700'}`}>
+          <div className="flex items-center gap-2 mb-1">
+            <ShieldCheck className={`w-6 h-6 shrink-0 ${isEligible ? 'text-success' : 'text-slate-500'}`} />
+            <h4 className="text-sm sm:text-base font-bold text-white leading-tight">Insurance</h4>
           </div>
-          <div className={`text-2xl font-black mt-2 ${isEligible ? 'text-success' : 'text-slate-400'}`}>
-            {isEligible ? 'LIKELY ELIGIBLE' : 'NOT ELIGIBLE'}
+          <div className={`text-base sm:text-xl font-black mt-1 ${isEligible ? 'text-success' : 'text-slate-400'}`}>
+            {isEligible ? 'ELIGIBLE' : 'NOT MET'}
           </div>
-          <p className="text-sm text-slate-400 mt-2">Based on current algorithmic assessment.</p>
+          <p className="text-xs text-slate-400 mt-1 leading-tight">Algorithmic assessment.</p>
         </div>
       </div>
 
-      {/* AI Farm Scenario & Report Explainer (Simplified Language & Voice Briefing) */}
+      {/* AI Farm Scenario & Report Explainer */}
       {farm && (
         <FarmAIExplainer
           farm={farm}
@@ -197,7 +197,7 @@ export default function DashboardPage() {
       {/* Actionable Agronomy & Low-Bandwidth Alerts Drawer */}
       {farmId && <FarmerAlertsDrawer farmId={farmId} />}
 
-      {/* Real-time Open-Meteo Weather Forecast & Agricultural Climate Ingest */}
+      {/* Real-time Open-Meteo Weather Forecast */}
       <LiveWeatherForecastWidget
         lat={farm?.center_lat || 36.7783}
         lon={farm?.center_lon || -119.4179}
@@ -205,7 +205,7 @@ export default function DashboardPage() {
         cropType={farm?.crop_type || 'Agricultural Crop'}
       />
 
-      {/* Precision GIS Multi-Spectral Satellite Intelligence Studio (Sentinel Hub / EOS Crop Monitoring) */}
+      {/* Precision GIS Multi-Spectral Satellite Intelligence Studio */}
       <PrecisionSatelliteGISConsole
         farmId={farmId}
         farmName={farm?.name || 'Registered Farm Parcel'}
@@ -240,42 +240,42 @@ export default function DashboardPage() {
         anomalies={detectedAnomalies}
       />
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-dark-800 rounded-xl border border-dark-700 p-6 shadow-md">
-            <h3 className="text-lg font-semibold text-white mb-4">Damage Analysis (Feature Impact)</h3>
-            <div className="grid grid-cols-2 gap-8">
+      {/* Main Content — stacks on mobile */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+          <div className="bg-dark-800 rounded-xl border border-dark-700 p-4 sm:p-6 shadow-md">
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Damage Analysis (Feature Impact)</h3>
+            <div className="grid grid-cols-2 gap-4 sm:gap-8 mb-6">
               <div>
                 <p className="text-sm text-slate-400 mb-1">Stress Level</p>
-                <p className="text-xl font-bold text-white capitalize">{(analysis.stress_level || 'MODERATE').replace('_', ' ')}</p>
+                <p className="text-lg sm:text-xl font-bold text-white capitalize">{(analysis.stress_level || 'MODERATE').replace('_', ' ')}</p>
               </div>
               <div>
-                <p className="text-sm text-slate-400 mb-1">Damage Probability</p>
-                <p className="text-xl font-bold text-warning">{(((analysis.damage_probability) || 0) * 100).toFixed(1)}%</p>
+                <p className="text-sm text-slate-400 mb-1">Damage Prob.</p>
+                <p className="text-lg sm:text-xl font-bold text-warning">{(((analysis.damage_probability) || 0) * 100).toFixed(1)}%</p>
               </div>
             </div>
 
-            <div className="mt-6 space-y-3">
+            <div className="space-y-3">
               <p className="text-sm text-slate-400 font-medium">Key Contributing Factors:</p>
               {[
                 { label: 'NDVI Drop',        width: Math.min((analysis.ndvi_drop_pct || 0) * 2, 100), color: 'bg-danger' },
-                { label: 'Rainfall Anomaly', width: Math.min(Math.abs(analysis.rainfall_anomaly_pct || 0), 100), color: 'bg-warning' },
+                { label: 'Rain Anomaly',     width: Math.min(Math.abs(analysis.rainfall_anomaly_pct || 0), 100), color: 'bg-warning' },
                 { label: 'Heat Stress',      width: (analysis.heat_stress_score || 0) * 100, color: 'bg-orange-500' },
               ].map(({ label, width, color }) => (
-                <div key={label} className="flex items-center gap-4">
-                  <span className="w-36 text-sm text-slate-300">{label}</span>
+                <div key={label} className="flex items-center gap-2 sm:gap-4">
+                  <span className="w-24 sm:w-36 text-xs sm:text-sm text-slate-300 shrink-0">{label}</span>
                   <div className="flex-1 h-2 bg-dark-900 rounded-full">
                     <div className={`h-full ${color} rounded-full`} style={{ width: `${width}%` }} />
                   </div>
-                  <span className="text-xs text-slate-500 w-10 text-right">{width.toFixed(0)}%</span>
+                  <span className="text-xs text-slate-500 w-8 sm:w-10 text-right shrink-0">{width.toFixed(0)}%</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           <WeatherRiskPanel
             drought_risk={analysis.drought_risk}
             flood_risk={analysis.flood_risk}
@@ -284,18 +284,18 @@ export default function DashboardPage() {
             rainfall_anomaly_pct={analysis.rainfall_anomaly_pct}
           />
 
-          <div className="bg-dark-800 rounded-xl border border-dark-700 p-6 shadow-md relative overflow-hidden">
+          <div className="bg-dark-800 rounded-xl border border-dark-700 p-4 sm:p-6 shadow-md relative overflow-hidden">
             {isEligible && <div className="absolute top-0 left-0 w-full h-1 bg-success" />}
-            <h3 className="text-lg font-semibold text-white mb-4">Claim Generation</h3>
-            <p className="text-slate-400 text-sm mb-6">
-              Generate a Zero-Knowledge proof of crop damage cryptographically verifying the satellite and AI findings.
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-3">Claim Generation</h3>
+            <p className="text-slate-400 text-sm mb-5">
+              Generate a Zero-Knowledge proof of crop damage, cryptographically verifying satellite &amp; AI findings.
             </p>
             <button
               onClick={handleGenerateClaim}
               disabled={!isEligible || isGeneratingClaim}
-              className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all ${
+              className={`w-full py-3.5 sm:py-4 rounded-xl font-bold text-white shadow-lg transition-all text-sm sm:text-base ${
                 isEligible
-                  ? 'bg-primary-600 hover:bg-primary-500 hover:shadow-primary-600/20'
+                  ? 'bg-primary-600 hover:bg-primary-500 hover:shadow-primary-600/20 active:scale-95'
                   : 'bg-dark-700 text-slate-500 cursor-not-allowed'
               }`}
             >
