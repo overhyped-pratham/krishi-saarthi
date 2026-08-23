@@ -24,6 +24,7 @@ import {
   Maximize2,
   Minimize2,
   Sparkles,
+  Download,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../lib/api';
@@ -176,6 +177,14 @@ const TECH_STACK = [
   { layer: 'Ledger', tech: 'SHA-256 Chained Immutable Blockchain', status: '✅ Tamper-Proof' },
 ];
 
+const NDVI_CRITERIA_LIST = [
+  { range: '> 0.70', status: 'Peak Dense Biomass', color: 'text-emerald-400', dot: 'bg-emerald-400', desc: 'Optimal healthy crop canopy, dense chlorophyll' },
+  { range: '0.50 – 0.70', status: 'Healthy Vegetation', color: 'text-green-400', dot: 'bg-green-400', desc: 'Normal vegetative canopy & active photosynthesis' },
+  { range: '0.35 – 0.50', status: 'Moderate / Early Stress', color: 'text-amber-400', dot: 'bg-amber-400', desc: 'Canopy thinning, moisture deficit onset' },
+  { range: '0.20 – 0.35', status: 'Severe Drought / Loss', color: 'text-rose-400', dot: 'bg-rose-400', desc: 'Drought scorch, policy claim payout trigger' },
+  { range: '< 0.20', status: 'Bare Soil / Fallow', color: 'text-slate-400', dot: 'bg-slate-400', desc: 'Barren soil, water bodies, or post-harvest' },
+];
+
 export default function PitchDeckPage() {
   const [viewMode, setViewMode] = useState<'slides' | 'document'>('slides');
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -260,6 +269,17 @@ export default function PitchDeckPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Download PPTX Button */}
+          <a
+            href="/AgriProof_AI_Presentation.pptx"
+            download="AgriProof_AI_Presentation.pptx"
+            className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 hover:text-emerald-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-sm shadow-emerald-500/10"
+            title="Download PowerPoint PPTX Presentation"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Download .PPTX</span>
+          </a>
+
           {/* View Mode Toggle */}
           <div className="flex items-center bg-white/[0.05] border border-white/[0.08] rounded-xl p-1 text-xs font-mono">
             <button
@@ -428,19 +448,36 @@ export default function PitchDeckPage() {
                           />
                         </div>
 
-                        {/* 10% Minimal Inference Telemetry */}
-                        <div className="space-y-3">
-                          <div className="text-xs font-mono text-white/40 uppercase tracking-widest">
-                            Live Inference Telemetry
+                        {/* 10% Minimal Inference Telemetry + NDVI Criteria Reference */}
+                        <div className="space-y-2.5">
+                          <div className="text-[11px] font-mono text-white/40 uppercase tracking-widest flex items-center justify-between">
+                            <span>Live Telemetry</span>
+                            <span className="text-[10px] text-cyan-400 font-bold">&lt; 650ms</span>
                           </div>
                           {stage.metrics.map((m) => (
-                            <div key={m.label} className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 space-y-0.5">
+                            <div key={m.label} className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-2.5 space-y-0.5">
                               <div className="text-[10px] font-mono text-white/40">{m.label}</div>
-                              <div className="text-xs font-mono font-bold text-cyan-300">{m.val}</div>
+                              <div className="text-xs font-mono font-bold text-cyan-300 truncate">{m.val}</div>
                             </div>
                           ))}
-                          <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-[11px] font-mono text-cyan-300">
-                            ⚡ Stage Runtime: <strong>&lt; 650ms</strong>
+
+                          {/* 📊 NDVI Benchmark Criteria Reference in Side */}
+                          <div className="bg-white/[0.02] border border-cyan-500/20 rounded-xl p-2.5 space-y-1.5 mt-1">
+                            <div className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider flex items-center justify-between">
+                              <span>📊 NDVI Criteria Reference</span>
+                              <span className="text-[9px] text-white/30 font-normal">Benchmarks</span>
+                            </div>
+                            <div className="space-y-1 text-[10px] font-mono">
+                              {NDVI_CRITERIA_LIST.map((c) => (
+                                <div key={c.range} className="flex items-center justify-between py-0.5 border-b border-white/[0.04] last:border-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
+                                    <span className="text-white/60">{c.range}</span>
+                                  </div>
+                                  <span className={`font-bold ${c.color}`}>{c.status}</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -521,6 +558,25 @@ export default function PitchDeckPage() {
                   <div className="text-xs text-white/50 leading-relaxed">{desc}</div>
                 </div>
               ))}
+            </div>
+          </section>
+
+          {/* NDVI Benchmark Criteria Reference */}
+          <section>
+            <h2 className="text-xs font-mono text-white/30 tracking-widest uppercase mb-4">Remote Sensing NDVI Benchmark Criteria</h2>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
+              <div className="grid grid-cols-1 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-white/[0.06]">
+                {NDVI_CRITERIA_LIST.map((c) => (
+                  <div key={c.range} className="p-4 space-y-1.5 bg-white/[0.01]">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${c.dot}`} />
+                      <span className={`font-mono font-bold text-sm ${c.color}`}>{c.range}</span>
+                    </div>
+                    <div className="font-bold text-white text-xs">{c.status}</div>
+                    <div className="text-[11px] text-white/40 leading-snug">{c.desc}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
 
