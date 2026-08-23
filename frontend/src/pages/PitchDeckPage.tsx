@@ -11,7 +11,6 @@ import { Link } from 'react-router-dom';
 import {
   Satellite,
   Lock,
-  Zap,
   ShieldCheck,
   ArrowRight,
   ArrowLeft,
@@ -25,8 +24,6 @@ import {
   Maximize2,
   Minimize2,
   Sparkles,
-  Database,
-  CloudSun,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../lib/api';
@@ -38,6 +35,107 @@ const PROBLEM_STATS = [
   { icon: AlertTriangle, label: 'Avg Claim Wait', value: '60–90d', sub: 'Manual human assessment delays', color: 'text-amber-400' },
   { icon: TrendingUp, label: 'Disputed Claims/yr', value: '₹18,000 Cr', sub: '₹18,000 Crore stuck in disputes', color: 'text-red-400' },
   { icon: ShieldCheck, label: 'Fraud / Subjectivity', value: '35%', sub: 'Zero objective ground truth', color: 'text-orange-400' },
+];
+
+const STAGE_SLIDES = [
+  {
+    slideNum: 4,
+    stageNum: 'STAGE 01',
+    title: 'Geodesic Region-of-Interest (ROI) Definition',
+    subtitle: 'Cryptographic Field Boundary & Polygon Hash Commitment',
+    image: '/snapshots/roi_definition.png',
+    badge: '100% Boundary Isolation',
+    tagColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
+    metrics: [
+      { label: 'Parcel Area', val: '2.84 Ha (7.0 Acres)' },
+      { label: 'GPS Center', val: '22.635° N, 75.852° E' },
+      { label: 'Commitment', val: 'SHA-256 Hash Locked' },
+    ],
+  },
+  {
+    slideNum: 5,
+    stageNum: 'STAGE 02',
+    title: 'PlanetScope (3m) & Sentinel-2 Ingestion',
+    subtitle: '12 Multi-Spectral Scene Passes Across 6 Waveband Channels',
+    image: '/snapshots/satellite_imagery.png',
+    badge: '10m GSD · ₹0 Data Cost',
+    tagColor: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+    metrics: [
+      { label: 'Optical Bands', val: 'B02, B03, B04, B08, B11, B12' },
+      { label: 'Revisit Orbit', val: 'Every 2–4 Days (ESA Copernicus)' },
+      { label: 'Raw Radiance', val: 'L2A Bottom-of-Atmosphere (BOA)' },
+    ],
+  },
+  {
+    slideNum: 6,
+    stageNum: 'STAGE 03',
+    title: 's2cloudless Machine Learning Cloud Masking',
+    subtitle: 'Automated Aerosol & Cloud Shadow Pixel Decision Trees',
+    image: '/snapshots/cloud_masking.png',
+    badge: '96.2% Clean Pixels',
+    tagColor: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+    metrics: [
+      { label: 'Cloud Contamination', val: '0.0% Clean BOA Surface' },
+      { label: 'Model Architecture', val: 'LightGBM Decision Ensemble' },
+      { label: 'Pixel Integrity', val: 'Sub-pixel Quality Assurance' },
+    ],
+  },
+  {
+    slideNum: 7,
+    stageNum: 'STAGE 04',
+    title: 'Multi-Spectral Indices & Chlorophyll Heatmap',
+    subtitle: '180-Day Temporal Trajectory Tracking Crop Stress',
+    image: '/snapshots/feature_extraction.png',
+    badge: 'NDVI: 0.38 (-36.7% Drop)',
+    tagColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+    metrics: [
+      { label: 'Vegetation Health', val: 'NDVI 0.38 (Baseline 0.68)' },
+      { label: 'Moisture Index', val: 'NDMI -0.18 (Severe Deficit)' },
+      { label: 'Canopy Density', val: 'EVI 0.29 (Premature Senescence)' },
+    ],
+  },
+  {
+    slideNum: 8,
+    stageNum: 'STAGE 05',
+    title: 'XGBoost ML Yield Loss Regressor',
+    subtitle: 'Trained on 12-Dimensional Multi-Spectral & Weather Features',
+    image: '/snapshots/thresholding.png',
+    badge: 'AI Yield Loss: 34.5% (HIGH RISK)',
+    tagColor: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+    metrics: [
+      { label: 'Expected Yield Loss', val: '34.5% (Drought Trigger Exceeded)' },
+      { label: 'Damage Probability', val: '75.9% High Confidence' },
+      { label: 'Unified Risk Score', val: '78.0 / 100 (HIGH RISK)' },
+    ],
+  },
+  {
+    slideNum: 9,
+    stageNum: 'STAGE 06',
+    title: 'GeoJSON Contour Damage Vectorization',
+    subtitle: 'Marching Squares Polygon Cutoff of Loss Extent',
+    image: '/snapshots/vectorize_extent.png',
+    badge: '1.05 Ha Damaged Acreage',
+    tagColor: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
+    metrics: [
+      { label: 'Affected Surface Area', val: '1.05 Hectares (37.0% of Parcel)' },
+      { label: 'Spatial Segmentation', val: 'Otsu Binary Thresholding' },
+      { label: 'Vector Output', val: 'GeoJSON Multipolygon Bounds' },
+    ],
+  },
+  {
+    slideNum: 10,
+    stageNum: 'STAGE 07',
+    title: 'Circom 2.1 Groth16 ZK-SNARK & Blockchain Ledger',
+    subtitle: 'Cryptographic Zero-Knowledge Verification with Instant Settlement',
+    image: '/snapshots/db_ledger.png',
+    badge: '₹1,20,700 Instant Payout',
+    tagColor: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+    metrics: [
+      { label: 'ZK-SNARK Curve', val: 'BN128 / Alt-bn128 (<8ms verify)' },
+      { label: 'Farmer Privacy', val: '100% Zero-PII (No GPS leaked)' },
+      { label: 'Settlement Speed', val: '5 Seconds via Smart Contract' },
+    ],
+  },
 ];
 
 const TRIPLE_INNOVATION = [
@@ -297,292 +395,58 @@ export default function PitchDeckPage() {
                 </div>
               )}
 
-              {/* SLIDE 3: 7-STAGE PIPELINE OVERVIEW */}
-              {currentSlide === 3 && (
-                <div className="space-y-6">
-                  <div className="text-xs font-mono text-cyan-400 tracking-widest uppercase">Autonomous Workflow</div>
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white">7-Stage End-to-End Orchestrated Pipeline</h2>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-7 gap-2 pt-4">
-                    {[
-                      { num: '01', title: 'ROI Geodesic', icon: '📍', desc: 'SHA-256 parcel boundary hash' },
-                      { num: '02', title: 'Satellite Ingest', icon: '🛰️', desc: 'Sentinel-2 10m bands B02-B12' },
-                      { num: '03', title: 'Cloud Mask', icon: '☁️', desc: 's2cloudless 96.2% clean pixels' },
-                      { num: '04', title: '6 Spectral Indices', icon: '🌿', desc: 'NDVI, EVI, NDWI, NDMI' },
-                      { num: '05', title: 'XGBoost ML', icon: '🤖', desc: 'Yield loss % + risk score' },
-                      { num: '06', title: 'Vector Extent', icon: '🗺️', desc: 'Marching squares damage area' },
-                      { num: '07', title: 'ZK Ledger Block', icon: '🔐', desc: 'Groth16 BN128 verified claim' },
-                    ].map((st) => (
-                      <div key={st.num} className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-3.5 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg">{st.icon}</span>
-                          <span className="text-[10px] font-mono text-cyan-400 font-bold">{st.num}</span>
+              {/* SLIDES 04 TO 10: 7 PIPELINE VISUAL RASTER STAGES (90% IMAGE, 10% INFERENCE) */}
+              {currentSlide >= 3 && (
+                (() => {
+                  const stage = STAGE_SLIDES[currentSlide - 3];
+                  return (
+                    <div className="space-y-4">
+                      {/* Stage Header */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-mono font-black px-2.5 py-1 rounded bg-white/[0.1] text-cyan-400">
+                            {stage.stageNum}
+                          </span>
+                          <div>
+                            <h2 className="text-xl sm:text-2xl font-bold text-white">{stage.title}</h2>
+                            <p className="text-xs text-white/40 font-mono">{stage.subtitle}</p>
+                          </div>
                         </div>
-                        <div className="font-bold text-white text-xs leading-tight">{st.title}</div>
-                        <div className="text-[10px] text-white/40 leading-snug">{st.desc}</div>
+                        <span className={`text-xs font-mono font-bold px-3 py-1 rounded-full border ${stage.tagColor}`}>
+                          {stage.badge}
+                        </span>
                       </div>
-                    ))}
-                  </div>
 
-                  <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4 flex items-center justify-between text-xs font-mono text-cyan-300">
-                    <span>⏱️ Total Autonomous Pipeline Execution Time:</span>
-                    <span className="font-bold text-white text-sm">~4.2 Seconds per Parcel</span>
-                  </div>
-                </div>
-              )}
+                      {/* 90% VISUAL IMAGE CANVAS */}
+                      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">
+                        {/* High-Resolution Pipeline Image */}
+                        <div className="lg:col-span-3 rounded-2xl overflow-hidden border border-white/[0.12] bg-neutral-950 shadow-2xl relative">
+                          <img
+                            src={stage.image}
+                            alt={stage.title}
+                            className="w-full h-auto max-h-[52vh] object-contain mx-auto bg-black"
+                          />
+                        </div>
 
-              {/* SLIDE 4: SATELLITE INGESTION & CLOUD MASKING */}
-              {currentSlide === 4 && (
-                <div className="space-y-6">
-                  <div className="text-xs font-mono text-cyan-400 tracking-widest uppercase">Stage 1–3 In-Depth</div>
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white">Satellite Ingestion & s2cloudless Masking</h2>
-
-                  <div className="grid md:grid-cols-2 gap-6 pt-2">
-                    <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-5 space-y-3">
-                      <div className="font-bold text-white text-base flex items-center gap-2">
-                        <Satellite className="w-5 h-5 text-cyan-400" />
-                        Sentinel-2 Bottom-of-Atmosphere (L2A)
-                      </div>
-                      <div className="space-y-2 text-xs font-mono">
-                        <div className="flex justify-between py-1 border-b border-white/[0.06]">
-                          <span className="text-white/40">Visible Bands:</span>
-                          <span className="text-white">B02 Blue (490nm), B03 Green (560nm), B04 Red (665nm)</span>
-                        </div>
-                        <div className="flex justify-between py-1 border-b border-white/[0.06]">
-                          <span className="text-white/40">Vegetation Edge:</span>
-                          <span className="text-cyan-300 font-bold">B08 NIR (842nm) — Chlorophyll Reflectance</span>
-                        </div>
-                        <div className="flex justify-between py-1 border-b border-white/[0.06]">
-                          <span className="text-white/40">Moisture Bands:</span>
-                          <span className="text-blue-400">B11 SWIR-1 (1610nm), B12 SWIR-2 (2190nm)</span>
-                        </div>
-                        <div className="flex justify-between py-1">
-                          <span className="text-white/40">Cadence:</span>
-                          <span className="text-emerald-400 font-bold">Every 2–5 Days Revisit (100% Free Open Access)</span>
+                        {/* 10% Minimal Inference Telemetry */}
+                        <div className="space-y-3">
+                          <div className="text-xs font-mono text-white/40 uppercase tracking-widest">
+                            Live Inference Telemetry
+                          </div>
+                          {stage.metrics.map((m) => (
+                            <div key={m.label} className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 space-y-0.5">
+                              <div className="text-[10px] font-mono text-white/40">{m.label}</div>
+                              <div className="text-xs font-mono font-bold text-cyan-300">{m.val}</div>
+                            </div>
+                          ))}
+                          <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-[11px] font-mono text-cyan-300">
+                            ⚡ Stage Runtime: <strong>&lt; 650ms</strong>
+                          </div>
                         </div>
                       </div>
                     </div>
-
-                    <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-5 space-y-3">
-                      <div className="font-bold text-white text-base flex items-center gap-2">
-                        <CloudSun className="w-5 h-5 text-amber-400" />
-                        s2cloudless Decision Tree Masking
-                      </div>
-                      <p className="text-xs text-white/60 leading-relaxed">
-                        Clouds and atmospheric aerosols are filtered using multi-spectral gradient thresholds before calculating indices.
-                      </p>
-                      <div className="grid grid-cols-2 gap-3 pt-2">
-                        <div className="bg-black/40 border border-white/[0.06] rounded-xl p-3 text-center">
-                          <div className="text-2xl font-bold font-mono text-emerald-400">96.2%</div>
-                          <div className="text-[10px] text-white/40 font-mono">Clean Pixels Retained</div>
-                        </div>
-                        <div className="bg-black/40 border border-white/[0.06] rounded-xl p-3 text-center">
-                          <div className="text-2xl font-bold font-mono text-cyan-400">10m</div>
-                          <div className="text-[10px] text-white/40 font-mono">Spatial Resolution GSD</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* SLIDE 5: 6 MULTI-SPECTRAL INDICES */}
-              {currentSlide === 5 && (
-                <div className="space-y-6">
-                  <div className="text-xs font-mono text-cyan-400 tracking-widest uppercase">Stage 4: Multi-Spectral Trajectory</div>
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white">6-Dimensional Biological Spectral Vectors</h2>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
-                    {[
-                      { name: 'NDVI (Chlorophyll Vigor)', formula: '(NIR - Red) / (NIR + Red)', role: 'Detects cellular plant biomass degradation', val: '0.38 (-36.7% drop)' },
-                      { name: 'NDMI (Moisture Deficit)', formula: '(NIR - SWIR1) / (NIR + SWIR1)', role: 'Measures leaf cellular hydration levels', val: '-0.18 (Severe Deficit)' },
-                      { name: 'EVI (Canopy Density)', formula: '2.5 × (NIR - Red) / (NIR + 6R - 7.5B + 1)', role: 'Decouples dense vegetative saturation', val: '0.29 (Stunted)' },
-                      { name: 'NDRE (Red-Edge Health)', formula: '(NIR - RedEdge) / (NIR + RedEdge)', role: 'Early disease detection before brown spots', val: '0.24 (Pre-visual Stress)' },
-                      { name: 'SAVI (Soil-Adjusted)', formula: '1.5 × (NIR - Red) / (NIR + Red + 0.5)', role: 'Cancels background soil reflectance noise', val: '0.32 (Dry Soil)' },
-                      { name: 'BSI (Bare Soil Exposure)', formula: '[(SWIR2 + Red) - (NIR + Blue)] / Sum', role: 'Quantifies complete crop loss patches', val: '+42% Exposure' },
-                    ].map((idx) => (
-                      <div key={idx.name} className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-4 space-y-1.5">
-                        <div className="text-xs font-bold text-cyan-300">{idx.name}</div>
-                        <div className="text-[10px] font-mono text-white/40">{idx.formula}</div>
-                        <div className="text-[11px] text-white/60">{idx.role}</div>
-                        <div className="text-xs font-mono font-bold text-amber-400 pt-1">{idx.val}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* SLIDE 6: XGBOOST ML REGRESSOR */}
-              {currentSlide === 6 && (
-                <div className="space-y-6">
-                  <div className="text-xs font-mono text-cyan-400 tracking-widest uppercase">Stage 5: Machine Learning Engine</div>
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white">XGBoost Yield Loss & Unified Risk Model</h2>
-
-                  <div className="grid md:grid-cols-3 gap-5 pt-2">
-                    <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-5 space-y-2">
-                      <div className="text-xs font-mono text-cyan-400 uppercase">Input Vector (12 Features)</div>
-                      <ul className="text-xs text-white/60 space-y-1 font-mono">
-                        <li>• NDVI Current & Baseline</li>
-                        <li>• NDVI Drop %</li>
-                        <li>• EVI & NDWI Indices</li>
-                        <li>• 30-Day Rainfall mm</li>
-                        <li>• Rainfall Anomaly %</li>
-                        <li>• Mean Temp & Heat Stress</li>
-                        <li>• Crop Type Encoded (0-4)</li>
-                        <li>• Days Since Sowing</li>
-                        <li>• Parcel Area Hectares</li>
-                      </ul>
-                    </div>
-
-                    <div className="bg-violet-500/10 border border-violet-500/30 rounded-2xl p-5 space-y-3 flex flex-col justify-center text-center">
-                      <Cpu className="w-8 h-8 text-violet-400 mx-auto" />
-                      <div className="font-bold text-white text-base">XGBoost Regressor</div>
-                      <div className="text-xs text-violet-200/80 font-mono">
-                        100 Estimators · Max Depth 5 · Learning Rate 0.1
-                      </div>
-                      <div className="text-[11px] text-white/40">
-                        Trained on synthetic & historical agronomy trial datasets with 87% R² accuracy.
-                      </div>
-                    </div>
-
-                    <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-5 space-y-3">
-                      <div className="text-xs font-mono text-emerald-400 uppercase">Live Output Inferences</div>
-                      <div className="space-y-2">
-                        <div>
-                          <div className="text-[10px] text-white/40 font-mono">EXPECTED YIELD LOSS:</div>
-                          <div className="text-2xl font-black font-mono text-red-400">34.5%</div>
-                        </div>
-                        <div>
-                          <div className="text-[10px] text-white/40 font-mono">DAMAGE PROBABILITY:</div>
-                          <div className="text-xl font-bold font-mono text-amber-400">75.9%</div>
-                        </div>
-                        <div>
-                          <div className="text-[10px] text-white/40 font-mono">UNIFIED RISK SCORE:</div>
-                          <div className="text-xl font-bold font-mono text-purple-400">78.0 / 100 (HIGH)</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* SLIDE 7: GROTH16 ZK PROOFS & BLOCKCHAIN */}
-              {currentSlide === 7 && (
-                <div className="space-y-6">
-                  <div className="text-xs font-mono text-cyan-400 tracking-widest uppercase">Stage 6–7: Privacy & Ledger</div>
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white">Circom 2.1 Groth16 Zero-Knowledge SNARKs</h2>
-
-                  <div className="grid md:grid-cols-2 gap-6 pt-2">
-                    <div className="bg-white/[0.03] border border-emerald-500/30 rounded-2xl p-5 space-y-3">
-                      <div className="font-bold text-emerald-300 text-sm flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-emerald-400" />
-                        Zero-Knowledge Proof Guarantee
-                      </div>
-                      <p className="text-xs text-white/60 leading-relaxed">
-                        The smart contract verifies that crop damage exceeded the policy threshold (NDVI Drop $\ge 30\%$ & Yield Loss $\ge 20\%$) <strong>without exposing the farmer's GPS coordinates, land size, or private data</strong>.
-                      </p>
-                      <div className="bg-black/50 border border-emerald-500/20 rounded-xl p-3 text-[11px] font-mono text-emerald-400 space-y-1">
-                        <div>Curve: BN128 (Alt-bn128 pairing-friendly)</div>
-                        <div>Proof Type: Groth16 (3 group elements: $\pi_A, \pi_B, \pi_C$)</div>
-                        <div>Verification Time: &lt; 8ms on-chain</div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white/[0.03] border border-purple-500/30 rounded-2xl p-5 space-y-3">
-                      <div className="font-bold text-purple-300 text-sm flex items-center gap-2">
-                        <Database className="w-4 h-4 text-purple-400" />
-                        SHA-256 Merkle Chained Ledger
-                      </div>
-                      <p className="text-xs text-white/60 leading-relaxed">
-                        Every verified claim is cryptographically mined as an immutable block chained to the Genesis block.
-                      </p>
-                      <div className="bg-black/50 border border-purple-500/20 rounded-xl p-3 text-[11px] font-mono text-purple-300 space-y-1">
-                        <div>Block Hash = SHA256(PrevHash + SatHash + PredHash + ZKProofHash)</div>
-                        <div>Audit Status: 100% Valid (Zero Tamper Tolerance)</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* SLIDE 8: INSTANT SETTLEMENT & GEMINI AI */}
-              {currentSlide === 8 && (
-                <div className="space-y-6">
-                  <div className="text-xs font-mono text-cyan-400 tracking-widest uppercase">Settlement & Remediation</div>
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white">Instant Payout & Gemini AI Crop Doctor</h2>
-
-                  <div className="grid md:grid-cols-2 gap-6 pt-2">
-                    <div className="bg-white/[0.03] border border-cyan-500/30 rounded-2xl p-5 space-y-3">
-                      <div className="font-bold text-cyan-300 text-sm flex items-center gap-2">
-                        <Zap className="w-4 h-4 text-cyan-400" />
-                        Autonomous Parametric Settlement
-                      </div>
-                      <div className="text-2xl font-black font-mono text-white">
-                        ₹1,20,700 <span className="text-xs text-white/40 font-normal">(~$1,445 USD)</span>
-                      </div>
-                      <div className="text-xs text-white/60 space-y-1 font-mono">
-                        <div>• Base Rate: ₹50,000 / ha × 2.84 ha = ₹1,42,000 Max Coverage</div>
-                        <div>• Assessed Loss: 34.5% − 10% Deductible ➔ 85.0% Payout Factor</div>
-                        <div>• Settlement Speed: 5 Seconds via Smart Contract Escrow</div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white/[0.03] border border-amber-500/30 rounded-2xl p-5 space-y-3">
-                      <div className="font-bold text-amber-300 text-sm flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-amber-400" />
-                        Gemini 3.7 Flash Pathology & Advisory
-                      </div>
-                      <div className="text-xs text-white/70 space-y-2">
-                        <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs">
-                          🌾 <strong>Detected Pathogen:</strong> Yellow / Stripe Rust (Puccinia striiformis)
-                        </div>
-                        <div className="text-[11px] text-white/60">
-                          • <strong>Chemical:</strong> Propiconazole 25% EC @ 500ml/ha foliar spray<br />
-                          • <strong>Organic:</strong> Trichoderma viride @ 5g/L + Neem kernel oil<br />
-                          • <strong>Dispatch:</strong> Instant low-bandwidth SMS / WhatsApp alert to farmer
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* SLIDE 9: SUMMARY & COMPETITIVE ADVANTAGE */}
-              {currentSlide === 9 && (
-                <div className="space-y-6">
-                  <div className="text-xs font-mono text-cyan-400 tracking-widest uppercase">Summary & Live Proof</div>
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white">AgriProof AI — The Final Verdict</h2>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
-                    {[
-                      { title: 'Claim Delay', before: '60–90 Days', after: '5 Seconds', icon: Zap },
-                      { title: 'Farmer Privacy', before: 'GPS Exposed', after: '100% ZK-SNARK', icon: Lock },
-                      { title: 'Satellite Data', before: 'High Cost', after: '₹0 Open Sentinel', icon: Satellite },
-                      { title: 'Fraud Risk', before: '35% Human Error', after: 'Cryptographic 0%', icon: ShieldCheck },
-                    ].map((item) => (
-                      <div key={item.title} className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-4 space-y-1.5">
-                        <item.icon className="w-5 h-5 text-cyan-400" />
-                        <div className="text-xs font-bold text-white">{item.title}</div>
-                        <div className="text-xs text-red-400 line-through">{item.before}</div>
-                        <div className="text-sm font-bold font-mono text-emerald-400">{item.after}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4 mt-4">
-                    <div>
-                      <div className="font-bold text-white text-sm">Ready for Live Judge Demonstration</div>
-                      <div className="text-xs text-white/50">All 10 API endpoints, ZK circuits, and ML models running live right now.</div>
-                    </div>
-                    <Link
-                      to="/farms"
-                      className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold font-mono text-xs flex items-center gap-2 shadow-lg shadow-cyan-500/25 transition-all"
-                    >
-                      <span>Launch Live Demo</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
+                  );
+                })()
               )}
             </motion.div>
           </AnimatePresence>
