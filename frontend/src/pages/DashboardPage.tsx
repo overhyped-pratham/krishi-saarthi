@@ -93,7 +93,11 @@ export default function DashboardPage() {
     : (analysis.damage_probability != null ? (Math.abs(analysis.damage_probability) > 1.0 ? analysis.damage_probability : analysis.damage_probability * 100) : 35.0);
 
   const isEligible  = (analysis.risk_score ?? 0) > 60 || normLossPct > 20;
-  const healthScore = Math.round((analysis.crop_health_score ?? (1 - (normLossPct / 100))) * 100);
+  const healthScore = Math.round(
+    analysis.crop_health_score != null
+      ? (analysis.crop_health_score > 1.0 ? analysis.crop_health_score : analysis.crop_health_score * 100)
+      : Math.max(0, 100 - normLossPct)
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-10 space-y-6">
