@@ -318,7 +318,26 @@ export default function RegisterFarmPage() {
                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition-all cursor-pointer"
                 >
                   <Hand className="w-3.5 h-3.5" />
-                  <span>Trace Field (Fullscreen)</span>
+                  <span>📱 Fullscreen Draw (Mobile Easy)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const lat = farmerCoords?.lat || 22.63497;
+                    const lon = farmerCoords?.lon || 75.84983;
+                    const delta = 0.0015;
+                    setBoundary([
+                      [lat + delta * 0.95, lon - delta * 1.05],
+                      [lat + delta * 1.05, lon + delta * 0.95],
+                      [lat - delta * 0.98, lon + delta * 1.08],
+                      [lat - delta * 1.02, lon - delta * 0.98],
+                    ]);
+                  }}
+                  className="px-3.5 py-2 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-600/40 rounded-xl text-xs font-semibold text-emerald-300 flex items-center gap-1.5 transition-colors shadow-sm"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>📐 Auto 2.5 Ha</span>
                 </button>
 
                 <button

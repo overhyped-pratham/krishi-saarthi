@@ -1,13 +1,13 @@
 /**
  * FullscreenFieldDrawer.tsx
  *
- * Immersive Fullscreen Agricultural Field Boundary Drawing & Tracing Studio:
- *  - 100vw x 100dvh full viewport immersive Leaflet canvas
- *  - Primary Interaction: "Press & Hold to Trace Field Boundary" (freehand pointer/touch tracking)
- *  - Ramer-Douglas-Peucker (RDP) point simplification & noise reduction
- *  - Interactive Vertex Editing (drag corners, click midpoint '+' handles to insert vertices, delete points)
- *  - Smart Fallback: Mode toggle between "✦ Trace Field" (Default) and "○ Add Points"
- *  - Minimal dark translucent floating GIS controls (Exit, Satellite/Standard basemap, Locate Me, Undo, Clear, Confirm)
+ * Immersive Fullscreen Agricultural Field Boundary Drawing Studio:
+ *  - 100vw x 100dvh full viewport mobile-optimized Leaflet canvas
+ *  - Mobile Precision Mode: Center Reticle Crosshair + "📍 Add Corner (Center)" button (pan map with thumb, drop exact corners)
+ *  - Mobile Direct Touch: Tap anywhere on satellite map to place vertices with touch-slop detection
+ *  - Freehand Finger/Stylus Tracing: Native Pointer & Touch Event stream with RDP path simplification
+ *  - Draggable Numbered Vertex Handles (drag corners with thumb, click midpoint '+' to subdivide)
+ *  - Quick Presets: "📐 Auto-Shape 2.5 Ha", "🚶 Drop My GPS Pin", "✨ Fix Shape", "↺ Undo", "🗑️ Clear"
  *  - Exact Geodesic Area computation (Hectares & Acres)
  *  - 100% Backward-compatible GeoJSON coordinate output ([lat, lon][])
  */
@@ -19,6 +19,7 @@ import {
   Polygon,
   Polyline,
   CircleMarker,
+  Marker,
   useMap,
   useMapEvents,
 } from 'react-leaflet';
@@ -34,6 +35,10 @@ import {
   Sparkles,
   MousePointer,
   Hand,
+  Crosshair,
+  Plus,
+  Navigation,
+  HelpCircle,
 } from 'lucide-react';
 
 export interface FullscreenFieldDrawerProps {
@@ -62,7 +67,6 @@ export function computeGeodesicAreaHectares(coords: number[][]): number {
     const lon1 = coords[i][1];
     const lat2 = coords[j][0];
     const lon2 = coords[j][1];
-    // Equirectangular projection in meters centered on parcel
     const x1 = lon1 * 111139.0 * Math.cos((lat1 * Math.PI) / 180.0);
     const y1 = lat1 * 111139.0;
     const x2 = lon2 * 111139.0 * Math.cos((lat2 * Math.PI) / 180.0);
@@ -75,7 +79,6 @@ export function computeGeodesicAreaHectares(coords: number[][]): number {
 
 /**
  * Sorts polygon coordinates in clockwise perimeter order around centroid
- * to prevent diagonal criss-crossing lines and self-intersecting hourglass shapes.
  */
 export function sortVerticesClockwise(coords: number[][]): number[][] {
   if (!coords || coords.length < 3) return coords;
@@ -148,7 +151,6 @@ function cleanAndSimplifyRawPath(
 ): number[][] {
   if (rawPoints.length < 3) return rawPoints;
 
-  // 1. Deduplicate consecutive points closer than ~1 meter (0.00001 deg)
   const minSpacing = 0.00001;
   const deduped: [number, number][] = [rawPoints[0]];
   for (let i = 1; i < rawPoints.length; i++) {
@@ -164,7 +166,6 @@ function cleanAndSimplifyRawPath(
 
   if (deduped.length < 3) return deduped;
 
-  // 2. Ensure closed path for RDP
   const first = deduped[0];
   const last = deduped[deduped.length - 1];
   const closeDist = Math.sqrt(
@@ -174,10 +175,8 @@ function cleanAndSimplifyRawPath(
     deduped.push([first[0], first[1]]);
   }
 
-  // 3. Apply RDP simplification
   const simplified = ramerDouglasPeucker(deduped, epsilon);
 
-  // 4. Remove duplicate closing point if present (Leaflet Polygon connects endpoints automatically)
   if (
     simplified.length > 2 &&
     simplified[0][0] === simplified[simplified.length - 1][0] &&
@@ -189,7 +188,7 @@ function cleanAndSimplifyRawPath(
   return simplified;
 }
 
-// ── Leaflet Inner Controller Subcomponents ───────────────────────────────────
+// ── Leaflet Controllers ───────────────────────────────────────────────────────
 
 /** Resizes Leaflet tiles to occupy the exact 100vw x 100dvh viewport */
 function FullscreenMapResizer() {
@@ -225,55 +224,34 @@ function FullscreenBoundsFitter({ bounds }: { bounds: L.LatLngBoundsExpression |
 }
 
 /**
- * Freehand Trace & Click Interaction Controller
+ * Mobile-First Touch & Pointer Drawing Controller
  */
-interface DrawInteractionControllerProps {
-  drawMode: 'trace' | 'points';
+interface MobileTouchDrawControllerProps {
+  drawMode: 'trace' | 'points' | 'crosshair';
   onTraceStart: (lat: number, lon: number) => void;
   onTraceMove: (lat: number, lon: number) => void;
   onTraceEnd: () => void;
   onAddPoint: (lat: number, lon: number) => void;
+  onCenterChange: (lat: number, lon: number) => void;
 }
 
-function DrawInteractionController({
+function MobileTouchDrawController({
   drawMode,
   onTraceStart,
   onTraceMove,
   onTraceEnd,
   onAddPoint,
-}: DrawInteractionControllerProps) {
+  onCenterChange,
+}: MobileTouchDrawControllerProps) {
   const map = useMap();
   const isTracingRef = useRef<boolean>(false);
+  const pointerStartPosRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
-  useEffect(() => {
-    if (drawMode !== 'trace') {
-      map.dragging.enable();
-    }
-  }, [drawMode, map]);
-
+  // Sync center when map pans
   useMapEvents({
-    mousedown(e) {
-      if (drawMode === 'trace') {
-        map.dragging.disable();
-        map.touchZoom.disable();
-        map.doubleClickZoom.disable();
-        isTracingRef.current = true;
-        onTraceStart(e.latlng.lat, e.latlng.lng);
-      }
-    },
-    mousemove(e) {
-      if (drawMode === 'trace' && isTracingRef.current) {
-        onTraceMove(e.latlng.lat, e.latlng.lng);
-      }
-    },
-    mouseup() {
-      if (drawMode === 'trace' && isTracingRef.current) {
-        isTracingRef.current = false;
-        map.dragging.enable();
-        map.touchZoom.enable();
-        map.doubleClickZoom.enable();
-        onTraceEnd();
-      }
+    move() {
+      const c = map.getCenter();
+      onCenterChange(c.lat, c.lng);
     },
     click(e) {
       if (drawMode === 'points') {
@@ -282,23 +260,81 @@ function DrawInteractionController({
     },
   });
 
+  // Initial center sync
   useEffect(() => {
-    const handleGlobalPointerUp = () => {
-      if (isTracingRef.current) {
+    const c = map.getCenter();
+    onCenterChange(c.lat, c.lng);
+  }, [map, onCenterChange]);
+
+  // Native pointer handlers on map container
+  useEffect(() => {
+    const container = map.getContainer();
+
+    const handlePointerDown = (e: PointerEvent) => {
+      // Ignore clicks on UI buttons/controls
+      if ((e.target as HTMLElement)?.closest('button, .leaflet-control, .custom-vertex-handle')) {
+        return;
+      }
+
+      pointerStartPosRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
+
+      if (drawMode === 'trace') {
+        e.preventDefault();
+        map.dragging.disable();
+        map.touchZoom.disable();
+        map.doubleClickZoom.disable();
+        isTracingRef.current = true;
+        const rect = container.getBoundingClientRect();
+        const pt = L.point(e.clientX - rect.left, e.clientY - rect.top);
+        const latlng = map.containerPointToLatLng(pt);
+        onTraceStart(latlng.lat, latlng.lng);
+      }
+    };
+
+    const handlePointerMove = (e: PointerEvent) => {
+      if (drawMode === 'trace' && isTracingRef.current) {
+        e.preventDefault();
+        const rect = container.getBoundingClientRect();
+        const pt = L.point(e.clientX - rect.left, e.clientY - rect.top);
+        const latlng = map.containerPointToLatLng(pt);
+        onTraceMove(latlng.lat, latlng.lng);
+      }
+    };
+
+    const handlePointerUp = (e: PointerEvent) => {
+      if (drawMode === 'trace' && isTracingRef.current) {
         isTracingRef.current = false;
         map.dragging.enable();
         map.touchZoom.enable();
         map.doubleClickZoom.enable();
         onTraceEnd();
+      } else if (drawMode === 'points' && pointerStartPosRef.current) {
+        const dx = Math.abs(e.clientX - pointerStartPosRef.current.x);
+        const dy = Math.abs(e.clientY - pointerStartPosRef.current.y);
+        const dt = Date.now() - pointerStartPosRef.current.time;
+        // Mobile tap detection (< 15px movement within 350ms)
+        if (dx < 15 && dy < 15 && dt < 350) {
+          const rect = container.getBoundingClientRect();
+          const pt = L.point(e.clientX - rect.left, e.clientY - rect.top);
+          const latlng = map.containerPointToLatLng(pt);
+          onAddPoint(latlng.lat, latlng.lng);
+        }
       }
+      pointerStartPosRef.current = null;
     };
-    window.addEventListener('mouseup', handleGlobalPointerUp);
-    window.addEventListener('touchend', handleGlobalPointerUp);
+
+    container.addEventListener('pointerdown', handlePointerDown, { passive: false });
+    window.addEventListener('pointermove', handlePointerMove, { passive: false });
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
+
     return () => {
-      window.removeEventListener('mouseup', handleGlobalPointerUp);
-      window.removeEventListener('touchend', handleGlobalPointerUp);
+      container.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
     };
-  }, [map, onTraceEnd]);
+  }, [map, drawMode, onTraceStart, onTraceMove, onTraceEnd, onAddPoint]);
 
   return null;
 }
@@ -321,11 +357,13 @@ export default function FullscreenFieldDrawer({
   const [rawTrace, setRawTrace] = useState<[number, number][]>([]);
   // Drawing state
   const [isTracing, setIsTracing] = useState<boolean>(false);
-  const [hasStartedDrawing, setHasStartedDrawing] = useState<boolean>(false);
-  const [drawMode, setDrawMode] = useState<'trace' | 'points'>('trace');
+  const [drawMode, setDrawMode] = useState<'crosshair' | 'points' | 'trace'>('crosshair');
   const [basemap, setBasemap] = useState<'satellite' | 'street'>('satellite');
   // Undo history stack
   const [history, setHistory] = useState<number[][][]>([]);
+  // Live viewport center tracking for the mobile crosshair
+  const [currentCenter, setCurrentCenter] = useState<[number, number]>([centerLat, centerLon]);
+  const [showHelp, setShowHelp] = useState<boolean>(false);
 
   // Live calculated area
   const areaHa = useMemo(() => computeGeodesicAreaHectares(boundary), [boundary]);
@@ -371,7 +409,6 @@ export default function FullscreenFieldDrawer({
 
   const handleTraceStart = useCallback((lat: number, lon: number) => {
     setIsTracing(true);
-    setHasStartedDrawing(true);
     setRawTrace([[lat, lon]]);
   }, []);
 
@@ -393,20 +430,57 @@ export default function FullscreenFieldDrawer({
     });
   }, [boundary]);
 
-  // ── "Add Points" Click Handler ─────────────────────────────────────────────
+  // ── "Add Points" / Tap Handler ─────────────────────────────────────────────
 
   const handleAddPoint = useCallback(
     (lat: number, lon: number) => {
-      setHasStartedDrawing(true);
       setHistory((h) => [...h, boundary]);
       setBoundary((prev) => [...prev, [lat, lon]]);
     },
     [boundary]
   );
 
+  // ── "Add Center Point" via Mobile Reticle Crosshair ─────────────────────────
+
+  const handleAddCenterPin = () => {
+    setHistory((h) => [...h, boundary]);
+    setBoundary((prev) => [...prev, [currentCenter[0], currentCenter[1]]]);
+  };
+
+  // ── "Drop My GPS Pin" ───────────────────────────────────────────────────────
+
+  const handleAddFarmerGpsPin = () => {
+    if (!farmerLocation?.lat || !farmerLocation?.lon) return;
+    setHistory((h) => [...h, boundary]);
+    setBoundary((prev) => [...prev, [farmerLocation.lat, farmerLocation.lon]]);
+  };
+
+  // ── "Auto-Shape 2.5 Ha" Preset ─────────────────────────────────────────────
+
+  const handleAutoSquare = () => {
+    setHistory((h) => [...h, boundary]);
+    const lat = currentCenter[0];
+    const lon = currentCenter[1];
+    const delta = 0.0015; // ~2.5 ha square
+    setBoundary([
+      [lat + delta * 0.95, lon - delta * 1.05],
+      [lat + delta * 1.05, lon + delta * 0.95],
+      [lat - delta * 0.98, lon + delta * 1.08],
+      [lat - delta * 1.02, lon - delta * 0.98],
+    ]);
+  };
+
   // ── Editing & Vertex Manipulation ──────────────────────────────────────────
 
-  // Add vertex on an edge midpoint
+  const handleUpdateVertex = (idx: number, newLat: number, newLon: number) => {
+    setHistory((h) => [...h, boundary]);
+    setBoundary((prev) => {
+      const next = [...prev];
+      next[idx] = [newLat, newLon];
+      return next;
+    });
+  };
+
   const handleAddMidpoint = (afterIdx: number, midLat: number, midLon: number) => {
     setHistory((h) => [...h, boundary]);
     setBoundary((prev) => {
@@ -416,14 +490,12 @@ export default function FullscreenFieldDrawer({
     });
   };
 
-  // Delete a specific vertex
   const handleDeleteVertex = (index: number) => {
     if (boundary.length <= 3) return;
     setHistory((h) => [...h, boundary]);
     setBoundary((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Undo last action
   const handleUndo = () => {
     if (history.length > 0) {
       const prev = history[history.length - 1];
@@ -434,14 +506,12 @@ export default function FullscreenFieldDrawer({
     }
   };
 
-  // Untangle criss-cross / hourglass shapes
   const handleUntangle = () => {
     if (boundary.length < 3) return;
     setHistory((h) => [...h, boundary]);
     setBoundary(sortVerticesClockwise(boundary));
   };
 
-  // Clear all points
   const handleClear = () => {
     if (boundary.length > 0) {
       setHistory((h) => [...h, boundary]);
@@ -450,14 +520,13 @@ export default function FullscreenFieldDrawer({
     setRawTrace([]);
   };
 
-  // Confirm boundary
   const handleConfirm = () => {
     if (boundary.length < 3) return;
     onConfirm(boundary, areaHa);
     onClose();
   };
 
-  // Midpoints computed between adjacent polygon vertices for easy subdivision
+  // Midpoints computed between adjacent polygon vertices
   const midpoints = useMemo(() => {
     if (boundary.length < 3) return [];
     return boundary.map((pt, i) => {
@@ -478,25 +547,34 @@ export default function FullscreenFieldDrawer({
       style={{ touchAction: isTracing ? 'none' : 'auto' }}
     >
       {/* ── TOP FLOATING CONTROL BAR ────────────────────────────────────────── */}
-      <header className="absolute top-0 inset-x-0 z-[10000] p-3 sm:p-4 flex items-center justify-between pointer-events-none">
+      <header className="absolute top-0 inset-x-0 z-[10000] p-2.5 sm:p-4 flex items-center justify-between pointer-events-none">
         
         {/* Top Left: Exit / Back Button */}
         <div className="pointer-events-auto flex items-center gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-2 rounded-xl bg-black/80 hover:bg-black/95 text-white border border-white/20 hover:border-white/40 backdrop-blur-md shadow-2xl transition-all flex items-center gap-2 text-xs font-semibold group cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-black/80 hover:bg-black/95 text-white border border-white/20 hover:border-white/40 backdrop-blur-md shadow-2xl transition-all flex items-center gap-1.5 text-xs font-semibold group cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 text-emerald-400 group-hover:-translate-x-0.5 transition-transform" />
             <span>Exit</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowHelp(!showHelp)}
+            className="p-2 rounded-xl bg-black/80 text-white/80 hover:text-white border border-white/20 backdrop-blur-md transition-colors"
+            title="How to draw on mobile"
+          >
+            <HelpCircle className="w-4 h-4" />
           </button>
         </div>
 
         {/* Top Center: Status & Title Pill */}
         <div className="pointer-events-auto flex flex-col items-center">
-          <div className="px-4 py-2 rounded-full bg-black/80 border border-emerald-500/30 backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.2)] flex items-center gap-2.5">
+          <div className="px-3.5 py-1.5 rounded-full bg-black/85 border border-emerald-500/30 backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.2)] flex items-center gap-2">
             <span
-              className={`w-2.5 h-2.5 rounded-full ${
+              className={`w-2 h-2 rounded-full ${
                 isTracing
                   ? 'bg-emerald-400 animate-ping'
                   : boundary.length >= 3
@@ -504,90 +582,121 @@ export default function FullscreenFieldDrawer({
                   : 'bg-amber-400 animate-pulse'
               }`}
             />
-            <span className="text-xs font-mono font-bold tracking-wider uppercase text-white">
+            <span className="text-[11px] sm:text-xs font-mono font-bold tracking-wider uppercase text-white">
               {isTracing
-                ? '● DRAWING FIELD — RELEASE TO COMPLETE'
+                ? '● TRACING FIELD…'
                 : boundary.length >= 3
-                ? `✓ BOUNDARY CREATED · ${areaHa} HA`
-                : 'MARK YOUR FIELD BOUNDARY'}
+                ? `✓ ${boundary.length} CORNERS · ${areaHa} HA`
+                : 'MAP FARM BOUNDARY'}
             </span>
           </div>
         </div>
 
         {/* Top Right: Basemap & Mode Controls */}
-        <div className="pointer-events-auto flex items-center gap-2">
-          
-          {/* Basemap Toggle: Satellite vs Street */}
-          <div className="flex bg-black/80 border border-white/20 rounded-xl p-1 backdrop-blur-md">
+        <div className="pointer-events-auto flex items-center gap-1.5">
+          {/* Basemap Toggle */}
+          <div className="flex bg-black/80 border border-white/20 rounded-xl p-0.5 backdrop-blur-md">
             <button
               type="button"
               onClick={() => setBasemap('satellite')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all ${
                 basemap === 'satellite'
                   ? 'bg-emerald-600 text-white shadow-md'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
-              <Satellite className="w-3.5 h-3.5" />
-              <span>Satellite</span>
+              <Satellite className="w-3 h-3" />
+              <span className="hidden sm:inline">Satellite</span>
             </button>
             <button
               type="button"
               onClick={() => setBasemap('street')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all ${
                 basemap === 'street'
                   ? 'bg-emerald-600 text-white shadow-md'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Map</span>
+              <Layers className="w-3 h-3" />
+              <span className="hidden sm:inline">Map</span>
             </button>
           </div>
 
-          {/* Draw Mode Switcher: Trace vs Points */}
-          <div className="hidden sm:flex bg-black/80 border border-white/20 rounded-xl p-1 backdrop-blur-md">
+          {/* Draw Mode Switcher */}
+          <div className="flex bg-black/80 border border-white/20 rounded-xl p-0.5 backdrop-blur-md">
             <button
               type="button"
-              onClick={() => setDrawMode('trace')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                drawMode === 'trace'
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+              onClick={() => setDrawMode('crosshair')}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all ${
+                drawMode === 'crosshair'
+                  ? 'bg-cyan-500 text-black font-bold shadow'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="Press and hold to freely trace your field"
+              title="Target with center crosshair (Easy for Mobile)"
             >
-              <Hand className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Trace Field</span>
+              <Crosshair className="w-3 h-3" />
+              <span className="hidden sm:inline">Target Reticle</span>
             </button>
             <button
               type="button"
               onClick={() => setDrawMode('points')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all ${
                 drawMode === 'points'
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                  ? 'bg-emerald-500 text-black font-bold shadow'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="Click individual corner points"
+              title="Tap anywhere on map to add points"
             >
-              <MousePointer className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Add Points</span>
+              <MousePointer className="w-3 h-3" />
+              <span className="hidden sm:inline">Tap Points</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setDrawMode('trace')}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all ${
+                drawMode === 'trace'
+                  ? 'bg-emerald-500 text-black font-bold shadow'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Press and hold to freely trace your field"
+            >
+              <Hand className="w-3 h-3" />
+              <span className="hidden sm:inline">Trace</span>
             </button>
           </div>
-
         </div>
       </header>
 
-      {/* ── SUBTLE INSTRUCTION OVERLAY (Fades on first draw) ────────────────── */}
-      {!hasStartedDrawing && boundary.length === 0 && (
-        <div className="absolute top-20 inset-x-0 z-[10000] flex justify-center pointer-events-none transition-opacity duration-700 animate-bounce">
-          <div className="px-5 py-2.5 rounded-2xl bg-black/85 border border-emerald-500/40 backdrop-blur-md shadow-2xl flex items-center gap-3">
-            <Sparkles className="w-4 h-4 text-emerald-400 animate-spin" />
-            <p className="text-xs font-medium text-slate-100">
-              {drawMode === 'trace'
-                ? '👆 Press & hold on the satellite map, then trace around your field boundary'
-                : '👆 Click anywhere on the map to add corner vertices around your field'}
-            </p>
+      {/* ── MOBILE INSTRUCTIONS MODAL ──────────────────────────────────────── */}
+      {showHelp && (
+        <div className="absolute top-16 inset-x-3 sm:inset-x-auto sm:right-4 z-[10001] max-w-sm bg-dark-900/95 border border-emerald-500/40 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-3">
+          <div className="flex items-center justify-between text-emerald-400 text-xs font-bold font-mono">
+            <span>📱 3 WAYS TO DRAW ON MOBILE:</span>
+            <button onClick={() => setShowHelp(false)} className="text-white/60 hover:text-white">✕</button>
+          </div>
+          <div className="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>1. Target Reticle (Recommended):</strong> Pan the satellite map under the center reticle `+` and tap <strong>"📍 Drop Corner Pin"</strong>.</p>
+            <p><strong>2. Direct Tap:</strong> Tap anywhere on the field corners to drop boundary vertices.</p>
+            <p><strong>3. Auto-Shape:</strong> Tap <strong>"📐 Auto 2.5 Ha"</strong> to instantly generate a parcel and drag the numbered green corners to fit your land!</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── CENTER RETICLE CROSSHAIR (Target Mode) ──────────────────────────── */}
+      {drawMode === 'crosshair' && (
+        <div className="absolute inset-0 z-[5000] flex items-center justify-center pointer-events-none">
+          <div className="relative flex items-center justify-center">
+            {/* Outer Target Circle */}
+            <div className="w-12 h-12 rounded-full border-2 border-cyan-400/80 shadow-[0_0_15px_rgba(0,229,255,0.4)] animate-pulse" />
+            {/* Center Dot */}
+            <div className="absolute w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00e5ff]" />
+            {/* Horizontal & Vertical Crosshairs */}
+            <div className="absolute w-6 h-0.5 bg-cyan-400/90" />
+            <div className="absolute h-6 w-0.5 bg-cyan-400/90" />
+            {/* Reticle Lat/Lon Badge */}
+            <div className="absolute -bottom-8 bg-black/80 border border-cyan-500/40 rounded-full px-2.5 py-0.5 text-[9px] font-mono text-cyan-300 backdrop-blur-md shadow whitespace-nowrap">
+              {currentCenter[0].toFixed(5)}°, {currentCenter[1].toFixed(5)}°
+            </div>
           </div>
         </div>
       )}
@@ -623,23 +732,24 @@ export default function FullscreenFieldDrawer({
             />
           )}
 
-          {/* Drawing Event Controller */}
-          <DrawInteractionController
+          {/* Mobile-First Touch & Pointer Drawing Controller */}
+          <MobileTouchDrawController
             drawMode={drawMode}
             onTraceStart={handleTraceStart}
             onTraceMove={handleTraceMove}
             onTraceEnd={handleTraceEnd}
             onAddPoint={handleAddPoint}
+            onCenterChange={(lat, lon) => setCurrentCenter([lat, lon])}
           />
 
-          {/* 1. Live Freehand Tracing Line & Transparent Fill (During Active Hold) */}
+          {/* 1. Live Freehand Tracing Line (During Active Hold & Drag) */}
           {rawTrace.length > 1 && (
             <>
               <Polyline
                 positions={rawTrace}
                 pathOptions={{
                   color: '#10b981',
-                  weight: 3.5,
+                  weight: 4,
                   opacity: 0.95,
                   lineJoin: 'round',
                   lineCap: 'round',
@@ -649,14 +759,13 @@ export default function FullscreenFieldDrawer({
                 positions={rawTrace}
                 pathOptions={{
                   fillColor: '#10b981',
-                  fillOpacity: 0.18,
+                  fillOpacity: 0.20,
                   stroke: false,
                 }}
               />
-              {/* Start Point Marker */}
               <CircleMarker
                 center={rawTrace[0]}
-                radius={7}
+                radius={8}
                 pathOptions={{
                   fillColor: '#10b981',
                   fillOpacity: 1,
@@ -676,38 +785,36 @@ export default function FullscreenFieldDrawer({
                 weight: 3.5,
                 opacity: 0.95,
                 fillColor: '#10b981',
-                fillOpacity: 0.22,
+                fillOpacity: 0.25,
               }}
             />
           )}
 
-          {/* 3. Incomplete Boundary (1 or 2 points in "Add Points" mode) */}
+          {/* 3. Incomplete Boundary Line (< 3 points) */}
           {boundary.length > 0 && boundary.length < 3 && !isTracing && (
             <Polyline
               positions={boundary as L.LatLngTuple[]}
               pathOptions={{
                 color: '#f59e0b',
-                weight: 3,
+                weight: 3.5,
                 dashArray: '6, 6',
               }}
             />
           )}
 
-          {/* 4. Interactive Corner Vertices */}
+          {/* 4. Interactive Draggable Corner Vertices */}
           {boundary.length >= 3 &&
             !isTracing &&
             boundary.map((pt, idx) => (
-              <CircleMarker
-                key={`vertex-${idx}-${pt[0]}-${pt[1]}`}
-                center={[pt[0], pt[1]]}
-                radius={8}
-                pathOptions={{
-                  fillColor: '#10b981',
-                  fillOpacity: 1,
-                  color: '#ffffff',
-                  weight: 2.5,
-                }}
+              <Marker
+                key={`vertex-drag-${idx}-${pt[0].toFixed(5)}-${pt[1].toFixed(5)}`}
+                position={[pt[0], pt[1]]}
+                draggable={true}
                 eventHandlers={{
+                  dragend: (e) => {
+                    const newPos = e.target.getLatLng();
+                    handleUpdateVertex(idx, newPos.lat, newPos.lng);
+                  },
                   click: (e) => {
                     L.DomEvent.stopPropagation(e);
                     if (boundary.length > 3) {
@@ -715,22 +822,45 @@ export default function FullscreenFieldDrawer({
                     }
                   },
                 }}
+                icon={L.divIcon({
+                  className: 'custom-vertex-handle',
+                  html: `<div style="width: 26px; height: 26px; border-radius: 50%; background: #10b981; border: 2.5px solid #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: bold; cursor: grab;">${idx + 1}</div>`,
+                  iconSize: [26, 26],
+                  iconAnchor: [13, 13],
+                })}
               />
             ))}
 
-          {/* 5. Midpoint '+' Insertion Handles between adjacent vertices */}
+          {/* 5. Incomplete Single Corner Markers (< 3 points) */}
+          {boundary.length < 3 &&
+            !isTracing &&
+            boundary.map((pt, idx) => (
+              <CircleMarker
+                key={`pt-${idx}-${pt[0]}-${pt[1]}`}
+                center={[pt[0], pt[1]]}
+                radius={9}
+                pathOptions={{
+                  fillColor: '#10b981',
+                  fillOpacity: 1,
+                  color: '#ffffff',
+                  weight: 2.5,
+                }}
+              />
+            ))}
+
+          {/* 6. Midpoint '+' Insertion Handles between adjacent vertices */}
           {boundary.length >= 3 &&
             !isTracing &&
             midpoints.map((mid) => (
               <CircleMarker
                 key={`midpoint-${mid.index}-${mid.lat}-${mid.lon}`}
                 center={[mid.lat, mid.lon]}
-                radius={5}
+                radius={6}
                 pathOptions={{
                   fillColor: '#ffffff',
-                  fillOpacity: 0.9,
+                  fillOpacity: 0.95,
                   color: '#10b981',
-                  weight: 2,
+                  weight: 2.5,
                 }}
                 eventHandlers={{
                   click: (e) => {
@@ -741,13 +871,13 @@ export default function FullscreenFieldDrawer({
               />
             ))}
 
-          {/* 6. Farmer GPS Device Marker */}
+          {/* 7. Farmer GPS Device Marker */}
           {farmerLocation?.lat && farmerLocation?.lon && (
             <CircleMarker
               center={[farmerLocation.lat, farmerLocation.lon]}
-              radius={8}
+              radius={9}
               pathOptions={{
-                fillColor: '#00a3ff',
+                fillColor: '#00e5ff',
                 fillOpacity: 1,
                 color: '#ffffff',
                 weight: 2.5,
@@ -758,99 +888,115 @@ export default function FullscreenFieldDrawer({
       </div>
 
       {/* ── BOTTOM FLOATING ACTION BAR ──────────────────────────────────────── */}
-      <footer className="absolute bottom-0 inset-x-0 z-[10000] p-3 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 pointer-events-none">
+      <footer className="absolute bottom-0 inset-x-0 z-[10000] p-2.5 sm:p-5 flex flex-col gap-2.5 pointer-events-none pb-6 sm:pb-5">
         
-        {/* Bottom Left: Undo, Clear & Redraw */}
-        <div className="pointer-events-auto flex items-center gap-2 self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={handleUndo}
-            disabled={boundary.length === 0 && history.length === 0}
-            className="px-3.5 py-2.5 rounded-xl bg-black/80 hover:bg-black/95 text-white border border-white/20 hover:border-white/40 disabled:opacity-40 disabled:pointer-events-none backdrop-blur-md shadow-xl transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
-            title="Undo last stroke or point"
-          >
-            <Undo2 className="w-4 h-4 text-amber-400" />
-            <span>Undo</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleClear}
-            disabled={boundary.length === 0}
-            className="px-3.5 py-2.5 rounded-xl bg-black/80 hover:bg-black/95 text-white border border-white/20 hover:border-white/40 disabled:opacity-40 disabled:pointer-events-none backdrop-blur-md shadow-xl transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
-            title="Clear and redraw"
-          >
-            <RotateCcw className="w-4 h-4 text-slate-300" />
-            <span>Clear</span>
-          </button>
-
-          {boundary.length >= 4 && (
+        {/* Row 1: Primary Action Buttons (Center Drop Pin & Auto-Shape) */}
+        <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-2">
+          {drawMode === 'crosshair' && (
             <button
               type="button"
-              onClick={handleUntangle}
-              className="px-3.5 py-2.5 rounded-xl bg-black/80 hover:bg-black/95 text-cyan-300 border border-cyan-500/40 backdrop-blur-md shadow-xl transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
-              title="Untangle criss-crossing edges into clean perimeter order"
+              onClick={handleAddCenterPin}
+              className="px-5 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-sm flex items-center gap-2 shadow-2xl shadow-cyan-500/40 active:scale-95 transition-all cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span>Fix Shape</span>
+              <Plus className="w-5 h-5 stroke-[3]" />
+              <span>📍 Drop Corner Pin Here</span>
             </button>
           )}
 
-          {boundary.length >= 3 && (
+          {boundary.length === 0 && (
             <button
               type="button"
-              onClick={() => {
-                handleClear();
-                setDrawMode('trace');
-              }}
-              className="px-3.5 py-2.5 rounded-xl bg-black/80 hover:bg-black/95 text-emerald-300 border border-emerald-500/40 backdrop-blur-md shadow-xl transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+              onClick={handleAutoSquare}
+              className="px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 backdrop-blur-md text-xs font-bold flex items-center gap-1.5 shadow-xl transition-all"
             >
               <Sparkles className="w-4 h-4 text-emerald-400" />
-              <span>Redraw</span>
+              <span>📐 Auto 2.5 Ha Parcel</span>
+            </button>
+          )}
+
+          {farmerLocation?.lat && farmerLocation?.lon && (
+            <button
+              type="button"
+              onClick={handleAddFarmerGpsPin}
+              className="px-3.5 py-2.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 backdrop-blur-md text-xs font-bold flex items-center gap-1.5 shadow-xl transition-all"
+              title="Add current phone GPS location as a corner"
+            >
+              <Navigation className="w-3.5 h-3.5 text-blue-400" />
+              <span className="hidden sm:inline">Drop GPS Pin</span>
             </button>
           )}
         </div>
 
-        {/* Bottom Center: Field Area Metric Pill */}
-        {boundary.length >= 3 && (
-          <div className="pointer-events-auto px-5 py-2.5 rounded-2xl bg-black/85 border border-white/20 backdrop-blur-md shadow-2xl flex items-center gap-3">
-            <div className="flex flex-col text-left">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
-                Calculated Field Area
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-lg font-extrabold text-emerald-400 font-mono">
-                  {areaHa} ha
-                </span>
-                <span className="text-xs text-slate-300 font-mono">
-                  ({areaAcres} acres)
-                </span>
-                <span className="text-[10px] text-slate-500 font-mono">
-                  · {boundary.length} vertices
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Row 2: Secondary Controls (Undo, Clear, Fix Shape, Confirm) */}
+        <div className="pointer-events-auto flex items-center justify-between gap-2">
+          
+          {/* Left Group: Undo & Clear */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleUndo}
+              disabled={boundary.length === 0 && history.length === 0}
+              className="px-3 py-2 rounded-xl bg-black/85 hover:bg-black text-white border border-white/20 hover:border-white/40 disabled:opacity-40 disabled:pointer-events-none backdrop-blur-md shadow-xl text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+            >
+              <Undo2 className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Undo</span>
+            </button>
 
-        {/* Bottom Right: Confirm Field Button */}
-        <div className="pointer-events-auto self-end sm:self-auto">
-          <button
-            type="button"
-            onClick={handleConfirm}
-            disabled={boundary.length < 3 || isTracing}
-            className={`px-6 py-3 rounded-2xl font-bold text-sm tracking-wide flex items-center gap-2.5 transition-all shadow-2xl ${
-              boundary.length >= 3 && !isTracing
-                ? 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-emerald-500/40 hover:scale-[1.02] cursor-pointer'
-                : 'bg-dark-800 text-slate-500 border border-dark-700 cursor-not-allowed opacity-60'
-            }`}
-          >
-            <Check className="w-4 h-4" />
-            <span>Confirm Field</span>
-          </button>
+            <button
+              type="button"
+              onClick={handleClear}
+              disabled={boundary.length === 0}
+              className="px-3 py-2 rounded-xl bg-black/85 hover:bg-black text-white border border-white/20 hover:border-white/40 disabled:opacity-40 disabled:pointer-events-none backdrop-blur-md shadow-xl text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+              <span className="hidden sm:inline">Clear</span>
+            </button>
+
+            {boundary.length >= 4 && (
+              <button
+                type="button"
+                onClick={handleUntangle}
+                className="px-3 py-2 rounded-xl bg-black/85 hover:bg-black text-cyan-300 border border-cyan-500/40 backdrop-blur-md shadow-xl text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Fix Shape</span>
+              </button>
+            )}
+          </div>
+
+          {/* Center Metric */}
+          {boundary.length >= 3 && (
+            <div className="px-3 py-1.5 rounded-xl bg-black/85 border border-emerald-500/30 backdrop-blur-md text-center">
+              <span className="text-sm font-extrabold text-emerald-400 font-mono">
+                {areaHa} ha
+              </span>
+              <span className="text-[10px] text-slate-300 font-mono ml-1.5 hidden sm:inline">
+                ({areaAcres} ac)
+              </span>
+            </div>
+          )}
+
+          {/* Right Group: Confirm Field Button */}
+          <div>
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={boundary.length < 3 || isTracing}
+              className={`px-5 py-2.5 rounded-xl font-bold text-xs tracking-wide flex items-center gap-1.5 transition-all shadow-2xl ${
+                boundary.length >= 3 && !isTracing
+                  ? 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-emerald-500/40 active:scale-95 cursor-pointer'
+                  : 'bg-dark-800 text-slate-500 border border-dark-700 cursor-not-allowed opacity-60'
+              }`}
+            >
+              <Check className="w-4 h-4" />
+              <span>Confirm Field</span>
+            </button>
+          </div>
+
         </div>
 
       </footer>
     </div>
   );
 }
+

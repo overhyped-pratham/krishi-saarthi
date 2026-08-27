@@ -235,6 +235,9 @@ function MapClickHandler({
   onAddPoint: (lat: number, lng: number) => void;
   disabled: boolean;
 }) {
+  const map = useMap();
+  const pointerStartPosRef = useRef<{ x: number; y: number; time: number } | null>(null);
+
   useMapEvents({
     click(e) {
       if (!disabled) {
@@ -242,6 +245,40 @@ function MapClickHandler({
       }
     },
   });
+
+  useEffect(() => {
+    if (disabled) return;
+    const container = map.getContainer();
+
+    const handlePointerDown = (e: PointerEvent) => {
+      if ((e.target as HTMLElement)?.closest('button, .leaflet-control, .leaflet-interactive')) {
+        return;
+      }
+      pointerStartPosRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
+    };
+
+    const handlePointerUp = (e: PointerEvent) => {
+      if (!pointerStartPosRef.current) return;
+      const dx = Math.abs(e.clientX - pointerStartPosRef.current.x);
+      const dy = Math.abs(e.clientY - pointerStartPosRef.current.y);
+      const dt = Date.now() - pointerStartPosRef.current.time;
+      if (dx < 15 && dy < 15 && dt < 350) {
+        const rect = container.getBoundingClientRect();
+        const pt = L.point(e.clientX - rect.left, e.clientY - rect.top);
+        const latlng = map.containerPointToLatLng(pt);
+        onAddPoint(latlng.lat, latlng.lng);
+      }
+      pointerStartPosRef.current = null;
+    };
+
+    container.addEventListener('pointerdown', handlePointerDown);
+    container.addEventListener('pointerup', handlePointerUp);
+    return () => {
+      container.removeEventListener('pointerdown', handlePointerDown);
+      container.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, [map, disabled, onAddPoint]);
+
   return null;
 }
 
@@ -862,16 +899,26 @@ export default function FarmMap({
           {/* ── Vertex Markers when Editing ─────────────────────────────────── */}
           {(isDrawingMode || !readOnly) &&
             points.map((pt, idx) => (
-              <CircleMarker
-                key={`vertex-${idx}`}
-                center={[pt[0], pt[1]]}
-                radius={isDrawingMode ? 6 : 4}
-                pathOptions={{
-                  color: '#ffffff',
-                  fillColor: isDrawingMode ? '#f59e0b' : polygonColor,
-                  fillOpacity: 1.0,
-                  weight: 2,
+              <Marker
+                key={`vertex-${idx}-${pt[0].toFixed(5)}-${pt[1].toFixed(5)}`}
+                position={[pt[0], pt[1]]}
+                draggable={isDrawingMode}
+                eventHandlers={{
+                  dragend: (e) => {
+                    const newPos = e.target.getLatLng();
+                    const updated = [...points];
+                    updated[idx] = [newPos.lat, newPos.lng];
+                    setPoints(updated);
+                    if (onChange) onChange(updated);
+                    if (farmId) localStorage.setItem(`agriproof:boundary:${farmId}`, JSON.stringify(updated));
+                  },
                 }}
+                icon={L.divIcon({
+                  className: 'custom-vertex-marker',
+                  html: `<div style="width: 22px; height: 22px; border-radius: 50%; background: ${isDrawingMode ? '#f59e0b' : '#10b981'}; border: 2px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold; cursor: grab;">${idx + 1}</div>`,
+                  iconSize: [22, 22],
+                  iconAnchor: [11, 11],
+                })}
               />
             ))}
 
