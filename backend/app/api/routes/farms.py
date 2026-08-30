@@ -582,9 +582,7 @@ async def explain_farm_ai(farm_id: str, db: AsyncSession = Depends(get_db)):
     }
 
 
-@router.post("/farms/{farm_id}/ask-advisor")
-async def ask_agronomy_advisor(farm_id: str, data: dict, db: AsyncSession = Depends(get_db)):
-    question = data.get("question", "")
+async def _ask_advisor_impl(farm_id: str, question: str, db: AsyncSession):
     res_farm = await db.execute(select(Farm).where(Farm.id == farm_id))
     farm = res_farm.scalars().first()
     crop = farm.crop_type if farm else "crop"
@@ -603,4 +601,19 @@ async def ask_agronomy_advisor(farm_id: str, data: dict, db: AsyncSession = Depe
         ],
         "source": "agronomy_ai_engine"
     }
+
+
+@router.post("/farms/{farm_id}/ask-advisor")
+async def ask_agronomy_advisor(farm_id: str, data: dict, db: AsyncSession = Depends(get_db)):
+    return await _ask_advisor_impl(farm_id, data.get("question", ""), db)
+
+
+@router.post("/ai/ask")
+async def ask_advisor_flat(data: dict, db: AsyncSession = Depends(get_db)):
+    """Alias accepted by frontend: POST /api/ai/ask with farmId in the request body."""
+    farm_id = data.get("farmId", "")
+    question = data.get("question", "")
+    if not farm_id:
+        raise HTTPException(status_code=400, detail="farmId is required")
+    return await _ask_advisor_impl(farm_id, question, db)
 

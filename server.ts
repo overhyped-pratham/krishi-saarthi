@@ -139,7 +139,8 @@ interface AnalysisResult {
   confidence: number;
   risk_score: number;
   risk_category: string;
-  ndvi_time_series: Array<{ date: string; ndvi: number }>;
+  ndvi_time_series: Array<{ date: string; ndvi: number; evi?: number; cloud_cover?: number }>;
+  created_at?: string;
 }
 
 interface Claim {
@@ -996,7 +997,7 @@ You MUST return a valid JSON object strictly adhering to the schema.`;
   }
 });
 
-app.post('/api/ai/ask-advisor', async (req, res) => {
+const handleAskAdvisor = async (req: any, res: any) => {
   const { farmId, question, language = 'en', tone = 'farmer_simple' } = req.body || {};
 
   if (!question || !question.trim()) {
@@ -1076,7 +1077,11 @@ Farm Data: ${JSON.stringify({ farm, analysis })}`;
       source: 'expert_rules_engine',
     });
   }
-});
+};
+
+// Frontend posts to /api/ai/ask; legacy path is /api/ai/ask-advisor
+app.post('/api/ai/ask', handleAskAdvisor);
+app.post('/api/ai/ask-advisor', handleAskAdvisor);
 
 // ==========================================
 // GEMINI HISTORICAL VEGETATION DISEASE & ANOMALY DETECTION
