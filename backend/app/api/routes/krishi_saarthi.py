@@ -468,3 +468,41 @@ async def get_google_cloud_run_deployment_info():
         ]
     }
 
+
+# ── Text-to-Speech (TTS) Agricultural Vocalization Endpoints ──────────────────
+
+class TTSRequest(BaseModel):
+    text: str
+    language: Optional[str] = "hi"
+    engine: Optional[str] = "auto"
+
+
+@router.post("/api/tts/synthesize")
+async def synthesize_text_to_speech(payload: TTSRequest):
+    """
+    Synthesizes localized audio advisory from input text using neural TTS models
+    (Hugging Face MMS-TTS VITS / Google TTS).
+    """
+    from app.services.ai.tts_speech_service import generate_audio_advisory
+    result = generate_audio_advisory(
+        text=payload.text,
+        language=payload.language or "hi",
+        engine_choice=payload.engine or "auto"
+    )
+    return result
+
+
+@router.get("/api/tts/stream")
+async def stream_tts_audio(text: str = Query(...), language: str = Query("hi")):
+    """
+    Directly streams audio/mpeg binary for HTML5 <audio> playback in farmer UI.
+    """
+    from fastapi.responses import Response
+    from app.services.ai.tts_speech_service import synthesize_speech_gtts
+    try:
+        audio_bytes, mime = synthesize_speech_gtts(text=text, language=language)
+        return Response(content=audio_bytes, media_type=mime)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"TTS error: {e}")
+
+
