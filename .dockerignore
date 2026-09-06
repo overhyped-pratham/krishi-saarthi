@@ -1,0 +1,75 @@
+# Dependencies
+node_modules
+frontend/node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+dist
+frontend/dist
+build
+.next
+out
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python artifacts
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv
+venv/
+ENV/
+
+# Version control & IDE
+.git
+.gitignore
+.gitattributes
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs & Temporary files
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Test & coverage artifacts
+coverage
+.nyc_output
+.pytest_cache
+
+# Large media / presentation files
+*.pptx
+*.mp4
+*.webm

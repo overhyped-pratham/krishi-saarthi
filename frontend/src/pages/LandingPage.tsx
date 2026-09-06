@@ -8,9 +8,13 @@ import {
   ShieldCheck, 
   Activity, 
   Cpu, 
-  Scan,
   Compass,
-  Globe
+  Globe,
+  Sprout,
+  Globe2,
+  Stethoscope,
+  CloudRain,
+  Bot
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import CinematicEarthBackground from '../components/CinematicEarthBackground';
@@ -36,7 +40,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white relative selection:bg-primary-container selection:text-white">
+    <div className="min-h-screen bg-black text-white relative selection:bg-cyan-500 selection:text-black">
       {/* 3D Earth Background: Switchable between Cinematic Horizon and Interstellar Globe */}
       {earthStyle === 'cinematic' ? (
         <CinematicEarthBackground speedFactor={orbitSpeed} />
@@ -51,28 +55,28 @@ export default function LandingPage() {
       <div className="relative z-10">
 
         {/* ============================================================== */}
-        {/* HERO SECTION : Matching the Reference Photographic Horizon */}
+        {/* HERO SECTION : Photographic Horizon & Krishi Saarthi Branding */}
         {/* ============================================================== */}
-        <section id="hero" className="min-h-screen flex flex-col justify-between items-center text-center px-6 pt-32 pb-12 relative">
+        <section id="hero" className="min-h-screen flex flex-col justify-between items-center text-center px-6 pt-28 pb-12 relative">
           
           {/* Live Telemetry Status Pill */}
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="z-20 inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-black/60 border border-primary/30 backdrop-blur-md shadow-[0_0_25px_rgba(0,163,255,0.25)] mb-2"
+            className="z-20 inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-black/70 border border-cyan-500/30 backdrop-blur-md shadow-[0_0_25px_rgba(0,163,255,0.25)] mb-2"
           >
             <div className="relative flex h-2.5 w-2.5">
-              <span className="radar-ping absolute inline-flex h-full w-full rounded-full bg-primary-container opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-container" />
+              <span className="radar-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75 animate-ping" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400" />
             </div>
-            <span className="font-label-caps text-xs text-secondary-fixed tracking-wider font-semibold">
-              SENTINEL-2 & PLANETSCOPE ACTIVE RECONNAISSANCE
+            <span className="font-mono text-xs text-cyan-300 tracking-wider font-semibold">
+              SENTINEL-2 MSI · DIGITAL PUBLIC GOOD · 5 STATES FEDERATED
             </span>
             <span className="text-xs text-white/40">|</span>
             <button 
               onClick={cycleOrbitSpeed} 
-              className="font-label-caps text-xs text-primary-400 hover:text-white transition-colors flex items-center gap-1"
+              className="font-mono text-xs text-cyan-400 hover:text-white transition-colors flex items-center gap-1"
               title="Click to toggle orbital speed"
             >
               <Compass className="w-3.5 h-3.5" />
@@ -81,34 +85,49 @@ export default function LandingPage() {
             <span className="text-xs text-white/40">|</span>
             <button 
               onClick={() => setEarthStyle(prev => prev === 'cinematic' ? 'interstellar' : 'cinematic')} 
-              className="font-label-caps text-xs text-emerald-400 hover:text-white transition-colors flex items-center gap-1 font-bold"
+              className="font-mono text-xs text-emerald-400 hover:text-white transition-colors flex items-center gap-1 font-bold"
               title="Switch 3D Scene View"
             >
               <Globe className="w-3.5 h-3.5" />
-              {earthStyle === 'cinematic' ? 'Switch: 3D Globe' : 'Switch: Horizon'}
+              {earthStyle === 'cinematic' ? '3D Globe' : 'Horizon'}
             </button>
           </motion.div>
 
           {/* Central Hero Title Floating in Deep Space */}
-          <div className="max-w-5xl mx-auto my-auto z-20 pt-4">
-            <motion.h1 
+          <div className="max-w-5xl mx-auto my-auto z-20 pt-2">
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1 }}
-              className="font-display-lg text-5xl sm:text-7xl md:text-8xl lg:text-[94px] lg:leading-[102px] font-black tracking-widest uppercase mb-4 glow-text"
-              style={{ letterSpacing: '0.14em' }}
+              transition={{ duration: 0.8 }}
+              className="inline-block"
             >
-              AgriProof<span className="text-secondary-fixed">.AI</span>
-            </motion.h1>
+              <span className="text-xs sm:text-sm font-mono tracking-[0.25em] text-cyan-400 uppercase block mb-1">
+                कृषि सारथी · Cooperative Agricultural Intelligence Network
+              </span>
+              <h1 
+                className="font-display-lg text-5xl sm:text-7xl md:text-8xl lg:text-[90px] lg:leading-[98px] font-black tracking-widest uppercase mb-3 text-white"
+                style={{ letterSpacing: '0.12em', textShadow: '0 0 40px rgba(0,243,255,0.35)' }}
+              >
+                KRISHI<span className="text-cyan-400"> SAARTHI</span>
+              </h1>
+            </motion.div>
             
             <motion.p 
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.2 }}
-              className="font-body-md text-base sm:text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-8 leading-relaxed font-light drop-shadow-md"
+              className="font-mono text-base sm:text-xl md:text-2xl text-cyan-200 max-w-3xl mx-auto mb-3 font-semibold tracking-wide italic"
             >
-              Autonomous Earth observation & Zero-Knowledge AI risk infrastructure. 
-              Verifying multi-spectral crop parameters from orbit with cryptographic proof and zero disclosure.
+              “From satellite intelligence to farmer action.”
+            </motion.p>
+
+            <motion.p 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.3 }}
+              className="font-sans text-xs sm:text-sm md:text-base text-white/70 max-w-3xl mx-auto mb-8 leading-relaxed font-light drop-shadow-md"
+            >
+              Connecting Indian states into an interoperable Digital Public Good. Combining spaceborne Sentinel-2 earth observation, soil chemistry, weather risk forecasting, explainable ML crop recommendations, plant pathology with Grad-CAM, and zero-knowledge parametric insurance.
             </motion.p>
 
             {/* Interactive CTA Buttons */}
@@ -116,51 +135,59 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.4 }}
-              className="flex flex-wrap items-center justify-center gap-4 z-20"
+              className="flex flex-wrap items-center justify-center gap-3.5 z-20"
             >
               <Link
-                to="/onboard"
-                className="neon-button px-8 py-4 rounded-xl font-label-caps text-sm font-bold tracking-[0.15em] flex items-center gap-3 group"
+                to="/krishi-saarthi"
+                className="px-7 py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-mono font-bold text-xs tracking-wider flex items-center gap-2.5 shadow-[0_0_25px_rgba(0,163,255,0.4)] transition-all active:scale-95 group"
               >
-                <Satellite className="w-5 h-5 text-secondary-fixed group-hover:rotate-45 transition-transform" />
-                <span>GET STARTED</span>
+                <Sprout className="w-4 h-4 text-black group-hover:rotate-12 transition-transform" />
+                <span>ENTER KRISHI SAARTHI</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              
-              <button 
-                onClick={() => document.getElementById('live-pipeline')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-6 py-4 rounded-xl bg-black/70 hover:bg-white/10 border border-white/20 hover:border-primary/50 font-label-caps text-sm text-white font-medium tracking-wider backdrop-blur-md transition-all flex items-center gap-2"
+
+              <Link
+                to="/cooperation"
+                className="px-6 py-3.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] border border-cyan-500/30 hover:border-cyan-400 text-white font-mono text-xs font-semibold tracking-wider backdrop-blur-md transition-all flex items-center gap-2"
               >
-                <Scan className="w-4 h-4 text-primary" />
-                <span>LIVE SATELLITE DEMO</span>
-              </button>
+                <Globe2 className="w-4 h-4 text-cyan-400" />
+                <span>STATE NETWORK</span>
+              </Link>
+              
+              <Link
+                to="/ledger"
+                className="px-5 py-3.5 rounded-xl bg-black/70 hover:bg-white/[0.06] border border-white/20 hover:border-white/40 font-mono text-xs text-white/80 hover:text-white font-medium tracking-wider backdrop-blur-md transition-all flex items-center gap-2"
+              >
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>ZK LEDGER</span>
+              </Link>
             </motion.div>
           </div>
 
           {/* Bottom Floating Telemetry Bar */}
           <div className="w-full max-w-4xl z-20 mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 pt-4">
-            <div className="glass-panel px-4 py-3 rounded-xl text-left">
-              <div className="font-label-caps text-[11px] text-slate-400 uppercase tracking-wider mb-1">Global Farmland</div>
-              <div className="font-headline-lg text-lg font-bold text-white flex items-baseline gap-1">
-                <span>1.42B</span> <span className="text-xs text-primary font-normal">HA</span>
+            <div className="glass-panel px-4 py-3 rounded-xl text-left bg-black/60 border border-white/10">
+              <div className="font-mono text-[10px] text-white/50 uppercase tracking-wider mb-1">Connected States</div>
+              <div className="font-mono text-lg font-bold text-white flex items-baseline gap-1">
+                <span>5</span> <span className="text-xs text-cyan-400 font-normal">FEDERATED</span>
               </div>
             </div>
-            <div className="glass-panel px-4 py-3 rounded-xl text-left">
-              <div className="font-label-caps text-[11px] text-slate-400 uppercase tracking-wider mb-1">Spectral Precision</div>
-              <div className="font-headline-lg text-lg font-bold text-secondary-fixed flex items-baseline gap-1">
-                <span>3.0</span> <span className="text-xs text-primary font-normal">METERS</span>
+            <div className="glass-panel px-4 py-3 rounded-xl text-left bg-black/60 border border-white/10">
+              <div className="font-mono text-[10px] text-white/50 uppercase tracking-wider mb-1">Spectral Precision</div>
+              <div className="font-mono text-lg font-bold text-cyan-300 flex items-baseline gap-1">
+                <span>10.0</span> <span className="text-xs text-cyan-400 font-normal">METERS</span>
               </div>
             </div>
-            <div className="glass-panel px-4 py-3 rounded-xl text-left">
-              <div className="font-label-caps text-[11px] text-slate-400 uppercase tracking-wider mb-1">ZK Proof Latency</div>
-              <div className="font-headline-lg text-lg font-bold text-white flex items-baseline gap-1">
-                <span>184</span> <span className="text-xs text-primary font-normal">MS</span>
+            <div className="glass-panel px-4 py-3 rounded-xl text-left bg-black/60 border border-white/10">
+              <div className="font-mono text-[10px] text-white/50 uppercase tracking-wider mb-1">Languages Supported</div>
+              <div className="font-mono text-lg font-bold text-white flex items-baseline gap-1">
+                <span>5</span> <span className="text-xs text-cyan-400 font-normal">REGIONAL</span>
               </div>
             </div>
-            <div className="glass-panel px-4 py-3 rounded-xl text-left">
-              <div className="font-label-caps text-[11px] text-slate-400 uppercase tracking-wider mb-1">Privacy Guarantee</div>
-              <div className="font-headline-lg text-lg font-bold text-primary-400 flex items-baseline gap-1">
-                <span>100%</span> <span className="text-xs text-primary font-normal">ZERO-PII</span>
+            <div className="glass-panel px-4 py-3 rounded-xl text-left bg-black/60 border border-white/10">
+              <div className="font-mono text-[10px] text-white/50 uppercase tracking-wider mb-1">ZK Proof Guarantee</div>
+              <div className="font-mono text-lg font-bold text-emerald-400 flex items-baseline gap-1">
+                <span>100%</span> <span className="text-xs text-emerald-300 font-normal">ZERO-PII</span>
               </div>
             </div>
           </div>
@@ -168,142 +195,221 @@ export default function LandingPage() {
           {/* Scroll Indicator */}
           <div 
             className="z-20 pt-4 animate-bounce cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
-            onClick={() => document.getElementById('capabilities')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => document.getElementById('architecture-flow')?.scrollIntoView({ behavior: 'smooth' })}
           >
-            <span className="font-label-caps text-[11px] text-secondary-fixed-dim tracking-widest block mb-1">
-              SCROLL TO EXPLORE
+            <span className="font-mono text-[11px] text-cyan-300 tracking-widest block mb-1">
+              SCROLL TO EXPLORE ARCHITECTURE
             </span>
-            <span className="material-symbols-outlined text-secondary-fixed-dim text-lg">keyboard_arrow_down</span>
+            <span className="material-symbols-outlined text-cyan-400 text-lg">keyboard_arrow_down</span>
+          </div>
+        </section>
+
+        {/* ============================================================== */}
+        {/* ARCHITECTURE PIPELINE FLOW (The 6-Step Execution Story)       */}
+        {/* ============================================================== */}
+        <section id="architecture-flow" className="py-20 px-6 md:px-12 max-w-6xl mx-auto relative z-20">
+          <div className="glass-panel rounded-3xl p-8 md:p-10 border border-white/10 bg-black/70 backdrop-blur-xl">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono text-xs uppercase tracking-wider mb-2">
+                <Activity className="w-3.5 h-3.5" />
+                <span>End-to-End System Architecture</span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-mono font-bold text-white">
+                How Krishi Saarthi Works
+              </h2>
+              <p className="text-xs text-white/50 font-sans mt-1 max-w-xl mx-auto">
+                From raw orbital satellite passes to localized farmer action and zero-knowledge claim guarantees.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-center">
+              <div className="p-3.5 bg-black/60 rounded-xl border border-white/10 flex flex-col justify-between">
+                <Satellite className="w-6 h-6 mx-auto text-cyan-400 mb-1.5" />
+                <div>
+                  <p className="text-xs font-mono font-bold text-white">1. Satellite EO</p>
+                  <p className="text-[10px] text-white/40 font-mono mt-0.5">Sentinel-2 MSI Level-2A</p>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-black/60 rounded-xl border border-white/10 flex flex-col justify-between">
+                <CloudRain className="w-6 h-6 mx-auto text-blue-400 mb-1.5" />
+                <div>
+                  <p className="text-xs font-mono font-bold text-white">2. Weather & Soil</p>
+                  <p className="text-[10px] text-white/40 font-mono mt-0.5">Open-Meteo & Soil Card</p>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-black/60 rounded-xl border border-white/10 flex flex-col justify-between">
+                <Cpu className="w-6 h-6 mx-auto text-amber-400 mb-1.5" />
+                <div>
+                  <p className="text-xs font-mono font-bold text-white">3. Crop AI</p>
+                  <p className="text-[10px] text-white/40 font-mono mt-0.5">XGBoost & Explainability</p>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-black/60 rounded-xl border border-white/10 flex flex-col justify-between">
+                <Stethoscope className="w-6 h-6 mx-auto text-red-400 mb-1.5" />
+                <div>
+                  <p className="text-xs font-mono font-bold text-white">4. Pathology</p>
+                  <p className="text-[10px] text-white/40 font-mono mt-0.5">Grad-CAM Leaf Vision</p>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-black/60 rounded-xl border border-white/10 flex flex-col justify-between">
+                <Bot className="w-6 h-6 mx-auto text-emerald-400 mb-1.5" />
+                <div>
+                  <p className="text-xs font-mono font-bold text-white">5. Copilot</p>
+                  <p className="text-[10px] text-white/40 font-mono mt-0.5">5 Regional Languages</p>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-black/60 rounded-xl border border-white/10 flex flex-col justify-between">
+                <Lock className="w-6 h-6 mx-auto text-purple-400 mb-1.5" />
+                <div>
+                  <p className="text-xs font-mono font-bold text-white">6. ZK Proofs</p>
+                  <p className="text-[10px] text-white/40 font-mono mt-0.5">Groth16 & SHA-256</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 flex items-center justify-center gap-4">
+              <Link
+                to="/krishi-saarthi"
+                className="px-6 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-mono font-bold text-xs flex items-center gap-2 shadow-[0_0_20px_rgba(0,163,255,0.3)] transition-all"
+              >
+                <span>Launch Operational Console</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
         </section>
 
         {/* ============================================================== */}
         {/* SYSTEM CAPABILITIES BENTO GRID                                */}
         {/* ============================================================== */}
-        <section id="capabilities" className="min-h-screen flex flex-col justify-center py-28 px-6 md:px-12 max-w-7xl mx-auto relative z-20">
-          <div className="mb-14">
-            <div className="inline-flex items-center gap-2 text-primary font-label-caps text-xs tracking-widest uppercase mb-3">
-              <span className="w-2 h-2 rounded-full bg-primary" />
-              Operational Layer
+        <section id="capabilities" className="py-20 px-6 md:px-12 max-w-7xl mx-auto relative z-20">
+          <div className="mb-12">
+            <div className="inline-flex items-center gap-2 text-cyan-400 font-mono text-xs tracking-widest uppercase mb-2">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              Core Functional Pillars
             </div>
-            <h2 className="font-headline-lg text-3xl md:text-5xl font-extrabold text-white mb-4">
-              <span className="text-primary-container font-bold">///</span> System Capabilities
+            <h2 className="font-mono text-3xl md:text-4xl font-bold text-white mb-2">
+              Digital Public Good Architecture
             </h2>
-            <div className="h-[1px] w-full bg-gradient-to-r from-primary/60 via-secondary-container/30 to-transparent" />
+            <div className="h-[1px] w-full bg-gradient-to-r from-cyan-500/60 via-emerald-500/30 to-transparent" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             
-            {/* Large Feature Card : Sensors & Orbit */}
-            <div className="md:col-span-8 glass-panel rounded-2xl p-8 flex flex-col justify-between min-h-[420px] relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-35 group-hover:scale-110 transition-all duration-700 pointer-events-none">
-                <span className="material-symbols-outlined text-[160px] text-primary">satellite_alt</span>
+            {/* Large Card : State Cooperation Registry */}
+            <div className="md:col-span-8 glass-panel rounded-2xl p-8 flex flex-col justify-between min-h-[400px] relative overflow-hidden group bg-black/60 border border-white/10">
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-30 group-hover:scale-110 transition-all duration-700 pointer-events-none">
+                <Globe2 className="w-40 h-40 text-cyan-400" />
               </div>
 
               <div className="z-10">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/30 mb-6">
-                  <span className="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse" />
-                  <span className="font-label-caps text-xs text-secondary-fixed font-semibold tracking-wider">
-                    Live Constellation Ingest
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 mb-5">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                  <span className="font-mono text-xs text-cyan-300 font-semibold tracking-wider">
+                    The Big Differentiator: State Agricultural Model Registry
                   </span>
                 </div>
-                <h3 className="font-headline-lg text-2xl md:text-3xl font-bold text-white mb-4">
-                  Multi-Spectral Constellation & Soil Telemetry
+                <h3 className="font-mono text-2xl md:text-3xl font-bold text-white mb-3">
+                  Interoperable Cross-State Intelligence
                 </h3>
-                <p className="font-body-md text-sm md:text-base text-slate-300 max-w-xl leading-relaxed">
-                  Continuous optical band synthesis across Sentinel-2 (B02-B12) and high-cadence PlanetScope. 
-                  Calculates sub-pixel NDVI, EVI, NDWI, and NDMI with automated s2cloudless atmospheric correction.
+                <p className="font-sans text-sm md:text-base text-white/70 max-w-xl leading-relaxed">
+                  Breaks departmental silos by allowing state agricultural directorates and research institutes (Madhya Pradesh, Gujarat, Maharashtra, Punjab, Karnataka) to register, version, and federate their specialized agronomic and pathology models.
                 </p>
               </div>
 
-              <div className="mt-8 z-10 grid grid-cols-3 gap-4">
-                <div className="bg-black/50 border border-white/10 rounded-xl p-4">
-                  <span className="font-label-caps text-xs text-slate-400 block mb-1">Revisit Time</span>
-                  <span className="font-headline-lg text-lg text-secondary-fixed font-bold">24 Hours</span>
+              <div className="mt-6 z-10 grid grid-cols-3 gap-3">
+                <div className="bg-black/50 border border-white/10 rounded-xl p-3 text-center">
+                  <span className="font-mono text-[10px] text-white/40 block mb-1">State Nodes</span>
+                  <span className="font-mono text-base text-cyan-300 font-bold">5 Connected</span>
                 </div>
-                <div className="bg-black/50 border border-white/10 rounded-xl p-4">
-                  <span className="font-label-caps text-xs text-slate-400 block mb-1">Spectral Bands</span>
-                  <span className="font-headline-lg text-lg text-primary font-bold">13 Bands</span>
+                <div className="bg-black/50 border border-white/10 rounded-xl p-3 text-center">
+                  <span className="font-mono text-[10px] text-white/40 block mb-1">Registry Standard</span>
+                  <span className="font-mono text-base text-white font-bold">DPG Schema</span>
                 </div>
-                <div className="bg-black/50 border border-white/10 rounded-xl p-4">
-                  <span className="font-label-caps text-xs text-slate-400 block mb-1">Cloud Masking</span>
-                  <span className="font-headline-lg text-lg text-primary-400 font-bold">99.4% Acc</span>
+                <div className="bg-black/50 border border-white/10 rounded-xl p-3 text-center">
+                  <span className="font-mono text-[10px] text-white/40 block mb-1">Cross-Validation</span>
+                  <span className="font-mono text-base text-emerald-400 font-bold">Active</span>
                 </div>
               </div>
             </div>
 
-            {/* Side Feature Card 1 : AI Intelligence */}
-            <div className="md:col-span-4 glass-panel rounded-2xl p-8 flex flex-col justify-between min-h-[420px] relative overflow-hidden group">
+            {/* Side Card 1 : Multilingual Copilot */}
+            <div className="md:col-span-4 glass-panel rounded-2xl p-8 flex flex-col justify-between min-h-[400px] relative overflow-hidden group bg-black/60 border border-white/10">
               <div className="z-10">
-                <div className="w-12 h-12 rounded-xl bg-secondary-container/10 border border-secondary-container/30 flex items-center justify-center mb-6">
-                  <Cpu className="w-6 h-6 text-secondary-fixed" />
+                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mb-5">
+                  <Bot className="w-6 h-6 text-cyan-400" />
                 </div>
-                <h3 className="font-headline-lg text-xl md:text-2xl font-bold text-white mb-3">
-                  Predictive AI Risk Models
+                <h3 className="font-mono text-xl font-bold text-white mb-2">
+                  Grounded Regional Copilot
                 </h3>
-                <p className="font-body-sm text-sm text-slate-300 leading-relaxed">
-                  Gradient-boosted XGBoost regressors and damage classifiers correlate weather anomaly indices, historical heat stress, and crop phenology to forecast yield losses before harvesting.
+                <p className="font-sans text-xs text-white/70 leading-relaxed">
+                  Multilingual AI conversational assistant strictly grounded in real telemetry (NDVI 0.64, 62 mm rain). Speaks Hindi, Marathi, Gujarati, Telugu, and English with audio briefings.
                 </p>
               </div>
 
-              <div className="mt-8 z-10">
-                <div className="p-3 bg-black/50 rounded-xl border border-white/10 mb-4 text-xs font-label-caps flex items-center justify-between">
-                  <span className="text-slate-400">Model Confidence:</span>
-                  <span className="text-secondary-fixed font-bold">96.8% (AUC-ROC)</span>
+              <div className="mt-6 z-10">
+                <div className="p-2.5 bg-black/50 rounded-xl border border-white/10 mb-3 text-[11px] font-mono flex items-center justify-between">
+                  <span className="text-white/40">Grounded Accuracy:</span>
+                  <span className="text-emerald-400 font-bold">Zero-Hallucination</span>
                 </div>
                 <Link
-                  to="/farms"
-                  className="w-full bg-white/5 hover:bg-primary/20 border border-white/15 hover:border-primary/50 rounded-xl py-3 font-label-caps text-xs text-white transition-all flex items-center justify-center gap-2"
+                  to="/krishi-saarthi"
+                  className="w-full bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 rounded-xl py-2.5 font-mono text-xs text-cyan-300 transition-all flex items-center justify-center gap-2"
                 >
-                  <span>Inspect AI Predictions</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>Open Copilot</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
 
-            {/* Side Feature Card 2 : ZK-SNARKs */}
-            <div className="md:col-span-4 glass-panel rounded-2xl p-8 flex flex-col justify-between min-h-[380px] relative overflow-hidden group">
+            {/* Side Card 2 : ZK-SNARK Parametric Engine */}
+            <div className="md:col-span-4 glass-panel rounded-2xl p-8 flex flex-col justify-between min-h-[380px] relative overflow-hidden group bg-black/60 border border-white/10">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center mb-6">
-                  <Lock className="w-6 h-6 text-primary" />
+                <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mb-5">
+                  <Lock className="w-6 h-6 text-purple-400" />
                 </div>
-                <h3 className="font-headline-lg text-xl md:text-2xl font-bold text-white mb-3">
-                  Groth16 Zero-Knowledge
+                <h3 className="font-mono text-xl font-bold text-white mb-2">
+                  Groth16 Zero-Knowledge Proofs
                 </h3>
-                <p className="font-body-sm text-sm text-slate-300 leading-relaxed">
-                  Circom 2.0 circuits verify parametric payout triggers (NDVI drop &gt; 30%, Rain anomaly &gt; 40%) with zero disclosure of farmer GPS coordinates or private yield data.
+                <p className="font-sans text-xs text-white/70 leading-relaxed">
+                  Circom 2.1 circuits prove crop drought conditions (NDVI drop &gt; 30%) with mathematical certainty without ever exposing private farmer GPS coordinates or parcel boundaries.
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs font-label-caps text-primary">
+              <div className="mt-6 pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono text-purple-300">
                 <span>Curve: BN128</span>
-                <span>Constraint: 32-bit</span>
+                <span>Latency: &lt; 200ms</span>
               </div>
             </div>
 
-            {/* Full Width Card : Decentralized Claim Ledger */}
-            <div className="md:col-span-8 glass-panel rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+            {/* Bottom Card : Tamper-Proof SHA-256 Ledger */}
+            <div className="md:col-span-8 glass-panel rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden bg-black/60 border border-white/10">
               <div className="flex-1 z-10">
-                <div className="inline-flex items-center gap-2 text-secondary-fixed font-label-caps text-xs tracking-wider uppercase mb-2">
+                <div className="inline-flex items-center gap-1.5 text-emerald-400 font-mono text-xs uppercase mb-2">
                   <ShieldCheck className="w-4 h-4" />
-                  Immutable Verification
+                  Cryptographic Immutability
                 </div>
-                <h3 className="font-headline-lg text-2xl font-bold text-white mb-3">
-                  SHA-256 Tamper-Proof Claim Ledger
+                <h3 className="font-mono text-2xl font-bold text-white mb-2">
+                  SHA-256 Merkle Claim Ledger
                 </h3>
-                <p className="font-body-md text-sm text-slate-300 leading-relaxed">
-                  Cryptographic block hash chaining secures every payout determination. Insurers and re-insurers audit claims mathematically without accessing sensitive farmer records.
+                <p className="font-sans text-xs sm:text-sm text-white/70 leading-relaxed">
+                  Each claim determination is cryptographically chained into an audit trail. Insurers verify parametric triggers mathematically without accessing raw satellite pixels.
                 </p>
               </div>
 
               <div className="flex-shrink-0 z-10">
                 <Link
                   to="/ledger"
-                  className="w-28 h-28 rounded-2xl border border-primary/40 bg-black/70 backdrop-blur-md flex flex-col items-center justify-center relative shadow-[0_0_30px_rgba(0,163,255,0.25)] hover:scale-105 transition-transform"
+                  className="w-28 h-28 rounded-2xl border border-cyan-500/40 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center relative shadow-[0_0_25px_rgba(0,163,255,0.2)] hover:scale-105 transition-transform"
                 >
-                  <div className="absolute inset-0 rounded-2xl border-2 border-secondary-fixed border-t-transparent animate-spin" />
-                  <Database className="w-7 h-7 text-primary mb-1" />
-                  <span className="font-label-caps text-[10px] text-secondary-fixed font-bold text-center">
+                  <div className="absolute inset-0 rounded-2xl border-2 border-cyan-400 border-t-transparent animate-spin" />
+                  <Database className="w-6 h-6 text-cyan-400 mb-1" />
+                  <span className="font-mono text-[10px] text-cyan-300 font-bold text-center">
                     VALIDATED<br />LEDGER
                   </span>
                 </Link>
@@ -316,182 +422,62 @@ export default function LandingPage() {
         {/* ============================================================== */}
         {/* LIVE SATELLITE DEMONSTRATION PIPELINE SHOWCASE                 */}
         {/* ============================================================== */}
-        <section id="live-pipeline" className="py-24 px-6 md:px-12 max-w-7xl mx-auto relative z-20">
-          <div className="mb-10 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 mb-3 font-label-caps text-xs text-primary">
+        <section id="live-pipeline" className="py-20 px-6 md:px-12 max-w-7xl mx-auto relative z-20">
+          <div className="mb-8 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 mb-2 font-mono text-xs text-cyan-400">
               <Activity className="w-3.5 h-3.5" />
               <span>LIVE EO RECONNAISSANCE ENGINE</span>
             </div>
-            <h2 className="font-headline-lg text-3xl md:text-4xl font-extrabold text-white">
-              Demonstration Field Alpha Spectral Pipeline
+            <h2 className="font-mono text-2xl md:text-3xl font-bold text-white">
+              Demonstration Field Spectral Pipeline
             </h2>
-            <p className="text-slate-400 mt-2 text-sm max-w-2xl mx-auto font-body-md">
-              Real-time multi-spectral processing over Patiala Wheat demonstration field showing baseline vs anomaly index computation.
+            <p className="text-white/50 text-xs max-w-xl mx-auto font-sans mt-1">
+              Multi-spectral reflectance computation showing baseline vs anomaly index extraction.
             </p>
           </div>
 
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/10">
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/10 bg-black/60">
             <AnalysisPipelineSnapshots
-              farmName="Patiala Wheat Demonstration Alpha"
-              cropType="wheat"
-              centerLat={30.3398}
-              centerLon={76.3869}
-              areaHa={8.5}
-              ndviCurrent={0.36}
-              ndviBaseline={0.76}
-              ndviDropPct={52.6}
-              evi={0.29}
-              ndwi={-0.21}
-              damageProb={0.88}
-              riskCategory="HIGH"
+              farmName="Indore Malwa Soybean Parcel"
+              cropType="soybean"
+              centerLat={22.63497}
+              centerLon={75.84983}
+              areaHa={2.4}
+              ndviCurrent={0.64}
+              ndviBaseline={0.70}
+              ndviDropPct={8.4}
+              evi={0.52}
+              ndwi={0.41}
+              damageProb={0.12}
+              riskCategory="LOW"
             />
-          </div>
-        </section>
-
-        {/* ============================================================== */}
-        {/* ZERO-PII VAULT & SPECTRAL INDICES SECTION                     */}
-        {/* ============================================================== */}
-        <section id="sensors" className="py-24 px-6 md:px-12 max-w-7xl mx-auto relative z-20">
-          <div className="glass-panel rounded-3xl p-8 md:p-12 border border-primary/30 relative overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-              
-              <div className="lg:col-span-7">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-fixed/10 border border-secondary-fixed/30 mb-4 font-label-caps text-xs text-secondary-fixed">
-                  <span>POLYGON COMMITMENT HASH</span>
-                </div>
-                <h2 className="font-headline-lg text-3xl md:text-4xl font-extrabold text-white mb-4">
-                  Zero-PII Farm Vault &amp; Sentinel-2 Sync
-                </h2>
-                <p className="font-body-md text-slate-300 text-sm md:text-base leading-relaxed mb-6">
-                  Raw boundary coordinates are hashed using salted cryptographic commitments before leaving the client. 
-                  Satellite multi-spectral queries execute over anonymized bounding boxes with synthetic differential privacy.
-                </p>
-
-                {/* Simulated Live Hex Output */}
-                <div className="bg-black/80 rounded-xl p-4 border border-white/10 font-label-caps text-xs text-primary space-y-2">
-                  <div className="flex items-center justify-between text-white/50 border-b border-white/10 pb-2">
-                    <span>TELEMETRY PACKET</span>
-                    <span className="text-emerald-400">STATUS: 200 OK</span>
-                  </div>
-                  <div className="text-secondary-fixed break-all font-mono text-[11px]">
-                    HASH: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-                  </div>
-                  <div className="flex justify-between text-xs text-slate-300 pt-1">
-                    <span>ΔNDVI: <strong className="text-white">-41.5% (Drought Anomaly)</strong></span>
-                    <span>Rain Anomaly: <strong className="text-white">-58.3%</strong></span>
-                    <span>ZK State: <strong className="text-emerald-400">ELIGIBLE</strong></span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:col-span-5 space-y-4">
-                <div className="bg-black/60 rounded-2xl p-6 border border-white/10">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-headline-lg text-lg font-bold text-white">Spectral Indices</span>
-                    <span className="font-label-caps text-xs text-primary">LIVE INGEST</span>
-                  </div>
-                  <div className="space-y-3 font-label-caps text-xs">
-                    <div>
-                      <div className="flex justify-between text-slate-300 mb-1">
-                        <span>NDVI (Vegetation Vigour)</span>
-                        <span className="text-white font-bold">0.34 (Baseline 0.74)</span>
-                      </div>
-                      <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                        <div className="bg-amber-400 h-full rounded-full" style={{ width: '46%' }} />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-slate-300 mb-1">
-                        <span>NDWI (Water / Moisture)</span>
-                        <span className="text-white font-bold">-0.24</span>
-                      </div>
-                      <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                        <div className="bg-cyan-400 h-full rounded-full" style={{ width: '32%' }} />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-slate-300 mb-1">
-                        <span>EVI (Enhanced Index)</span>
-                        <span className="text-white font-bold">0.28</span>
-                      </div>
-                      <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                        <div className="bg-emerald-400 h-full rounded-full" style={{ width: '38%' }} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ============================================================== */}
-        {/* END-TO-END EXECUTION FLOW RIBBON                              */}
-        {/* ============================================================== */}
-        <section className="py-16 px-6 md:px-12 max-w-5xl mx-auto relative z-20">
-          <div className="glass-panel rounded-2xl p-8 border border-white/10">
-            <h4 className="text-center font-bold text-slate-300 text-xs uppercase tracking-widest mb-8 font-mono">
-              Autonomous Parametric Execution Flow
-            </h4>
-            <div className="flex flex-col md:flex-row items-center justify-between text-center gap-4">
-              <div className="flex-1 p-4 bg-black/60 rounded-xl border border-white/10 w-full md:w-auto">
-                <Satellite className="w-8 h-8 mx-auto text-sky-400 mb-2" />
-                <p className="text-xs font-bold text-white">1. Satellite EO</p>
-                <p className="text-[10px] text-slate-400">PlanetScope + Sentinel-2</p>
-              </div>
-              <ArrowRight className="text-slate-600 hidden md:block" />
-              <div className="flex-1 p-4 bg-black/60 rounded-xl border border-white/10 w-full md:w-auto">
-                <Activity className="w-8 h-8 mx-auto text-emerald-400 mb-2" />
-                <p className="text-xs font-bold text-white">2. AI Damage Model</p>
-                <p className="text-[10px] text-slate-400">XGBoost &amp; Spectral Anomaly</p>
-              </div>
-              <ArrowRight className="text-slate-600 hidden md:block" />
-              <div className="flex-1 p-4 bg-black/60 rounded-xl border border-white/10 w-full md:w-auto">
-                <Lock className="w-8 h-8 mx-auto text-purple-400 mb-2" />
-                <p className="text-xs font-bold text-white">3. Groth16 ZK Proof</p>
-                <p className="text-[10px] text-slate-400">Private Policy Circuit</p>
-              </div>
-              <ArrowRight className="text-slate-600 hidden md:block" />
-              <div className="flex-1 p-4 bg-black/60 rounded-xl border border-white/10 w-full md:w-auto">
-                <Database className="w-8 h-8 mx-auto text-amber-400 mb-2" />
-                <p className="text-xs font-bold text-white">4. Ledger Payout</p>
-                <p className="text-[10px] text-slate-400">Instant Smart Contract</p>
-              </div>
-            </div>
-
-            <div className="mt-10 text-center">
-              <Link
-                to="/onboard"
-                className="inline-flex items-center gap-3 px-8 py-4 neon-button font-label-caps text-xs font-bold tracking-wider rounded-xl uppercase"
-              >
-                <span>Start Farm Analysis</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
           </div>
         </section>
 
       </div>
 
       {/* Footer */}
-      <footer className="w-full bg-black/90 backdrop-blur-xl border-t border-white/10 relative z-20 py-12">
-        <div className="flex flex-col md:flex-row justify-between items-center w-full px-6 md:px-12 max-w-7xl mx-auto gap-6">
+      <footer className="w-full bg-black/90 backdrop-blur-xl border-t border-white/10 relative z-20 py-10">
+        <div className="flex flex-col md:flex-row justify-between items-center w-full px-6 md:px-12 max-w-7xl mx-auto gap-4">
           <div className="flex flex-col items-center md:items-start">
-            <div className="flex items-center gap-2 mb-2">
-              <Satellite className="h-5 w-5 text-primary" />
-              <span className="font-headline-lg text-xl font-extrabold text-white">AgriProof.AI</span>
+            <div className="flex items-center gap-2 mb-1">
+              <Satellite className="h-5 w-5 text-cyan-400" />
+              <span className="font-mono text-lg font-bold text-white">KRISHI SAARTHI</span>
             </div>
-            <span className="font-label-caps text-xs text-slate-400">
-              Precision Orbit &amp; Zero-Knowledge Agricultural Insurance Engine
+            <span className="font-mono text-[11px] text-white/40">
+              Cooperative Agricultural Intelligence Network · Sentinel-2 · Digital Public Good
             </span>
           </div>
           
-          <div className="flex flex-wrap justify-center gap-6 font-label-caps text-xs text-slate-400">
-            <Link to="/register" className="hover:text-primary transition-colors">Register Farm</Link>
-            <Link to="/farms" className="hover:text-primary transition-colors">My Farms</Link>
-            <Link to="/ledger" className="hover:text-primary transition-colors">Claim Ledger</Link>
-            <a href="#hero" className="hover:text-primary transition-colors">Back to Top</a>
+          <div className="flex flex-wrap justify-center gap-5 font-mono text-xs text-white/50">
+            <Link to="/krishi-saarthi" className="hover:text-cyan-400 transition-colors">Command Center</Link>
+            <Link to="/cooperation" className="hover:text-cyan-400 transition-colors">State Network</Link>
+            <Link to="/doctor" className="hover:text-cyan-400 transition-colors">Crop Doctor</Link>
+            <Link to="/weather" className="hover:text-cyan-400 transition-colors">Weather</Link>
+            <Link to="/farms" className="hover:text-cyan-400 transition-colors">My Fields</Link>
+            <Link to="/ledger" className="hover:text-cyan-400 transition-colors">ZK Ledger</Link>
+            <Link to="/insurer" className="hover:text-cyan-400 transition-colors">Insurer</Link>
+            <a href="#hero" className="hover:text-cyan-400 transition-colors">Back to Top ↑</a>
           </div>
         </div>
       </footer>

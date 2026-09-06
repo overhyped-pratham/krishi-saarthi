@@ -15,8 +15,15 @@ import httpx
 import json
 from pathlib import Path
 
-BASE_URL = "http://localhost:8000"
-FRONTEND_URL = "http://localhost:5173"
+import argparse
+
+parser = argparse.ArgumentParser(description="AgriProof AI Smoke Test")
+parser.add_argument("--url", default="http://localhost:3000", help="Base backend URL")
+parser.add_argument("--frontend", default="http://localhost:3000", help="Frontend URL")
+cli_args, _ = parser.parse_known_args()
+
+BASE_URL = cli_args.url
+FRONTEND_URL = cli_args.frontend
 
 def log_step(step: int, name: str, status: str = "RUNNING"):
     symbol = "*" if status == "RUNNING" else ("[PASS]" if status == "PASSED" else "[FAIL]")

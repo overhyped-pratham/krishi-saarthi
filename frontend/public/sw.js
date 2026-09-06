@@ -6,25 +6,15 @@ const STATIC_ASSETS = [
   '/manifest.json'
 ];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    }).then(() => self.skipWaiting())
-  );
+self.addEventListener('install', (e) => {
+  self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+      .then(() => self.registration.unregister())
+      .then(() => self.clients.claim())
   );
 });
 

@@ -1,14 +1,16 @@
 export function registerServiceWorker() {
-  if (typeof window !== 'undefined' && 'serviceWorker' in navigator && import.meta.env.PROD) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((reg) => {
-          console.log('[AgriProof SW] Service Worker registered successfully:', reg.scope);
-        })
-        .catch((err) => {
-          console.warn('[AgriProof SW] Service Worker registration failed:', err);
-        });
+  if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const registration of registrations) {
+        registration.unregister();
+      }
     });
+    if ('caches' in window) {
+      caches.keys().then((names) => {
+        for (const name of names) {
+          caches.delete(name);
+        }
+      });
+    }
   }
 }

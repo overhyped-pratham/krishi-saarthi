@@ -374,6 +374,25 @@ export const api = {
       client.post('/api/diagnostics/gemini-consult', data),
     getDiseaseClasses: () => client.get('/api/diagnostics/disease-classes'),
   },
+  krishiSaarthi: {
+    saveField: (data: any) => client.post<any>('/api/fields', data),
+    getField: (id: string) => client.get<any>(`/api/fields/${id}`),
+    getHealth: (id: string) => client.get<any>(`/api/fields/${id}/health`),
+    getWeather: (id: string) => client.get<any>(`/api/fields/${id}/weather`),
+    getCropRecommendations: (params: any) => client.post<{ status: string; recommendations: any[] }>('/api/crop-recommendation', params),
+    diagnoseDisease: (data: { filename?: string; image_base64?: string; model_choice?: string; confidence_threshold?: number }) => client.post<any>('/api/disease-diagnosis', data),
+    detectDamageYolo: (data: { filename?: string; image_base64?: string; model_choice?: string; confidence_threshold?: number }) => client.post<any>('/api/disease-detect', data),
+    evaluateFieldRisk: (data: any) => client.post<any>('/api/field-risk/evaluate', data),
+    getSoilProfile: (state: string) => client.get<any>(`/api/soil-profiles/${encodeURIComponent(state)}`),
+    getStates: () => client.get<any[]>('/api/states'),
+    getModels: (params?: { state?: string; crop?: string; model_type?: string }) => client.get<any[]>('/api/models', { params }),
+    getModel: (id: string) => client.get<any>(`/api/models/${id}`),
+    registerModel: (data: any) => client.post<any>('/api/models', data),
+    getCentralIntelligence: (fieldId: string, isDemo = true, state = 'Madhya Pradesh') =>
+      client.get<any>(`/api/krishi-saarthi/central-intelligence/${fieldId}`, { params: { demo: isDemo, state } }),
+    chatCopilot: (data: { question: string; fieldId?: string; language?: string; state?: string }) =>
+      client.post<{ answer: string; language: string; source: string; grounded_metrics: any }>('/api/krishi-saarthi/chat', data),
+  },
 }
 
 /** Build the WebSocket URL for a given farm's analysis stream */

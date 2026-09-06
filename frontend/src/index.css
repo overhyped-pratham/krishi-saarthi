@@ -261,6 +261,27 @@
   background-color: #0c121e !important;
 }
 
+/* Satellite Field Scanning Radar & Laser Animations */
+@keyframes laserScanSweep {
+  0% { top: 0%; opacity: 0.9; }
+  50% { top: 97%; opacity: 1; }
+  100% { top: 0%; opacity: 0.9; }
+}
+
+@keyframes radarRadarPulse {
+  0% { transform: scale(0.96); opacity: 0.8; }
+  50% { transform: scale(1.04); opacity: 0.3; }
+  100% { transform: scale(0.96); opacity: 0.8; }
+}
+
+.animate-laser-sweep {
+  animation: laserScanSweep 2.2s ease-in-out infinite;
+}
+
+.animate-radar-pulse {
+  animation: radarRadarPulse 1.8s ease-in-out infinite;
+}
+
 /* Print Stylesheet for Claim Document */
 @media print {
   @page {

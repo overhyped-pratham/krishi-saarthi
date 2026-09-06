@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.staticfiles import StaticFiles
 
-from app.api.routes import farms, claims, ledger, insurer, farmer_alerts, diagnostics, auth as auth_routes
+from app.api.routes import farms, claims, ledger, insurer, farmer_alerts, diagnostics, auth as auth_routes, krishi_saarthi
 from app.api.websocket import router as ws_router
 from app.database import init_db
 from app.config import get_settings
@@ -37,9 +37,9 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="AgriProof AI Backend",
-    description="FastAPI backend for AgriProof AI",
-    version="1.0.0",
+    title="Krishi Saarthi & AgriProof AI Engine",
+    description="Cooperative Agricultural Intelligence Network Backend",
+    version="2.0.0",
     lifespan=lifespan
 )
 
@@ -54,6 +54,7 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 app.mount("/storage", StaticFiles(directory=str(storage_dir)), name="storage")
 
+app.include_router(krishi_saarthi.router)
 app.include_router(farms.router, prefix="/api", tags=["Farms"])
 app.include_router(claims.router, prefix="/api", tags=["Claims"])
 app.include_router(ledger.router, prefix="/api", tags=["Ledger"])

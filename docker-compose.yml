@@ -1,9 +1,72 @@
 version: '3.8'
 
 services:
-  # ── PostgreSQL Database ──────────────────────────────────────────────────
+  # ── 1. Krishi Saarthi Unified Fullstack Application (Primary) ────────────────
+  # Serves the complete Krishi Saarthi Command Center (API + SPA) on port 3000
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: krishi-saarthi:latest
+    container_name: krishi-saarthi-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL:-}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
+      - TWILIO_FROM_PHONE_NUMBER=${TWILIO_FROM_PHONE_NUMBER:-}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ── 2. Python FastAPI Intelligence Backend (Microservice Mode) ───────────────
+  # Specialized high-throughput ML inference & ZK SnarkJS proof pipeline
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: krishi-saarthi-backend:latest
+    container_name: krishi-saarthi-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app                              # Live reload code mount
+      - ./models:/app/../models                     # ML model weights
+      - ./circuits:/app/../circuits                 # ZK circuits
+      - ./data:/app/../data                         # Sample datasets
+      - user_uploads:/app/storage/uploads
+      - analysis_results:/app/storage/results
+      - zk_proofs:/app/storage/zk_proofs
+      - static_results:/app/static/results
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://agriproof:agriproof_secret@postgres:5432/agriproof
+      - OPEN_METEO_BASE_URL=https://api.open-meteo.com/v1
+      - APP_ENV=production
+      - STORAGE_DIR=/app/storage
+      - CORS_ORIGINS=["http://localhost:5173","http://localhost:3000","http://app:3000"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    profiles:
+      - full
+      - microservices
+
+  # ── 3. PostgreSQL Database (Microservice Mode) ──────────────────────────────
   postgres:
     image: postgres:16-alpine
+    container_name: krishi-saarthi-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: agriproof
@@ -18,59 +81,31 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    profiles:
+      - full
+      - microservices
 
-  # ── FastAPI Backend ──────────────────────────────────────────────────────
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/app                    # Live reload source
-      - ./models:/app/../models           # ML model weights
-      - ./circuits:/app/../circuits       # ZK circuits
-      - ./data:/app/../data               # Demo data
-      - user_uploads:/app/storage/uploads          # Persistent user uploads
-      - analysis_results:/app/storage/results      # Pipeline result artifacts
-      - zk_proofs:/app/storage/zk_proofs           # ZK proof files
-      - static_results:/app/static/results         # Generated images/snapshots
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://agriproof:agriproof_secret@postgres:5432/agriproof
-      - PLANET_USER_ID=${PLANET_USER_ID:-e3f35a9a-7155-4eed-9e38-0a590270e658}
-      - PLANET_API_KEY=${PLANET_API_KEY:-PLAK12bc61b3896a4b5fac1282d5cb8bb208}
-      - PLANET_BASE_URL=https://api.planet.com/data/v1
-      - SENTINEL_HUB_CLIENT_ID=${SENTINEL_HUB_CLIENT_ID:-}
-      - SENTINEL_HUB_CLIENT_SECRET=${SENTINEL_HUB_CLIENT_SECRET:-}
-      - SENTINEL_HUB_INSTANCE_ID=${SENTINEL_HUB_INSTANCE_ID:-}
-      - OPEN_METEO_BASE_URL=https://api.open-meteo.com/v1
-      - CIRCUITS_DIR=/app/../circuits
-      - APP_ENV=production
-      - STORAGE_DIR=/app/storage
-      - CORS_ORIGINS=["http://localhost:5173","http://localhost:3000","http://frontend:5173"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-
-  # ── React Frontend ──────────────────────────────────────────────────────
-  frontend:
+  # ── 4. Standalone Frontend Development Server (Dev Profile) ─────────────────
+  frontend-dev:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    image: krishi-saarthi-frontend-dev:latest
+    container_name: krishi-saarthi-frontend-dev
     restart: unless-stopped
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend/src:/app/src           # Live reload source
+      - ./frontend/src:/app/src
     environment:
-      - VITE_API_URL=http://backend:8000
+      - VITE_API_URL=http://localhost:8000
     depends_on:
       - backend
     command: npm run dev -- --host
+    profiles:
+      - dev
 
-# ── Named Volumes (persistent storage) ────────────────────────────────────
+# ── Named Volumes (Persistent Storage) ─────────────────────────────────────────
 volumes:
   postgres_data:
     driver: local

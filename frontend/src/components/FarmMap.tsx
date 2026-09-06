@@ -306,7 +306,7 @@ export default function FarmMap({
   farmerLocation: propFarmerLoc,
 }: FarmMapProps) {
   const [mapReady, setMapReady] = useState(false);
-  const [baseMap, setBaseMap] = useState<'satellite' | 'street'>('satellite');
+  const [baseMap, setBaseMap] = useState<'esri' | 'google' | 'hybrid' | 'street'>('esri');
   // Analysis overlay state: Default to 'original' (Natural True-Color Satellite)
   // so no orange/red raster blocks the farmer's view during drawing/registration.
   const [activeAnalysisOverlay, setActiveAnalysisOverlay] = useState<
@@ -599,18 +599,42 @@ export default function FarmMap({
         
         {/* Left: Base Layer & Multi-Spectral Switcher */}
         <div className="flex items-center gap-1.5 flex-wrap pointer-events-auto bg-dark-950/90 backdrop-blur-md border border-dark-700/90 p-1.5 rounded-xl shadow-xl">
-          {/* Base Map Switch */}
+          {/* Base Map: 4-source tile switcher */}
           <button
             type="button"
-            onClick={() => setBaseMap('satellite')}
+            onClick={() => setBaseMap('esri')}
             className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-              baseMap === 'satellite'
+              baseMap === 'esri'
                 ? 'bg-primary-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
             <Satellite className="w-3.5 h-3.5" />
-            <span>Satellite</span>
+            <span>ESRI</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setBaseMap('google')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              baseMap === 'google'
+                ? 'bg-primary-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Satellite className="w-3.5 h-3.5" />
+            <span>Google</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setBaseMap('hybrid')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              baseMap === 'hybrid'
+                ? 'bg-primary-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Satellite className="w-3.5 h-3.5" />
+            <span>Hybrid</span>
           </button>
           <button
             type="button"
@@ -622,7 +646,7 @@ export default function FarmMap({
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>Map</span>
+            <span>Street</span>
           </button>
 
           <div className="h-4 w-[1px] bg-dark-700 mx-1" />
@@ -828,16 +852,29 @@ export default function FarmMap({
         >
           <MapResizer />
           {/* Base Tile Layer */}
-          {baseMap === 'satellite' ? (
+          {baseMap === 'google' ? (
             <TileLayer
-              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-              attribution="Tiles &copy; Esri &mdash; Sentinel-2 / Landsat"
-              maxZoom={19}
+              url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+              attribution="&copy; Google Satellite"
+              maxZoom={21}
             />
-          ) : (
+          ) : baseMap === 'hybrid' ? (
+            <TileLayer
+              url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+              attribution="&copy; Google Hybrid Satellite"
+              maxZoom={21}
+            />
+          ) : baseMap === 'street' ? (
             <TileLayer
               url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution="&copy; OpenStreetMap contributors"
+              maxZoom={19}
+            />
+          ) : (
+            /* default: ESRI World Imagery */
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution="Tiles &copy; Esri &mdash; Sentinel-2 / Landsat"
               maxZoom={19}
             />
           )}

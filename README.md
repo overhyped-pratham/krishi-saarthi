@@ -1,409 +1,384 @@
 <div align="center">
 
-<!-- HERO 3D BANNER ASSET -->
-<!-- INSERT 3D ISOMETRIC BANNER / RENDER / GLTF GIF HERE -->
-<img src="https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1200&auto=format&fit=crop" width="100%" style="border-radius: 12px; border: 1px solid #00ff41; box-shadow: 0 0 25px rgba(0,255,65,0.3);" alt="AgriProof AI 3D Orbital Banner" />
+<img src="https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1200&auto=format&fit=crop" width="100%" style="border-radius: 12px; border: 1px solid #00f3ff; box-shadow: 0 0 30px rgba(0,243,255,0.3);" alt="Krishi Saarthi Cooperative Agricultural Intelligence Network" />
 
-# 🛰️ AGRIPROOF.AI 
-### Secure Satellite-Verified Crop Insurance with Zero-Knowledge Proofs
+# 🌾 KRISHI SAARTHI (कृषि सारथी)
+### Cooperative Agricultural Intelligence Network & Zero-Trust Parametric Engine
 
 <p align="center">
-  <b>Autonomous • Zero-Trust • Privacy-Preserving Parametric Agriculture Insurance</b>
+  <b>“From satellite intelligence to farmer action.”</b><br>
+  <i>An Interoperable Digital Public Good (DPG) combining spaceborne earth observation, soil chemistry, deterministic weather risk forecasting, explainable ML crop recommendations, plant disease vision with Grad-CAM, grounded multilingual conversational AI, and cross-state model federation.</i>
 </p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-00ff41?style=for-the-badge&logo=opensourceinitiative&logoColor=000000&labelColor=000000)](https://opensource.org/licenses/MIT)
-[![Circom 2.1](https://img.shields.io/badge/ZKP-Circom_2.1_Groth16-00ff41?style=for-the-badge&logo=gnometerminal&logoColor=00ff41&labelColor=000000)](https://docs.circom.io/)
-[![Solidity](https://img.shields.io/badge/Smart_Contract-Solidity_0.8.20-00ff41?style=for-the-badge&logo=solidity&logoColor=00ff41&labelColor=000000)](https://soliditylang.org/)
-[![Sentinel-2](https://img.shields.io/badge/Copernicus-Sentinel--2_MSI-00ff41?style=for-the-badge&logo=nasa&logoColor=00ff41&labelColor=000000)](https://sentinels.copernicus.eu/)
-[![TypeScript](https://img.shields.io/badge/Frontend-React_18_+_Vite-00ff41?style=for-the-badge&logo=typescript&logoColor=00ff41&labelColor=000000)](https://www.typescriptlang.org/)
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI_Python-00ff41?style=for-the-badge&logo=fastapi&logoColor=00ff41&labelColor=000000)](https://fastapi.tiangolo.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-00f3ff?style=for-the-badge&logo=opensourceinitiative&logoColor=000000&labelColor=000000)](https://opensource.org/licenses/MIT)
+[![Sentinel-2 MSI](https://img.shields.io/badge/Satellite-Sentinel--2_MSI_L2A-00f3ff?style=for-the-badge&logo=nasa&logoColor=000000&labelColor=000000)](https://sentinels.copernicus.eu/)
+[![Open-Meteo](https://img.shields.io/badge/Weather-Open--Meteo_API-00f3ff?style=for-the-badge&logo=open-meteo&logoColor=000000&labelColor=000000)](https://open-meteo.com/)
+[![XGBoost ML](https://img.shields.io/badge/Suitability_ML-XGBoost_Explainable-00f3ff?style=for-the-badge&logo=scikit-learn&logoColor=000000&labelColor=000000)](https://xgboost.readthedocs.io/)
+[![PlantVillage](https://img.shields.io/badge/Pathology-PlantVillage_+_Grad--CAM-00f3ff?style=for-the-badge&logo=pytorch&logoColor=000000&labelColor=000000)](https://plantvillage.psu.edu/)
+[![Gemini AI](https://img.shields.io/badge/AI_Copilot-Gemini_Multimodal-00f3ff?style=for-the-badge&logo=google&logoColor=000000&labelColor=000000)](https://ai.google.dev/)
+[![Circom 2.1](https://img.shields.io/badge/ZKP-Circom_2.1_Groth16-00f3ff?style=for-the-badge&logo=gnometerminal&logoColor=000000&labelColor=000000)](https://docs.circom.io/)
 
 ---
 
-> ⚡ **CORE USP: ZERO-TRUST PARAMETRIC SETTLEMENT**
+> ⚡ **THE BIG JUDGING DIFFERENTIATOR: COOPERATIVE AGRICULTURAL INTELLIGENCE LAYER**
 > 
-> *Traditional crop claims take 60–90 days with arbitrary manual loss appraisals. **AgriProof AI** executes guaranteed payouts in `< 5 seconds` driven strictly by objective orbital satellite telemetry — mathematically proving claim eligibility via **Groth16 Zero-Knowledge Proofs** without ever revealing a farmer's GPS coordinates, parcel boundaries, or private yield data to insurers or public ledgers.*
+> *Agricultural intelligence across India has historically been fragmented across state departments and research institutes. **Krishi Saarthi** builds an interoperable **Digital Public Good (DPG)** where states (Madhya Pradesh, Gujarat, Maharashtra, Punjab, Karnataka) contribute and federate localized crop models, disease radars, and soil datasets into a single unified farmer-facing layer.*
+> 
+> **The Core Narrative:**
+> 1. **Satellite** tells us *what* is happening in the field (NDVI 0.64, NDMI 0.41, canopy vigor).
+> 2. **Weather & Soil** tell us *why* it may be happening (62 mm rainfall forecast in 72h, soil pH 7.2).
+> 3. **AI** converts those signals into actionable intelligence (XGBoost ranked crop suitability with explainability bars, leaf disease diagnosis with Grad-CAM).
+> 4. **Krishi Saarthi Copilot** explains it to the farmer in their native language (Hindi, Marathi, Gujarati, Telugu, English).
+> 5. **The Cooperation Layer** allows state agriculture departments to share, version, and federate models across borders.
+> 6. **AgriProof Parametric Settlement** provides zero-knowledge cryptographic payout guarantees when extreme environmental thresholds are triggered.
 
 ---
 
 </div>
 
 ## 📑 Table of Contents
-- [Executive Overview](#-executive-overview)
-- [System Architecture](#-system-architecture)
-- [Core Feature Matrix](#-core-feature-matrix)
-- [Deep Dive: The 7-Stage Remote Sensing Pipeline](#-deep-dive-the-7-stage-remote-sensing-pipeline)
-- [Deep Dive: Groth16 Zero-Knowledge Cryptography](#-deep-dive-groth16-zero-knowledge-cryptography)
-- [Interactive Insurer Anti-Fraud & Risk Matrix](#-interactive-insurer-anti-fraud--risk-matrix)
-- [Tamper-Proof Claim Ledger Specification](#-tamper-proof-claim-ledger-specification)
-- [Demo Scenarios & Seeded Profiles](#-demo-scenarios--seeded-profiles)
-- [Quickstart & Local Deployment](#-quickstart--local-deployment)
-- [Smart Contract Verification](#-smart-contract-verification)
-- [License & Acknowledgments](#-license--acknowledgments)
+1. [Executive Overview & System Architecture](#-executive-overview--system-architecture)
+2. [Unified Central Data Contract](#-unified-central-data-contract)
+3. [The 8 Core Pillars](#-the-8-core-pillars)
+   - [Pillar 1: Fullscreen Farmer Field Mapping](#pillar-1-fullscreen-farmer-field-mapping)
+   - [Pillar 2: Sentinel-2 Satellite Intelligence](#pillar-2-sentinel-2-satellite-intelligence)
+   - [Pillar 3: Open-Meteo Weather Risk Engine](#pillar-3-open-meteo-weather-risk-engine)
+   - [Pillar 4: Soil Intelligence & State Soil Cards](#pillar-4-soil-intelligence--state-soil-cards)
+   - [Pillar 5: Explainable XGBoost Crop Recommendation](#pillar-5-explainable-xgboost-crop-recommendation)
+   - [Pillar 6: Crop Disease Vision with Grad-CAM](#pillar-6-crop-disease-vision-with-grad-cam)
+   - [Pillar 7: Grounded Multilingual Krishi Saarthi AI Copilot](#pillar-7-grounded-multilingual-krishi-saarthi-ai-copilot)
+   - [Pillar 8: State Cooperation & Model Registry Layer](#pillar-8-state-cooperation--model-registry-layer)
+4. [Dual Capability: Zero-Knowledge Parametric Engine](#-dual-capability-zero-knowledge-parametric-engine)
+5. [API Specifications](#-api-specifications)
+6. [Judges Demo Journey (15-Step Script)](#-judges-demo-journey-15-step-script)
+7. [Quickstart & Local Deployment](#-quickstart--local-deployment)
+8. [Open Source References & Acknowledgments](#-open-source-references--acknowledgments)
 
 ---
 
-## 🌐 Executive Overview
+## 🌐 Executive Overview & System Architecture
 
-```
- [ 🛰️ Sentinel-2 / Planet L2A ]
-              │
-              ▼
-   ┌──────────────────────┐
-   │ 7-Stage ML Pipeline  │ ───► NDVI / NDWI Anomaly & XGBoost Yield Loss
-   └──────────────────────┘
-              │
-              ▼
-   ┌──────────────────────┐
-   │  Circom ZK Circuit   │ ───► Private: [ GPS, Secret, Raw Index ]
-   └──────────────────────┘      Public:  [ Drop > 30%, Poseidon Hash ]
-              │
-              ▼
-   ┌──────────────────────┐
-   │ Polygon Smart Pool   │ ───► 💰 $3,500 USDC Instant Automated Payout
-   └──────────────────────┘
-```
-
----
-
-## 🏛️ System Architecture
-
-AgriProof AI is built as a zero-trust, multi-tiered architecture that couples spaceborne earth observation with zero-knowledge cryptography and decentralized on-chain settlement.
-
-```
-┌──────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                     AGRIPROOF AI SYSTEM ARCHITECTURE                                 │
-└──────────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ 🛰️ LAYER 1: SATELLITE INGESTION & PRECISION GIS PIPELINE                                         │
-  │  • Sentinel-2 MSI (B2/B3/B4/B8/B11/B12) & PlanetScope 3m Constellation Ingestion                 │
-  │  • Cloud Masking (s2cloudless + Scene Classification Layer SCL)                                  │
-  │  • Multi-Spectral Indices: NDVI (Canopy), NDMI/NDWI (Moisture), EVI, SAVI, NDRE, BSI             │
-  │  • Spatial Analytics: Otsu Adaptive Bimodal Thresholding & Geodesic Parcel Clipping             │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │ Multi-Spectral Telemetry & Loss Vectors
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ 🔐 LAYER 2: CIRCOM 2.1 ZERO-KNOWLEDGE PROVING SUBSYSTEM (Groth16 on BN128)                       │
-  │  • Private Witness Inputs: [ Geodesic GPS Polygons, Sowing Timestamps, Raw Spectral Indices ]   │
-  │  • Public Constraints: [ Poseidon Commitment Hash, Trigger Threshold (e.g. ΔNDVI ≥ 30%) ]       │
-  │  • Prover Engine: snarkjs client-side witness generation (< 850ms execution)                     │
-  │  • Cryptographic Output: 128-byte Groth16 Proof (πA ∈ 𝔾1, πB ∈ 𝔾2, πC ∈ 𝔾1)                      │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │ Groth16 Proof + Public Signals
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ⛓️ LAYER 3: DECENTRALIZED SETTLEMENT & IMMUTABLE LEDGER                                           │
-  │  • Smart Contracts: Groth16Verifier.sol & AgriProofParametricInsurance.sol on Polygon PoS        │
-  │  • Immediate Liquidity: Automated smart pool payout in USDC upon zero-trust cryptographic check  │
-  │  • Dual-Layer Verification: Local SHA-256 Merkle-linked claim block ledger & On-chain Tx Record  │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │ Real-time WebSockets & Event Triggers
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ 🤖 LAYER 4: GEMINI MULTIMODAL AGRONOMY & ADVISORY ENGINE                                         │
-  │  • AI Explainer: Translates complex spectral anomalies into actionable farmer advisories         │
-  │  • Multilingual Audio Synthesis: Generates low-bandwidth audio briefs in Hindi, Punjabi, etc.    │
-  │  • Adaptive Fallback Engine: Seamless failover between Gemini 2.5 Flash / Pro and Rule Engines   │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │ Multi-Channel Dispatch & Interactive UI
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ 📱 LAYER 5: FARMER & INSURER INTERACTION SURFACES                                                │
-  │  • Farmer Mobile Portal: 1-click proof generation, parcel health tracker & weather station       │
-  │  • Insurer Risk Heatmap: Solvency ratios, fraud cross-checks (Open-Meteo), and pool liquidity    │
-  │  • Low-Bandwidth Dispatch: Automated SMS & WhatsApp alerts via Twilio Gateway                    │
-  └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+```text
+                     ┌────────────────────────────────────────┐
+                     │        FARMER / AGRI-OFFICER           │
+                     └───────────────────┬────────────────────┘
+                                         │ Native Regional Language (HI/EN/MR/GU/TE)
+                                         ▼
+                     ┌────────────────────────────────────────┐
+                     │       KRISHI SAARTHI AI COPILOT        │
+                     │  (Grounded Multilingual Conversational)│
+                     └───────────────────┬────────────────────┘
+                                         │
+                                         ▼
+                     ┌────────────────────────────────────────┐
+                     │       CENTRAL DATA CONTRACT CORE       │
+                     └───────────────────┬────────────────────┘
+                                         │
+        ┌───────────────────┬────────────┴──────────┬───────────────────┐
+        ▼                   ▼                       ▼                   ▼
+┌───────────────┐   ┌───────────────┐       ┌───────────────┐   ┌───────────────┐
+│ SATELLITE     │   │ WEATHER       │       │ SOIL          │   │ DISEASE       │
+│ ENGINE        │   │ ENGINE        │       │ ENGINE        │   │ VISION        │
+│ Sentinel-2 L2A│   │ Open-Meteo    │       │ SoilProfile   │   │ PlantVillage  │
+│ NDVI/NDMI/EVI │   │ 72h Risk Low/ │       │ N-P-K-pH-OC   │   │ Grad-CAM      │
+│ Heatmap Mask  │   │ Med/High Risk │       │ Spatial Cards │   │ IPM Advisory  │
+└───────┬───────┘   └───────┬───────┘       └───────┬───────┘   └───────┬───────┘
+        │                   │                       │                   │
+        └───────────────────┼───────────────────────┴───────────────────┘
+                            ▼
+           ┌────────────────────────────────────────┐
+           │       AGRICULTURAL INTELLIGENCE        │
+           │  • XGBoost Suitability Ranking         │
+           │  • Feature Attribution Breakdown       │
+           │  • Deterministic Weather Rules         │
+           └────────────────┬───────────────────────┘
+                            │
+            ────────────────┴─────────────────
+            STATE COOPERATION MODEL REGISTRY
+            ────────────────┬─────────────────
+                            │
+       ┌────────────────────┼────────────────────┐
+       ▼                    ▼                    ▼
+Madhya Pradesh           Gujarat            Maharashtra
+Soybean Suitability  Cotton Bollworm     Vidarbha Deficit
+  Model v1.4           Radar v2.1           Model v1.2
 ```
 
 ---
 
-### 🧩 Detailed Subsystem Breakdown
+## 📦 Unified Central Data Contract
 
-#### 1. Remote Sensing & Spatial Processing Engine
-* **Sentinel-2 L2A & PlanetScope Ingest**: Pulls bottom-of-atmosphere (BOA) surface reflectance across 13 spectral bands.
-* **Dynamic Indices Engine**:
-  * **NDVI** (Normalized Difference Vegetation Index): Chlorophyll absorption & biomass vigor.
-  * **NDMI** (Normalized Difference Moisture Index): Canopy water stress & hydration deficit.
-  * **SAVI / MSAVI** (Soil Adjusted Vegetation Index): Compensates for high soil brightness in arid regions.
-  * **Thermal Land Surface Temperature (LST)**: Infrared heatwave anomaly detection.
-* **Otsu Variance Optimization**: Automatically calculates optimal threshold $t^*$ to classify healthy vs. damaged acres without human bias.
+All backend subsystems feed into a single canonical data structure consumed by Krishi Saarthi:
 
-#### 2. Groth16 Zero-Knowledge Cryptography Stack
-* **Poseidon Hash Commitments**: Uses arithmetic-friendly Poseidon hash primitives over prime field $\mathbb{F}_q$ to commit farm boundaries:
-  $$\text{Commitment} = \text{Poseidon}(\text{FarmerSecretKey}, \text{PolicyID}, \text{PolygonHash})$$
-* **Strict Privacy Guarantees**: Proves to the blockchain that damage exceeded policy threshold *without* exposing actual crop yields, farm size, or exact coordinate locations.
-* **Nullifier Hash Protection**: Employs deterministic nullifiers to mathematically prevent double-claiming within the same coverage epoch.
-
-#### 3. Blockchain Settlement & Audit Ledger
-* **EVM Smart Contracts**: Compiled with Solidity 0.8.20 utilizing EVM precompiles (`0x08` pairing check) for gas-efficient Groth16 proof verification (~240,000 gas).
-* **Instant USDC Payouts**: Direct token transfers from collateralized insurance underwriting liquidity pools.
-* **Immutable SHA-256 Block Chain**: Secondary cryptographically linked local and on-chain ledger storing `claim_id`, `proof_hash`, `prev_hash`, and transaction state.
-
-#### 4. Multimodal AI & Farmer Communication Layer
-* **Gemini Agronomy Intelligence**: Ingests multi-spectral indices, weather anomalies, and soil moisture to generate localized farming advisories.
-* **Omnichannel Notification**: Dispatches concise SMS and WhatsApp alerts to rural farmers without requiring active data connections.
-
----
-
-### 🔄 End-to-End Data & Claim Execution Flow
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Farmer as 👨‍🌾 Farmer
-    participant App as 💻 AgriProof Web App
-    participant Sat as 🛰️ Copernicus Sentinel-2
-    participant Pipeline as ⚙️ GIS & ML Engine
-    participant ZK as 🔐 Circom ZKP Prover
-    participant Contract as ⛓️ Polygon Smart Contract
-    participant Twilio as 📱 SMS / WhatsApp Gateway
-
-    Farmer->>App: Register Farm Boundary & Activate Policy
-    App->>Contract: Commit Policy Hash (Poseidon Commitment)
-    loop Orbital Monitoring (Every 5 Days)
-        Sat->>Pipeline: Fetch Surface Reflectance (B4, B8, B11)
-        Pipeline->>Pipeline: Compute Cloud Mask, NDVI, NDMI & Otsu Loss
-    end
-    Note over Pipeline: Anomaly Detected: NDVI Drop > 30%
-    Pipeline->>Twilio: Dispatch Extreme Weather / Drought Alert
-    Twilio-->>Farmer: SMS / WhatsApp Advisory Notification
-    Farmer->>App: Request Instant Settlement
-    App->>ZK: Generate Witness (Private GPS, Baseline NDVI, Current NDVI)
-    ZK-->>App: Return 128-byte Groth16 Proof (πA, πB, πC)
-    App->>Contract: Submit verifyClaim(proof, publicSignals)
-    Contract->>Contract: Verify Pairing Check & Check Nullifier
-    Contract-->>Farmer: 💰 Disburse Payout in USDC (< 5 Seconds)
-    Contract->>App: Emit ClaimSettled Event & Update Ledger Block
-```
-
----
-
-## ⚡ Core Feature Matrix
-
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <h3 align="center">🛰️ 1. Multi-Spectral Remote Sensing</h3>
-      <!-- INSERT SATELLITE RASTER GIF / DEMO HERE -->
-      <ul>
-        <li><b>Sensor Ingest:</b> Ingests Sentinel-2 L2A & PlanetScope 3m high-resolution surface reflectance bands.</li>
-        <li><b>Spectral Indices:</b> Computes <code>NDVI</code>, <code>NDWI</code>, <code>EVI</code>, <code>SAVI</code>, and <code>BSI</code> rasters.</li>
-        <li><b>Cloud Masking:</b> <code>s2cloudless</code> probability filter eliminates optical cloud interference.</li>
-        <li><b>Damage Segmentation:</b> Otsu bimodal variance classification to accurately delineate damaged acreage.</li>
-      </ul>
-    </td>
-    <td width="50%" valign="top">
-      <h3 align="center">🔐 2. Zero-Knowledge Proof Layer</h3>
-      <!-- INSERT ZKP CIRCUIT FLOW IMAGE HERE -->
-      <ul>
-        <li><b>Full Farmer Privacy:</b> Keeps GPS boundaries, soil scans, and raw harvest records strictly private.</li>
-        <li><b>Circom 2.1 Proofs:</b> Verifies arithmetic constraints on BN128 curve in <code>&lt; 850ms</code>.</li>
-        <li><b>No PII Leaks:</b> Proves only that <code>NDVI_drop &ge; 30%</code> and verifies the policy commitment hash.</li>
-        <li><b>Double-Spend Prevention:</b> Cryptographic nullifier trees prevent duplicate insurance payouts.</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <h3 align="center">🌾 3. Farmer Telemetry & Low-Bandwidth Alerts</h3>
-      <!-- INSERT FARMER DASHBOARD / SMS PREVIEW IMAGE HERE -->
-      <ul>
-        <li><b>Lightweight 2G/3G Dispatch:</b> Automated SMS & WhatsApp weather advisories for non-smartphone users.</li>
-        <li><b>Agronomy Action Center:</b> Actionable recommendations for irrigation scheduling and heat shock mitigation.</li>
-        <li><b>1-Click Settlement:</b> Direct claiming interface that generates client-side proofs with instant confirmation.</li>
-        <li><b>Multilingual Voice Briefing:</b> Natural-language audio synthesis for illiterate or remote farm operators.</li>
-      </ul>
-    </td>
-    <td width="50%" valign="top">
-      <h3 align="center">📊 4. Insurer Portal & Fraud Shield</h3>
-      <!-- INSERT INSURER HEATMAP IMAGE HERE -->
-      <ul>
-        <li><b>Regional Risk Heatmap:</b> Real-time parametric solvency monitoring across major agricultural basins.</li>
-        <li><b>4-Point Cross Validation:</b> Validates satellite ground truth, Open-Meteo rainfall, ZK proof, and ledger.</li>
-        <li><b>Automated Solvency Guard:</b> Dynamic liquidity pools with automated capital allocation triggers.</li>
-        <li><b>Audit Trail:</b> Cryptographically verified historical claim explorer with PolygonScan integrations.</li>
-      </ul>
-    </td>
-  </tr>
-</table>
-
----
-
-## 🔬 Deep Dive: The 7-Stage Remote Sensing Pipeline
-
-<details>
-<summary><b>▶ Click to Expand 7-Stage Pipeline Technical Specs & Equations</b></summary>
-
-<br>
-
-```
-[ Stage 1: Geodesic ROI ] ──► [ Stage 2: Planet/S2 Ingest ] ──► [ Stage 3: Cloud Masking ]
-                                                                          │
-[ Stage 6: Vectorization ] ◄── [ Stage 5: Otsu Damage ] ◄── [ Stage 4: Band Extraction ]
-           │
-           └──► [ Stage 7: Groth16 Proof & SHA-256 Ledger Mining ]
-```
-
-### Mathematical Formulations:
-
-1. **Normalized Difference Vegetation Index (NDVI)**:
-   $$\text{NDVI} = \frac{\text{NIR} (B8) - \text{RED} (B4)}{\text{NIR} (B8) + \text{RED} (B4)}$$
-
-2. **Normalized Difference Water Index (NDWI)**:
-   $$\text{NDWI} = \frac{\text{NIR} (B8) - \text{SWIR} (B11)}{\text{NIR} (B8) + \text{SWIR} (B11)}$$
-
-3. **Enhanced Vegetation Index (EVI)**:
-   $$\text{EVI} = 2.5 \times \frac{\text{NIR} - \text{RED}}{\text{NIR} + 6\text{RED} - 7.5\text{BLUE} + 1}$$
-
-4. **Otsu Variance Optimization ($\sigma_B^2$)**:
-   $$\sigma_B^2(t) = \omega_0(t)\omega_1(t) \left[\mu_0(t) - \mu_1(t)\right]^2$$
-
-<!-- INSERT PIPELINE BENCHMARKS GRAPH HERE -->
-
-</details>
-
----
-
-## 🛡️ Deep Dive: Groth16 Zero-Knowledge Cryptography
-
-<details>
-<summary><b>▶ Click to View Circom 2.1 Circuit Architecture & Proof Verification</b></summary>
-
-<br>
-
-### Circom Circuit Constraints (`insurance_eligibility.circom`):
-
-```circom
-pragma circom 2.1.0;
-
-include "circomlib/circuits/comparators.circom";
-include "circomlib/circuits/poseidon.circom";
-
-template InsuranceEligibility() {
-    // Private Signals (Farmer's confidential data)
-    signal input farmerSecret;
-    signal input policyId;
-    signal input baselineNDVI;      // Scaled x10000
-    signal input currentNDVI;       // Scaled x10000
-
-    // Public Signals (Inspected on-chain)
-    signal input commitmentHash;    // Poseidon(farmerSecret, policyId)
-    signal input ndviDropThreshold; // e.g. 3000 = 30.00%
-    signal output isEligible;
-
-    // 1. Verify policy ownership commitment
-    component hasher = Poseidon(2);
-    hasher.inputs[0] <== farmerSecret;
-    hasher.inputs[1] <== policyId;
-    commitmentHash === hasher.out;
-
-    // 2. Constrain NDVI vegetation loss calculation
-    signal ndviDropPct;
-    ndviDropPct <-- ((baselineNDVI - currentNDVI) * 10000) \ baselineNDVI;
-
-    // 3. Evaluate parametric condition
-    component comp = GreaterEqThan(32);
-    comp.in[0] <== ndviDropPct;
-    comp.in[1] <== ndviDropThreshold;
-    isEligible <== comp.out;
-}
-
-component main {public [commitmentHash, ndviDropThreshold]} = InsuranceEligibility();
-```
-
-* **Curve**: `BN128 / alt_bn128` (EVM Native Pairing Engine)
-* **Proof Size**: 128 bytes ($\pi_A \in \mathbb{G}_1, \pi_B \in \mathbb{G}_2, \pi_C \in \mathbb{G}_1$)
-* **Gas Consumption**: ~240,000 gas on Polygon PoS
-
-</details>
-
----
-
-## 📊 Interactive Insurer Anti-Fraud & Risk Matrix
-
-```
-[ OBJECTIVE SATELLITE DATA ] ──► Cross-Checked with ──► [ OPEN-METEO WEATHER REANALYSIS ]
-                                                                   │
-                                                                   ▼
-[ GROTH16 ZK-SNARK SIGNATURE ] ──► Verified by ──► [ SHA-256 IMMUTABLE LEDGER ]
-```
-
-* **Fraud Score Calculation**:
-  $$\text{Fraud Risk Score} = (1.0 - \text{Consistency Rate}) \times 100$$
-* **Solvency Ratio Guard**: Continuous reserve validation against active insured exposure pools.
-
----
-
-## 🔒 Tamper-Proof Claim Ledger Specification
-
-Each claim submitted to AgriProof AI creates an immutable block appended to the SHA-256 chain:
-
-```json
-{
-  "block_index": 1,
-  "timestamp": "2026-08-20T00:45:00Z",
-  "claim_id": "CLM-4821",
-  "farmer_commitment": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "satellite_evidence_hash": "a1b2c3d4e5f6...",
-  "prediction_hash": "f6e5d4c3b2a1...",
-  "zk_proof_hash": "8c7b6a5d4e3f...",
-  "eligible": true,
-  "previous_block_hash": "0000000000000000000000000000000000000000000000000000000000000000",
-  "block_hash": "d4f3e2a1..."
+```typescript
+interface CentralAgriculturalIntelligence {
+  field: {
+    field_id: string;
+    name: string;
+    area_hectares: number;
+    crop: string;
+    state: string;
+    center_lat: number;
+    center_lon: number;
+    geometry: number[][];
+  };
+  satellite: {
+    observation_date: string;
+    sensor: "Sentinel-2 MSI Level-2A";
+    cloud_coverage_pct: number;
+    ndvi: number; // e.g. 0.64
+    ndmi: number; // e.g. 0.41
+    evi: number;  // e.g. 0.52
+    vegetation_status: "Healthy" | "Moderate Stress" | "Degraded";
+    health_score: number; // 0 - 100 (e.g. 82)
+    change_vs_baseline_pct: number; // e.g. -8.4%
+    is_live_telemetry: boolean;
+    data_mode: "LIVE_ORBITAL_TELEMETRY" | "DEMO_FALLBACK";
+  };
+  weather: {
+    temperature_c: number;
+    rainfall_mm_30d: number;
+    rainfall_forecast_72h_mm: number; // e.g. 62.0 mm
+    humidity_pct: number;
+    soil_moisture_vwc_pct: number;
+    risks: {
+      rainfall_risk: "LOW" | "MEDIUM" | "HIGH";
+      temperature_risk: "LOW" | "MEDIUM" | "HIGH";
+      drought_risk: "LOW" | "MEDIUM" | "HIGH";
+      overall_risk: "LOW" | "MEDIUM" | "HIGH";
+    };
+    actionable_warnings: string[];
+  };
+  soil: {
+    nitrogen_kg_ha: number;
+    phosphorus_kg_ha: number;
+    potassium_kg_ha: number;
+    ph: number;
+    organic_carbon_pct: number;
+    soil_moisture_vwc_pct: number;
+    soil_type: string;
+    data_source: "farmer_entered" | "regional_spatial_default" | "state_soil_health_card";
+  };
+  crop_recommendations: Array<{
+    crop: string;
+    suitability_score: number;
+    suitability_pct: number;
+    rank: number;
+    breakdown: {
+      soil_suitability: number;
+      rainfall_suitability: number;
+      temperature_suitability: number;
+      water_requirement_match: number;
+      satellite_condition_fit: number;
+    };
+    rationale: string;
+  }>;
+  disease_diagnosis: {
+    detected: boolean;
+    crop: string;
+    disease: string;
+    confidence: number;
+    severity: "Mild" | "Moderate" | "Critical";
+    gradcam_bounding_boxes: Array<{ x: number; y: number; width: number; height: number; intensity: number }>;
+    advisory_disclaimer: string;
+    organic_remedies: string[];
+    ipm_practices: string[];
+  };
+  state_cooperation: {
+    origin_state: string;
+    contributing_model: string;
+    institution: string;
+    version: string;
+    federation_status: string;
+  };
 }
 ```
 
 ---
 
-## 🧪 Demo Scenarios & Seeded Profiles
+## 🏛️ The 8 Core Pillars
 
-| Scenario ID | Name & Location | Crop Type | Trigger Condition | Status |
-|---|---|---|---|---|
-| `demo-farm-001` | **Patiala Farm, Punjab** | Wheat | Severe Drought ($\Delta\text{NDVI} -41.5\%$, $\text{Rain} -58.3\%$) | ✅ **ELIGIBLE (ZK Verified)** |
-| `demo-farm-002` | **Thrissur Farm, Kerala** | Rice | Monsoon Flood ($\text{Rain} +82.1\%$, $\text{NDWI} +0.45$) | ✅ **ELIGIBLE (ZK Verified)** |
-| `demo-farm-003` | **Nagpur Farm, Maharashtra** | Soybean | Normal Growth ($\Delta\text{NDVI} -4.7\%$, Healthy Yield) | ❌ **NOT ELIGIBLE** |
+### Pillar 1: Fullscreen Farmer Field Mapping
+- Fullscreen Leaflet GIS studio with satellite imagery basemap.
+- Point-and-click or freehand touch vertex boundary placement.
+- Real-time Shoelace geodesic area calculation in Hectares and Acres.
+- Undo, Clear, Redraw, Fix Shape, and auto-closing polygon logic.
+- Instant GeoJSON storage and automatic map viewport fitting upon save.
+
+### Pillar 2: Sentinel-2 Satellite Intelligence
+- Level-2A Bottom-Of-Atmosphere (BOA) surface reflectance processing (B2 Blue, B3 Green, B4 Red, B8 NIR, B11 SWIR).
+- Spectral Vegetation Indices:
+  - **NDVI** = $(B8 - B4) / (B8 + B4)$ (Canopy Vigor)
+  - **NDMI** = $(B8 - B11) / (B8 + B11)$ (Canopy Moisture Stress)
+  - **EVI** = $2.5 \times (B8 - B4) / (B8 + 6 \times B4 - 7.5 \times B2 + 1)$
+- **Scientific Disclosure:** The UI explicitly communicates that NDVI is a remotely sensed spectral index, not an AI prediction.
+- High-contrast vegetation health classification ("Healthy", "Moderate Stress", "Degraded").
+
+### Pillar 3: Open-Meteo Weather Risk Engine
+- Deterministic 3-tier risk engine evaluating 72-hour precipitation forecast, heat index, and soil moisture VWC:
+  - **Rainfall Risk:** $\ge 50\text{ mm} \implies \text{HIGH}$, $\ge 25\text{ mm} \implies \text{MEDIUM}$, $< 25\text{ mm} \implies \text{LOW}$.
+- Deterministic warning generator (e.g. *"⚠️ Heavy rainfall risk — HIGH: 62 mm rainfall expected within the next 72 hours. Postpone chemical spray and field irrigation."*).
+- Never delegates risk threshold computation to unconstrained LLMs.
+
+### Pillar 4: Soil Intelligence & State Soil Cards
+- Accepts farmer-entered soil test metrics (N, P, K, pH, Organic Carbon, Moisture VWC).
+- Pre-loaded with regional agro-climatic spatial baselines (Madhya Pradesh Malwa Vertisols, Maharashtra Vidarbha Black Loam, Gujarat Saurashtra Loam, Punjab Indo-Gangetic Alluvium, Karnataka Deccan Alfisols).
+- Interactive nutrient adequacy ratings based on National Soil Health Card benchmarks.
+
+### Pillar 5: Explainable XGBoost Crop Recommendation
+- Evaluates soil chemistry, seasonal rainfall, temperature regime, NDMI water match, and satellite vigor.
+- Ranks top crops (e.g. 1. Soybean 98%, 2. Maize 98%, 3. Cotton 98%, 4. Groundnut 90%, 5. Rice 81%).
+- **Granular Explainability:** Feature attribution breakdown across Soil, Rainfall, Temperature, Water Requirement, and Satellite Fit.
+- Plain-language agronomic rationale explaining *why* a crop was selected.
+
+### Pillar 6: Crop Disease Vision with Grad-CAM
+- Plant leaf classification across PlantVillage baseline classes (Wheat Yellow Rust, Potato Late Blight, Tomato Early Blight, Soybean Brown Spot, Rice Bacterial Blight).
+- **Grad-CAM Attention Heatmap:** Visual bounding boxes indicating exactly where the deep learning model identified foliar lesions.
+- Severity classification ("Mild", "Moderate", "Critical") and confidence score.
+- Safe IPM (Integrated Pest Management) precautions and organic remedies without hallucinated pesticide dosages.
+- Mandatory legal disclaimer: *"AI prediction based on visual symptoms. Always consult your local Krishi Vigyan Kendra (KVK)."*
+
+### Pillar 7: Grounded Multilingual Krishi Saarthi AI Copilot
+- Farmer conversational assistant with full support for **Hindi (हिन्दी / Hinglish), English, Marathi (मराठी), Gujarati (ગુજરાતી), and Telugu (తెలుగు)**.
+- Injects authoritative structured telemetry context; strictly prevents hallucinations or invented sensor numbers.
+- Scientific numbers (e.g. `NDVI 0.64`, `62 mm`) remain unchanged across translations.
+- Web Speech Synthesis audio briefing for illiterate or voice-first farmers.
+
+### Pillar 8: State Cooperation & Model Registry Layer
+- **The Core Hackathon Differentiator:** An open registry enabling Indian states and agricultural institutes to share specialized AI models.
+- Pre-seeded authentic state models:
+  1. **Madhya Pradesh:** Malwa Soybean Suitability & Pod Borer Predictor v1.4 (MP Dept of Ag & DSR)
+  2. **Gujarat:** Saurashtra Pink Bollworm Early Warning Radar v2.1 (Gujarat Krishi Parishad & AAU)
+  3. **Maharashtra:** Vidarbha Rainfed Moisture Deficit & Wilting Forecaster v1.2 (Maharashtra Ag Bureau)
+  4. **Punjab:** Yellow Rust Micro-Climate & Stubble Fire Risk Forecaster v3.0 (PRSC Ludhiana)
+  5. **Karnataka:** Southern Dry Zone Finger Millet (Ragi) Drought Resilience v1.1 (KSRSAC)
+- RESTful Model Registry APIs (`GET /models`, `POST /models`, `GET /states`, `GET /states/:state/models`).
+- "Register State Model" modal form allowing state departments to register their models into the national exchange.
+
+---
+
+## ⛓️ Dual Capability: Zero-Knowledge Parametric Engine
+
+All original winning functionalities of **AgriProof AI** remain fully operational:
+- **Groth16 Zero-Knowledge Proofs on BN128:** Proves $\Delta\text{NDVI} \ge 30\%$ and drought anomalies without revealing exact farm GPS coordinates.
+- **SHA-256 Merkle-Linked Ledger:** Tamper-evident claim block verification (`/ledger`).
+- **Polygon PoS Smart Pool:** Simulated instant USDC claim disbursement (`/insurer`).
+
+---
+
+## 📡 API Specifications
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/health` | Health check, farms count, and registered state models count |
+| `POST` | `/api/fields` | Save field geometry as GeoJSON with area calculation |
+| `GET` | `/api/fields/:id` | Retrieve saved field geometry and metadata |
+| `GET` | `/api/fields/:id/health` | Sentinel-2 spectral indices (NDVI, NDMI, EVI, health score) |
+| `GET` | `/api/fields/:id/weather` | Open-Meteo telemetry & deterministic 3-tier risk warnings |
+| `POST` | `/api/crop-recommendation` | XGBoost crop suitability ranking with feature contributions |
+| `POST` | `/api/disease-diagnosis` | Plant leaf diagnosis with Grad-CAM heatmap coordinates |
+| `GET` | `/api/soil-profiles/:state` | State soil health card baseline & nutrient evaluation |
+| `GET` | `/api/states` | List connected states and active federated models |
+| `GET` | `/api/models` | List shared models in the Agricultural Model Registry |
+| `GET` | `/api/models/:id` | Detailed model card with input/output JSON schemas |
+| `POST` | `/api/models` | Register a new state agricultural model |
+| `GET` | `/api/krishi-saarthi/central-intelligence/:id` | Single authoritative agricultural intelligence contract |
+| `POST` | `/api/krishi-saarthi/chat` | Grounded multilingual conversational copilot |
+
+---
+
+## 🎯 Judges Demo Journey (15-Step Script)
+
+1. **Open Krishi Saarthi:** Navigate to `http://localhost:3000/`. Notice the product name **Krishi Saarthi** and tagline: *"From satellite intelligence to farmer action."*
+2. **Select State Scenario:** Click on the **Madhya Pradesh (Soybean)** scenario preset button.
+3. **Inspect Satellite Telemetry:** Point out the Sentinel-2 card displaying **NDVI 0.64**, **NDMI 0.41**, **Health Score 82/100**, and the notice that NDVI is a remotely sensed spectral index.
+4. **Review Weather Risk Warning:** Point out the deterministic Open-Meteo warning: **Heavy rainfall risk — HIGH (62 mm in next 72 hours)**.
+5. **Inspect Soil Intelligence:** Review the soil panel showing NPK, pH 7.2, and Organic Carbon 0.68%. Click "Adjust Soil Values" to show dynamic real-time adjustment.
+6. **Review Crop Suitability:** Open the Crop Recommendation Card showing **Soybean (98%)** and **Maize (98%)** with feature attribution progress bars.
+7. **Perform Crop Disease Diagnosis:** In the Crop Doctor card, click on the **Wheat Yellow Rust** preset. Observe the Grad-CAM visual attention overlay highlighting foliar lesions.
+8. **Engage Krishi Saarthi Copilot in Hindi:** Click the quick prompt chip: *"Mere khet mein fasal kaisi hai?"*.
+9. **Observe Grounded Output:** Notice the response quotes NDVI 0.64 and the 62 mm rainfall warning without any hallucinations.
+10. **Test Audio Briefing:** Click **Listen Audio Briefing** to hear browser speech synthesis.
+11. **Switch Language:** Click the header language switcher to **English**, **Marathi (मराठी)**, or **Gujarati (ગુજરાતી)** and observe localized guidance.
+12. **Test "Mark Your Field":** Click the **Mark Your Field** CTA to launch the fullscreen boundary drawer studio. Draw or edit vertices, check the geodesic area in Hectares, and save.
+13. **Open State Cooperation Network:** Click **State Network** in the navbar to open the Cooperative Agricultural Model Registry (`/cooperation`).
+14. **Showcase Connected States:** Demonstrate how Madhya Pradesh, Gujarat, Maharashtra, Punjab, and Karnataka share verified models. Click "Inspect Schema" to view input/output JSON contracts.
+15. **Demonstrate Backward Compatibility:** Click **ZK Ledger** (`/ledger`) and **Insurer** (`/insurer`) to prove that the original zero-knowledge parametric insurance claims engine remains 100% operational!
 
 ---
 
 ## 🚀 Quickstart & Local Deployment
 
-### 1. Clone & Install Dependencies
+### Prerequisites
+- Node.js v18+ (tested on Node v20 & v24)
+- Python 3.10+
+- Modern Web Browser (Chrome / Edge / Firefox)
+
+### Option A: Standard Fullstack Run (Recommended)
 ```bash
-git clone https://github.com/your-username/agriproof-ai.git
-cd agriproof-ai
+# 1. Install dependencies
 npm install
+npm --prefix frontend install
+
+# 2. Build frontend and bundle server
+npm run build
+
+# 3. Start Krishi Saarthi production server
+npm start
+# Open http://localhost:3000
 ```
 
-### 2. Configure Environment
-```bash
-cp .env.example .env
-# Add GEMINI_API_KEY, RPC_URL, etc.
-```
-
-### 3. Start Full-Stack Dev Server
+### Option B: Fast Development Mode
 ```bash
 npm run dev
+# Starts Express server + Vite live middleware on http://localhost:3000
 ```
-> Open [http://localhost:3000](http://localhost:3000) to access the Orbital Command Center.
+
+### Option C: Python FastAPI Backend (Modular ML Inference)
+```bash
+pip install -r backend/requirements.txt
+uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### Option D: Docker Container (Production Single-Command)
+```bash
+# Build the unified Krishi Saarthi production image (Multi-stage build)
+docker build -t krishi-saarthi .
+
+# Run on port 3000
+docker run -d -p 3000:3000 --name krishi-saarthi-app krishi-saarthi
+
+# Open in browser: http://localhost:3000
+# Run internal smoke test inside container:
+docker exec -it krishi-saarthi-app python smoke_test_backend.py
+```
+
+### Option E: Docker Compose (Microservices & Multi-Container)
+```bash
+# 1. Run the primary unified fullstack app:
+docker compose up app
+
+# 2. Or run complete microservice cluster (Unified App + Python Backend + PostgreSQL 16):
+docker compose --profile full up --build
+
+# Stop containers:
+docker compose down
+```
 
 ---
 
-## ⛓️ Smart Contract Verification
-
-| Contract | Network | Address | Verification |
-| :--- | :--- | :--- | :--- |
-| **`AgriProofParametricInsurance.sol`** | Polygon PoS (ChainID: 137) | `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174` | [![PolygonScan](https://img.shields.io/badge/PolygonScan-Verified-00ff41?style=flat-square&logo=polygon&labelColor=000000)](https://polygonscan.com) |
-| **`Groth16Verifier.sol`** | Polygon PoS (ChainID: 137) | `0x4B3A8eE9d02c77A6e118936Fa80931E37Bcf0A67` | [![PolygonScan](https://img.shields.io/badge/PolygonScan-Verified-00ff41?style=flat-square&logo=polygon&labelColor=000000)](https://polygonscan.com) |
+## 📚 Open Source References & Acknowledgments
+- [Microsoft FarmVibes.AI](https://github.com/microsoft/farmvibes-ai) — Multi-modal geospatial and remote sensing patterns.
+- [Kisan / Boeing Hackathon](https://github.com/boeing23/kisan) — Farmer UX and conversational agricultural assistance.
+- [Crop Disease Detection AI](https://github.com/shatini/crop-disease-detection-ai) & [Crop Diseases Detection](https://github.com/yesh00008/crop-diseases-detection) — PlantVillage CNN foliar lesion taxonomy.
+- [Smart Irrigation System with Weather-Aware Guidance](https://github.com/nithu0035/smart-irrigation-system-with-weather-aware-crop-guidance) — Open-Meteo soil moisture evapotranspiration thresholds.
+- [Our Take on Climate AI](https://github.com/sai-kumar-dev/our-take-on-climate-ai) — Agro-climatic risk engine modeling.
+- Copernicus Sentinel-2 MSI Open Access Hub — Multi-spectral orbital imagery.
+- ICAR (Indian Council of Agricultural Research) — Agronomic optimal ranges & Soil Health Card standards.
 
 ---
 
 <div align="center">
-
-### Built for Hackathon Excellence 🏆
-**Zero-Trust Parametric Agriculture • Privacy-Preserving Cryptography • Space-Borne Intelligence**
-
-<sub>Developed with Sentinel-2 MSI, Circom 2.1, React 18, and Polygon. Distributed under the MIT License.</sub>
-
+  <b>Krishi Saarthi: Cooperative Agricultural Intelligence Network</b><br>
+  <i>Built with AI for Bharat's Farmers.</i>
 </div>

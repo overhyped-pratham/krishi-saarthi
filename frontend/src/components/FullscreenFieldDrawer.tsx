@@ -358,7 +358,7 @@ export default function FullscreenFieldDrawer({
   // Drawing state
   const [isTracing, setIsTracing] = useState<boolean>(false);
   const [drawMode, setDrawMode] = useState<'crosshair' | 'points' | 'trace'>('crosshair');
-  const [basemap, setBasemap] = useState<'satellite' | 'street'>('satellite');
+  const [basemap, setBasemap] = useState<'esri' | 'google' | 'hybrid' | 'street'>('esri');
   // Undo history stack
   const [history, setHistory] = useState<number[][][]>([]);
   // Live viewport center tracking for the mobile crosshair
@@ -594,19 +594,43 @@ export default function FullscreenFieldDrawer({
 
         {/* Top Right: Basemap & Mode Controls */}
         <div className="pointer-events-auto flex items-center gap-1.5">
-          {/* Basemap Toggle */}
+          {/* Basemap: 4-source switcher */}
           <div className="flex bg-black/80 border border-white/20 rounded-xl p-0.5 backdrop-blur-md">
             <button
               type="button"
-              onClick={() => setBasemap('satellite')}
+              onClick={() => setBasemap('esri')}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all ${
-                basemap === 'satellite'
+                basemap === 'esri'
                   ? 'bg-emerald-600 text-white shadow-md'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
               <Satellite className="w-3 h-3" />
-              <span className="hidden sm:inline">Satellite</span>
+              <span className="hidden sm:inline">ESRI</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setBasemap('google')}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all ${
+                basemap === 'google'
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Satellite className="w-3 h-3" />
+              <span className="hidden sm:inline">Google</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setBasemap('hybrid')}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all ${
+                basemap === 'hybrid'
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Satellite className="w-3 h-3" />
+              <span className="hidden sm:inline">Hybrid</span>
             </button>
             <button
               type="button"
@@ -618,7 +642,7 @@ export default function FullscreenFieldDrawer({
               }`}
             >
               <Layers className="w-3 h-3" />
-              <span className="hidden sm:inline">Map</span>
+              <span className="hidden sm:inline">Street</span>
             </button>
           </div>
 
@@ -717,17 +741,30 @@ export default function FullscreenFieldDrawer({
           <FullscreenMapResizer />
           {initialBounds && <FullscreenBoundsFitter bounds={initialBounds} />}
 
-          {/* Satellite vs Street Tile Layers */}
-          {basemap === 'satellite' ? (
+          {/* Tile layer — switches between ESRI, Google Satellite, Bing, and Street */}
+          {basemap === 'google' ? (
             <TileLayer
-              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-              attribution="Esri World Imagery"
-              maxZoom={20}
+              url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+              attribution="&copy; Google Satellite"
+              maxZoom={21}
             />
-          ) : (
+          ) : basemap === 'hybrid' ? (
+            <TileLayer
+              url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+              attribution="&copy; Google Hybrid Satellite"
+              maxZoom={21}
+            />
+          ) : basemap === 'street' ? (
             <TileLayer
               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
               attribution="CartoDB Voyager"
+              maxZoom={20}
+            />
+          ) : (
+            /* default: ESRI World Imagery */
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution="Esri World Imagery"
               maxZoom={20}
             />
           )}

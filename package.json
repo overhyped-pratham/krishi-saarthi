@@ -8,6 +8,11 @@
     "build": "npm --prefix frontend install && npm --prefix frontend run build && node -e \"const fs=require('fs'); if(fs.existsSync('frontend/dist')) fs.cpSync('frontend/dist','dist',{recursive:true});\" && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "postinstall": "npm --prefix frontend install && npm --prefix frontend run build && node -e \"const fs=require('fs'); if(fs.existsSync('frontend/dist')) fs.cpSync('frontend/dist','dist',{recursive:true});\" && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
+    "smoke:backend": "python smoke_test_backend.py",
+    "docker:build": "docker build -t krishi-saarthi .",
+    "docker:run": "docker run -p 3000:3000 krishi-saarthi",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

@@ -25,6 +25,9 @@ import {
   Minimize2,
   Sparkles,
   Download,
+  Play,
+  Pause,
+  Layers,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../lib/api';
@@ -185,21 +188,67 @@ const NDVI_CRITERIA_LIST = [
   { range: '< 0.20', status: 'Bare Soil / Fallow', color: 'text-slate-400', dot: 'bg-slate-400', desc: 'Barren soil, water bodies, or post-harvest' },
 ];
 
+const SLIDE_STEPS = [
+  { num: '01', title: 'Intro', label: 'Platform Hook' },
+  { num: '02', title: 'Problem', label: 'Claim Bottleneck' },
+  { num: '03', title: 'Tri-Tech', label: 'Architecture' },
+  { num: '04', title: 'S1: ROI', label: 'Boundary Hash' },
+  { num: '05', title: 'S2: Ingest', label: 'Sentinel-2 BOA' },
+  { num: '06', title: 'S3: Cloud', label: 's2cloudless QA' },
+  { num: '07', title: 'S4: Spectral', label: 'ΔNDVI / NDMI' },
+  { num: '08', title: 'S5: AI Regressor', label: 'XGBoost Yield' },
+  { num: '09', title: 'S6: Extent', label: 'Vector Damage' },
+  { num: '10', title: 'S7: ZK Ledger', label: 'Groth16 Settlement' },
+];
+
 export default function PitchDeckPage() {
   const [viewMode, setViewMode] = useState<'slides' | 'document'>('slides');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [apiStatuses, setApiStatuses] = useState<ApiStatus[]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isAutoPlay, setIsAutoPlay] = useState(false);
+  const [autoPlayProgress, setAutoPlayProgress] = useState(0);
+  const SLIDE_DURATION_MS = 6000;
 
   const totalSlides = 10;
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev < totalSlides - 1 ? prev + 1 : 0));
+    setAutoPlayProgress(0);
   }, [totalSlides]);
 
   const prevSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev > 0 ? prev - 1 : totalSlides - 1));
+    setAutoPlayProgress(0);
   }, [totalSlides]);
+
+  // Auto-Play Sequence Timer
+  useEffect(() => {
+    if (!isAutoPlay || viewMode !== 'slides') {
+      setAutoPlayProgress(0);
+      return;
+    }
+
+    const intervalTime = 100;
+    const step = (intervalTime / SLIDE_DURATION_MS) * 100;
+
+    const timer = setInterval(() => {
+      setAutoPlayProgress((prev) => {
+        if (prev >= 100) {
+          nextSlide();
+          return 0;
+        }
+        return prev + step;
+      });
+    }, intervalTime);
+
+    return () => clearInterval(timer);
+  }, [isAutoPlay, viewMode, nextSlide]);
+
+  // Reset progress bar on slide change
+  useEffect(() => {
+    setAutoPlayProgress(0);
+  }, [currentSlide]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -211,6 +260,9 @@ export default function PitchDeckPage() {
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         prevSlide();
+      } else if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        setIsAutoPlay((prev) => !prev);
       } else if (e.key === 'f' || e.key === 'F') {
         setIsFullscreen((prev) => !prev);
       }
@@ -221,7 +273,7 @@ export default function PitchDeckPage() {
 
   useEffect(() => {
     const run = async () => {
-      const DEMO_FARM = '068eb629-2ec1-4bc0-ac9f-ecd1bd19dda0';
+      const DEMO_FARM = 'demo-farm-002';
       const results: ApiStatus[] = [];
 
       try {
@@ -280,6 +332,31 @@ export default function PitchDeckPage() {
             <span>Download .PPTX</span>
           </a>
 
+          {/* Auto-Play Sequence Button */}
+          {viewMode === 'slides' && (
+            <button
+              onClick={() => setIsAutoPlay(!isAutoPlay)}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-sm ${
+                isAutoPlay
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-amber-500/10'
+                  : 'bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/30 text-emerald-300'
+              }`}
+              title="Toggle Auto Sequence Playback (P)"
+            >
+              {isAutoPlay ? (
+                <>
+                  <Pause className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Pause Sequence</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Play Sequence</span>
+                </>
+              )}
+            </button>
+          )}
+
           {/* View Mode Toggle */}
           <div className="flex items-center bg-white/[0.05] border border-white/[0.08] rounded-xl p-1 text-xs font-mono">
             <button
@@ -316,7 +393,48 @@ export default function PitchDeckPage() {
 
       {/* ── 1. VISUAL SLIDE PRESENTATION MODE ── */}
       {viewMode === 'slides' ? (
-        <div className="relative z-10 max-w-5xl mx-auto px-4 py-8 flex flex-col justify-between min-h-[75vh]">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 py-4 flex flex-col justify-between min-h-[75vh]">
+          {/* ── 10-STAGE INTERACTIVE SEQUENCE STRIP ── */}
+          <div className="w-full mb-4">
+            {isAutoPlay && (
+              <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mb-2.5">
+                <div
+                  className="h-full bg-gradient-to-r from-cyan-400 via-emerald-400 to-amber-400 transition-all duration-100 ease-linear"
+                  style={{ width: `${autoPlayProgress}%` }}
+                />
+              </div>
+            )}
+
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-none font-mono text-xs">
+              <span className="text-[10px] text-white/40 uppercase tracking-wider font-bold mr-1 shrink-0 flex items-center gap-1">
+                <Layers className="w-3 h-3 text-cyan-400" />
+                <span>Sequence:</span>
+              </span>
+              {SLIDE_STEPS.map((step, idx) => {
+                const isActive = currentSlide === idx;
+                const isPassed = currentSlide > idx;
+                return (
+                  <button
+                    key={step.num}
+                    onClick={() => setCurrentSlide(idx)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold shrink-0 transition-all flex items-center gap-1.5 border cursor-pointer ${
+                      isActive
+                        ? 'bg-cyan-500 text-black border-cyan-400 shadow-md shadow-cyan-500/20 scale-105'
+                        : isPassed
+                        ? 'bg-white/[0.04] text-cyan-300/90 border-cyan-500/25 hover:bg-white/[0.08]'
+                        : 'bg-white/[0.02] text-white/40 border-white/[0.06] hover:text-white hover:bg-white/[0.05]'
+                    }`}
+                    title={`${step.num}. ${step.title}: ${step.label}`}
+                  >
+                    <span className={isActive ? 'text-black font-black' : isPassed ? 'text-cyan-400' : 'text-white/30'}>
+                      {step.num}
+                    </span>
+                    <span>{step.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -479,6 +597,25 @@ export default function PitchDeckPage() {
                               ))}
                             </div>
                           </div>
+                          {/* Quick Stage Stepper Buttons */}
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              onClick={prevSlide}
+                              disabled={currentSlide <= 3}
+                              className="flex-1 py-1.5 px-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-20 disabled:cursor-not-allowed border border-white/[0.08] text-[11px] font-mono text-white/70 hover:text-white flex items-center justify-center gap-1 transition-all cursor-pointer"
+                            >
+                              <ArrowLeft className="w-3 h-3" />
+                              <span>Prev Stage</span>
+                            </button>
+                            <button
+                              onClick={nextSlide}
+                              disabled={currentSlide >= 9}
+                              className="flex-1 py-1.5 px-2 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 disabled:opacity-20 disabled:cursor-not-allowed border border-cyan-500/30 text-[11px] font-mono font-bold text-cyan-300 hover:text-cyan-200 flex items-center justify-center gap-1 transition-all cursor-pointer"
+                            >
+                              <span>Next Stage</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -489,21 +626,34 @@ export default function PitchDeckPage() {
           </AnimatePresence>
 
           {/* Slide Navigation Controls */}
-          <div className="pt-8 flex items-center justify-between border-t border-white/[0.08]">
+          <div className="pt-6 flex flex-wrap items-center justify-between gap-4 border-t border-white/[0.08]">
             <div className="flex items-center gap-2">
               <button
                 onClick={prevSlide}
-                className="px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-white/70 hover:text-white text-xs font-mono flex items-center gap-1.5 transition-all"
+                className="px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-white/70 hover:text-white text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Prev</span>
               </button>
               <button
                 onClick={nextSlide}
-                className="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                className="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
               >
                 <span>Next</span>
                 <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={() => setIsAutoPlay(!isAutoPlay)}
+                className={`px-3 py-2 rounded-xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-all ml-2 cursor-pointer ${
+                  isAutoPlay
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                    : 'bg-white/[0.04] text-white/70 hover:text-white border-white/[0.08]'
+                }`}
+                title="Toggle Auto Sequence Playback (P)"
+              >
+                {isAutoPlay ? <Pause className="w-3.5 h-3.5 text-amber-400" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
+                <span>{isAutoPlay ? 'Pause' : 'Auto Play'}</span>
               </button>
             </div>
 

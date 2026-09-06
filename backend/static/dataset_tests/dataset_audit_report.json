@@ -1,0 +1,169 @@
+{
+  "audit_timestamp": "2026-09-06 06:19:37 UTC",
+  "model_name": "Agrosight-YOLOv11-Crop-Disease",
+  "weights_path": "C:\\Users\\Pratham\\.cache\\huggingface\\hub\\models--Nick-Maximillien--Agrosight-YOLOv11-Crop-Disease\\snapshots\\19712ae4aa351b8853a0064a429f727943bb014c\\best.pt",
+  "dataset": "PlantVillage Canonical Color Dataset (spMohanty/PlantVillage-Dataset)",
+  "benchmark_results": [
+    {
+      "sample_id": "sample_1_early_blight",
+      "filename": "0012b9d2-2130-4a06-a834-b1f3af34f57e___RS_Erly.B 8389.JPG",
+      "ground_truth": "Tomato___Early_blight",
+      "ground_truth_disease": "Early Blight (Alternaria solani)",
+      "original_resolution": "256x256",
+      "file_size_kb": 17.83,
+      "prediction": "Tea Helopeltis",
+      "confidence": 0.0676,
+      "model_type": "Object Detection & Segmentation (YOLOv11)",
+      "inference_time_orig_ms": 243.38,
+      "bounding_boxes": [
+        {
+          "class": "Tea Helopeltis",
+          "conf": 0.0676,
+          "box": [
+            156.8,
+            31.4,
+            211.2,
+            131.6
+          ]
+        },
+        {
+          "class": "Tomato Alternaria Diseases",
+          "conf": 0.0531,
+          "box": [
+            153.6,
+            35.1,
+            218.7,
+            136.2
+          ]
+        },
+        {
+          "class": "Tea Helopeltis",
+          "conf": 0.0472,
+          "box": [
+            166.2,
+            25.1,
+            201.6,
+            135.1
+          ]
+        },
+        {
+          "class": "Tomato Alternaria Diseases",
+          "conf": 0.0327,
+          "box": [
+            214.8,
+            137.2,
+            243.9,
+            175.7
+          ]
+        }
+      ],
+      "total_leaf_pixels": 39465,
+      "affected_pixels": 17332,
+      "affected_area_pct": 43.92,
+      "is_correct": false,
+      "heatmap_path": "E:\\build with ai gdg\\backend\\static\\dataset_tests\\sample_1_early_blight_damage_viz.png",
+      "stress_test": {
+        "test_resolution": "128x128",
+        "prediction": "Tomato Alternaria Diseases",
+        "confidence": 0.2208,
+        "inference_time_ms": 86.59,
+        "confidence_delta": 0.1532,
+        "speedup_factor": 2.81
+      }
+    },
+    {
+      "sample_id": "sample_2_late_blight",
+      "filename": "0051e5e8-d1c4-4a84-bf3a-a426cdad6285___RS_LB 4640.JPG",
+      "ground_truth": "Potato___Late_blight",
+      "ground_truth_disease": "Late Blight (Phytophthora infestans)",
+      "original_resolution": "256x256",
+      "file_size_kb": 12.48,
+      "prediction": "Tea Red Spider",
+      "confidence": 0.0364,
+      "model_type": "Object Detection & Segmentation (YOLOv11)",
+      "inference_time_orig_ms": 85.9,
+      "bounding_boxes": [
+        {
+          "class": "Tea Red Spider",
+          "conf": 0.0364,
+          "box": [
+            66.0,
+            123.7,
+            119.1,
+            185.8
+          ]
+        },
+        {
+          "class": "Tea Algal Leaf Spot",
+          "conf": 0.0329,
+          "box": [
+            158.9,
+            104.4,
+            183.5,
+            128.8
+          ]
+        }
+      ],
+      "total_leaf_pixels": 19495,
+      "affected_pixels": 11796,
+      "affected_area_pct": 60.51,
+      "is_correct": false,
+      "heatmap_path": "E:\\build with ai gdg\\backend\\static\\dataset_tests\\sample_2_late_blight_damage_viz.png",
+      "stress_test": {
+        "test_resolution": "128x128",
+        "prediction": "Tomato Alternaria Diseases",
+        "confidence": 0.0645,
+        "inference_time_ms": 88.9,
+        "confidence_delta": 0.0281,
+        "speedup_factor": 0.97
+      }
+    },
+    {
+      "sample_id": "sample_3_healthy",
+      "filename": "000146ff-92a4-4db6-90ad-8fce2ae4fddd___GH_HL Leaf 259.1.JPG",
+      "ground_truth": "Tomato___healthy",
+      "ground_truth_disease": "Healthy Tomato Leaf",
+      "original_resolution": "256x256",
+      "file_size_kb": 15.28,
+      "prediction": "Healthy Tea",
+      "confidence": 0.2766,
+      "model_type": "Object Detection & Segmentation (YOLOv11)",
+      "inference_time_orig_ms": 85.46,
+      "bounding_boxes": [
+        {
+          "class": "Healthy Tea",
+          "conf": 0.2766,
+          "box": [
+            75.5,
+            85.5,
+            171.2,
+            194.8
+          ]
+        },
+        {
+          "class": "Tomato Healthy",
+          "conf": 0.218,
+          "box": [
+            73.2,
+            82.1,
+            174.5,
+            191.5
+          ]
+        }
+      ],
+      "total_leaf_pixels": 27063,
+      "affected_pixels": 0,
+      "affected_area_pct": 0.0,
+      "is_correct": true,
+      "heatmap_path": "E:\\build with ai gdg\\backend\\static\\dataset_tests\\sample_3_healthy_damage_viz.png",
+      "stress_test": {
+        "test_resolution": "128x128",
+        "prediction": "Tomato Healthy",
+        "confidence": 0.5278,
+        "inference_time_ms": 94.72,
+        "confidence_delta": 0.2512,
+        "speedup_factor": 0.9
+      }
+    }
+  ]
+}

@@ -1,11 +1,11 @@
-# ─── AgriProof AI Frontend ───────────────────────────────────────────────────
-FROM node:18-alpine
+# ─── Krishi Saarthi & AgriProof AI — Frontend Dev Server ──────────────────────
+FROM node:20-alpine
 
 WORKDIR /app
 
 # Install dependencies
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package*.json ./
+RUN npm ci || npm install
 
 # Copy source code
 COPY . .
