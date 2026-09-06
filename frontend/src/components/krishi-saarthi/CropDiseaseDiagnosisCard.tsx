@@ -39,7 +39,7 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
   const [selectedPreset, setSelectedPreset] = useState(SAMPLE_LEAF_PRESETS[0]);
   const [currentImage, setCurrentImage] = useState<string>(SAMPLE_LEAF_PRESETS[0].image);
   const [modelChoice, setModelChoice] = useState<'ensemble' | 'yolov11' | 'yolov8' | 'cnn'>('ensemble');
-  const [viewMode, setViewMode] = useState<'mask' | 'bbox' | 'heatmap'>('mask');
+  const [viewMode, setViewMode] = useState<'mask' | 'bbox' | 'heatmap' | 'comparison'>('comparison');
   const [analyzing, setAnalyzing] = useState(false);
   const [diagnosis, setDiagnosis] = useState<any>({
     crop: 'Wheat',
@@ -262,6 +262,14 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
           {/* View Mode Toggle Overlay */}
           <div className="absolute top-2 right-2 z-10 flex items-center p-0.5 bg-black/80 backdrop-blur-md border border-white/20 rounded-md text-[9px] font-mono shadow-lg">
             <button
+              onClick={() => setViewMode('comparison')}
+              className={`px-1.5 py-0.5 rounded transition-all ${
+                viewMode === 'comparison' ? 'bg-amber-500 text-black font-bold' : 'text-white/60 hover:text-white'
+              }`}
+            >
+              Side-by-Side
+            </button>
+            <button
               onClick={() => setViewMode('mask')}
               className={`px-1.5 py-0.5 rounded transition-all ${
                 viewMode === 'mask' ? 'bg-amber-500 text-black font-bold' : 'text-white/60 hover:text-white'
@@ -287,49 +295,122 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
             </button>
           </div>
 
-          {/* 1. SVG Foliar Segmentation Masks */}
-          {(viewMode === 'mask' || viewMode === 'heatmap') && (
-            <svg
-              className="absolute inset-0 w-full h-full pointer-events-none"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-            >
-              {diagnosis?.segmentation_masks?.map((m: any, idx: number) => (
-                <g key={idx}>
-                  <polygon
-                    points={m.points}
-                    fill={viewMode === 'heatmap' ? 'rgba(239, 68, 68, 0.65)' : (m.color || 'rgba(245, 158, 11, 0.50)')}
-                    stroke="#ef4444"
-                    strokeWidth="0.75"
-                    strokeDasharray={viewMode === 'mask' ? '2,2' : undefined}
-                    className="animate-pulse"
-                  />
-                </g>
-              ))}
-            </svg>
-          )}
-
-          {/* 2. YOLO Bounding Box Overlays */}
-          {viewMode === 'bbox' &&
-            diagnosis?.gradcam_bounding_boxes?.map((b: any, idx: number) => (
-              <div
-                key={idx}
-                className="absolute border-2 border-dashed border-red-400 bg-red-500/25 rounded-lg pointer-events-none animate-pulse flex items-start justify-between p-1"
-                style={{
-                  left: `${b.x}%`,
-                  top: `${b.y}%`,
-                  width: `${b.width}%`,
-                  height: `${b.height}%`,
-                }}
-              >
-                <span className="text-[8px] font-mono bg-black/80 text-red-300 border border-red-500/40 px-1 rounded">
-                  {b.label ? `${b.label.slice(0, 16)}` : 'Lesion'}
-                </span>
-                <span className="text-[8px] font-mono bg-red-600 text-white px-1 rounded font-bold">
-                  {((b.intensity || 0.9) * 100).toFixed(0)}%
-                </span>
+          {/* Side-by-Side Comparison Dual View */}
+          {viewMode === 'comparison' ? (
+            <div className="grid grid-cols-2 w-full h-full gap-0.5 bg-black">
+              {/* Left Pane: Original Leaf */}
+              <div className="relative w-full h-full overflow-hidden flex flex-col items-center justify-center border-r border-white/20 bg-neutral-950">
+                <img
+                  src={currentImage}
+                  alt="Original leaf"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-md border border-white/20 text-[8px] font-mono text-white/90">
+                  ORIGINAL LEAF
+                </div>
+                <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-md border border-white/20 text-[8px] font-mono text-emerald-400">
+                  {diagnosis.healthy_vegetation_pct || 63.5}% Healthy Lamina
+                </div>
               </div>
-            ))}
+
+              {/* Right Pane: Disease Heatmap & Lesion Overlays */}
+              <div className="relative w-full h-full overflow-hidden flex flex-col items-center justify-center bg-neutral-950">
+                <img
+                  src={currentImage}
+                  alt="Heatmap overlay"
+                  className="w-full h-full object-cover"
+                />
+                {/* SVG Foliar Heatmap */}
+                <svg
+                  className="absolute inset-0 w-full h-full pointer-events-none"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                >
+                  {diagnosis?.segmentation_masks?.map((m: any, idx: number) => (
+                    <polygon
+                      key={idx}
+                      points={m.points}
+                      fill="rgba(239, 68, 68, 0.70)"
+                      stroke="#ef4444"
+                      strokeWidth="1"
+                      className="animate-pulse"
+                    />
+                  ))}
+                </svg>
+
+                {/* YOLO Bounding Boxes */}
+                {diagnosis?.gradcam_bounding_boxes?.map((b: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="absolute border border-yellow-400 bg-red-500/20 rounded pointer-events-none flex items-start justify-between p-0.5"
+                    style={{
+                      left: `${b.x}%`,
+                      top: `${b.y}%`,
+                      width: `${b.width}%`,
+                      height: `${b.height}%`,
+                    }}
+                  >
+                    <span className="text-[7px] font-mono bg-yellow-400 text-black px-0.5 font-bold rounded-xs truncate max-w-[85%]">
+                      {b.label || 'Lesion'}
+                    </span>
+                  </div>
+                ))}
+
+                <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-red-600/90 backdrop-blur-md border border-red-400/50 text-[8px] font-mono text-white font-bold">
+                  DISEASE HEATMAP ({diagnosis.visually_affected_area_pct || 36.46}% AFFECTED)
+                </div>
+                <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-md border border-white/20 text-[8px] font-mono text-amber-300">
+                  {diagnosis.pathogen_type ? diagnosis.pathogen_type.split(' ')[0] : 'Pathogen'} Detected
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* 1. SVG Foliar Segmentation Masks */}
+              {(viewMode === 'mask' || viewMode === 'heatmap') && (
+                <svg
+                  className="absolute inset-0 w-full h-full pointer-events-none"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                >
+                  {diagnosis?.segmentation_masks?.map((m: any, idx: number) => (
+                    <g key={idx}>
+                      <polygon
+                        points={m.points}
+                        fill={viewMode === 'heatmap' ? 'rgba(239, 68, 68, 0.65)' : (m.color || 'rgba(245, 158, 11, 0.50)')}
+                        stroke="#ef4444"
+                        strokeWidth="0.75"
+                        strokeDasharray={viewMode === 'mask' ? '2,2' : undefined}
+                        className="animate-pulse"
+                      />
+                    </g>
+                  ))}
+                </svg>
+              )}
+
+              {/* 2. YOLO Bounding Box Overlays */}
+              {viewMode === 'bbox' &&
+                diagnosis?.gradcam_bounding_boxes?.map((b: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="absolute border-2 border-dashed border-red-400 bg-red-500/25 rounded-lg pointer-events-none animate-pulse flex items-start justify-between p-1"
+                    style={{
+                      left: `${b.x}%`,
+                      top: `${b.y}%`,
+                      width: `${b.width}%`,
+                      height: `${b.height}%`,
+                    }}
+                  >
+                    <span className="text-[8px] font-mono bg-black/80 text-red-300 border border-red-500/40 px-1 rounded">
+                      {b.label ? `${b.label.slice(0, 16)}` : 'Lesion'}
+                    </span>
+                    <span className="text-[8px] font-mono bg-red-600 text-white px-1 rounded font-bold">
+                      {((b.intensity || 0.9) * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                ))}
+            </>
+          )}
 
           <div className="absolute bottom-2 left-2 right-2 px-2 py-1 rounded bg-black/80 backdrop-blur-md border border-white/10 flex items-center justify-between text-[10px] font-mono text-white/70">
             <span className="flex items-center gap-1">
@@ -383,50 +464,70 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
               </div>
             </div>
 
-            {/* Scientific Canopy Area Health Meter */}
-            <div className="mt-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/10">
-              <div className="flex items-center justify-between text-xs font-mono mb-1.5">
-                <span className="flex items-center gap-1.5 text-rose-300 font-semibold">
-                  <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-                  Visually Affected: <strong>{diagnosis.visually_affected_area_pct || 18.7}%</strong>
-                </span>
-                <span className="flex items-center gap-1.5 text-emerald-300 font-semibold">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  Healthy Canopy: <strong>{diagnosis.healthy_vegetation_pct || 81.3}%</strong>
-                </span>
+            {/* Structured Pathology & Surface Decomposition */}
+            <div className="mt-3 p-3 rounded-xl bg-black/60 border border-white/10 space-y-2.5">
+              {/* Lamina Area Breakdown Progress */}
+              <div>
+                <div className="flex items-center justify-between text-xs font-mono mb-1.5">
+                  <span className="flex items-center gap-1.5 text-rose-400 font-semibold">
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+                    Diseased Foliar Area: <strong>{diagnosis.visually_affected_area_pct || 0}%</strong>
+                  </span>
+                  <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    Photosynthetic Lamina: <strong>{diagnosis.healthy_vegetation_pct || 100}%</strong>
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-neutral-900 overflow-hidden flex border border-white/10">
+                  <div
+                    className="h-full bg-rose-500 transition-all duration-500"
+                    style={{ width: `${diagnosis.visually_affected_area_pct || 0}%` }}
+                  />
+                  <div
+                    className="h-full bg-emerald-500 transition-all duration-500"
+                    style={{ width: `${diagnosis.healthy_vegetation_pct || 100}%` }}
+                  />
+                </div>
               </div>
-              <div className="w-full h-2 rounded-full bg-black/60 overflow-hidden flex border border-white/10">
-                <div
-                  className="h-full bg-gradient-to-r from-rose-500 to-amber-500 transition-all duration-500"
-                  style={{ width: `${diagnosis.visually_affected_area_pct || 18.7}%` }}
-                />
-                <div
-                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
-                  style={{ width: `${diagnosis.healthy_vegetation_pct || 81.3}%` }}
-                />
-              </div>
-              <div className="flex items-center justify-between text-[10px] font-mono text-white/40 mt-1">
-                <span>Foliar Symptom Area</span>
-                <span className="text-amber-300 font-semibold">Detected Stress: {diagnosis.severity || 'Moderate'}</span>
-                <span>Photosynthetic Foliage</span>
+
+              {/* Surface Area Quantified Comparison Metrics */}
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/10 text-center font-mono">
+                <div className="p-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                  <span className="text-[9px] text-white/40 block uppercase">Total Leaf Lamina</span>
+                  <span className="text-xs font-bold text-white mt-0.5 block">
+                    {diagnosis.total_lamina_pixels ? `${diagnosis.total_lamina_pixels.toLocaleString()} px²` : 'Calibrated'}
+                  </span>
+                </div>
+                <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <span className="text-[9px] text-rose-300 block uppercase">Lesion Area</span>
+                  <span className="text-xs font-bold text-rose-400 mt-0.5 block">
+                    {diagnosis.diseased_pixels ? `${diagnosis.diseased_pixels.toLocaleString()} px²` : `${diagnosis.visually_affected_area_pct}%`}
+                  </span>
+                </div>
+                <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                  <span className="text-[9px] text-emerald-300 block uppercase">Healthy Tissue</span>
+                  <span className="text-xs font-bold text-emerald-400 mt-0.5 block">
+                    {diagnosis.healthy_vegetation_pct || 100}%
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Top-3 CNN Predictions — shown only in CNN mode */}
             {modelChoice === 'cnn' && diagnosis.top3_predictions && diagnosis.top3_predictions.length > 0 && (
-              <div className="mt-2.5 p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/20">
+              <div className="mt-2.5 p-3 rounded-xl bg-black/60 border border-emerald-500/20">
                 <span className="text-[10px] font-mono text-emerald-400 font-semibold block mb-2 uppercase tracking-wider">
-                  PlantVillage CNN — Top 3 Predictions
+                  PlantVillage CNN — Top Ranked Pathogen Matches
                 </span>
                 <div className="space-y-1.5">
                   {diagnosis.top3_predictions.map((pred: any, i: number) => (
                     <div key={i} className="flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-mono text-white/70 truncate flex-1">
+                      <span className="text-[11px] font-mono text-white/80 truncate flex-1">
                         {i === 0 && <span className="text-emerald-400 font-bold mr-1">▶</span>}
                         {pred.label.replace('___', ' — ').replace(/_/g, ' ')}
                       </span>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <div className="w-16 h-1.5 rounded-full bg-black/60 overflow-hidden border border-white/10">
+                        <div className="w-16 h-1.5 rounded-full bg-neutral-800 overflow-hidden border border-white/10">
                           <div
                             className={`h-full rounded-full transition-all ${i === 0 ? 'bg-emerald-400' : 'bg-white/30'}`}
                             style={{ width: `${(pred.confidence * 100).toFixed(0)}%` }}
@@ -441,41 +542,43 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
                 </div>
               </div>
             )}
-            <div className="mt-2.5 p-2.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-red-500/10 to-transparent border border-amber-500/30 flex items-center justify-between">
+
+            {/* Field Risk Correlation */}
+            <div className="mt-2.5 p-2.5 rounded-xl bg-black/50 border border-white/10 flex items-center justify-between">
               <div>
-                <span className="text-[9px] font-mono uppercase text-amber-300/80 tracking-wider block">
-                  Agronomic Risk Model (YOLO Mask + Sentinel-2 NDVI + Climate)
+                <span className="text-[9px] font-mono uppercase text-white/50 tracking-wider block">
+                  Agronomic Stress Index (Vision + Sentinel-2 Telemetry)
                 </span>
                 <span className="text-xs font-mono font-bold text-white">
-                  Estimated Crop Impact:{' '}
-                  <span className="text-amber-400">
-                    {diagnosis.dual_signal_risk?.estimated_crop_impact || 'Moderate Potential Yield Impact (15-30%)'}
+                  Estimated Field Impact:{' '}
+                  <span className="text-amber-400 font-semibold">
+                    {diagnosis.dual_signal_risk?.estimated_crop_impact || 'Moderate Potential Impact (15-30%)'}
                   </span>
                 </span>
               </div>
-              <span className="text-[10px] font-mono px-2 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0 font-bold">
-                Field Risk: {diagnosis.dual_signal_risk?.composite_field_risk_score || 74.2}/100
+              <span className="text-[10px] font-mono px-2 py-1 rounded bg-white/10 text-white border border-white/20 shrink-0 font-bold">
+                Field Stress: {diagnosis.dual_signal_risk?.composite_field_risk_score || 74.2}/100
               </span>
             </div>
 
-            {/* Organic Remedies & IPM Actions */}
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-sans">
-              <div className="p-2.5 rounded-lg bg-emerald-950/20 border border-emerald-500/20">
+            {/* Prescribed Clinical Management */}
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div className="p-2.5 rounded-lg bg-black/40 border border-emerald-500/20">
                 <span className="text-[10px] font-mono text-emerald-400 font-semibold block mb-1">
-                  🌿 Prescribed Organic Alternatives:
+                  Biological &amp; Cultural Control:
                 </span>
-                <ul className="text-[11px] text-white/70 space-y-1 list-disc list-inside">
+                <ul className="text-[11px] text-white/75 space-y-1 list-disc list-inside">
                   {diagnosis.organic_remedies?.map((rem: string, i: number) => (
                     <li key={i}>{rem}</li>
                   ))}
                 </ul>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-blue-950/20 border border-blue-500/20">
+              <div className="p-2.5 rounded-lg bg-black/40 border border-blue-500/20">
                 <span className="text-[10px] font-mono text-blue-400 font-semibold block mb-1">
-                  🛡️ Integrated Pest Management (IPM):
+                  Good Agronomic Practices (GAP):
                 </span>
-                <ul className="text-[11px] text-white/70 space-y-1 list-disc list-inside">
+                <ul className="text-[11px] text-white/75 space-y-1 list-disc list-inside">
                   {diagnosis.ipm_practices?.map((ipm: string, i: number) => (
                     <li key={i}>{ipm}</li>
                   ))}
@@ -483,13 +586,13 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
               </div>
             </div>
 
-            {/* Chemical Treatment Prescription (if available) */}
+            {/* Targeted Chemical Recommendation */}
             {diagnosis.chemical_treatment && (
-              <div className="mt-2 p-2 rounded-lg bg-rose-950/20 border border-rose-500/20 text-xs font-sans">
+              <div className="mt-2 p-2 rounded-lg bg-black/40 border border-red-500/20 text-xs">
                 <span className="text-[10px] font-mono text-rose-300 font-semibold block mb-0.5">
-                  🧪 Curative Chemical Treatment (KVK/CIBRC Guidelines):
+                  Curative Fungicide / Bactericide Intervention:
                 </span>
-                <p className="text-[11px] text-white/70">
+                <p className="text-[11px] text-white/75 font-mono">
                   {diagnosis.chemical_treatment}
                 </p>
               </div>
