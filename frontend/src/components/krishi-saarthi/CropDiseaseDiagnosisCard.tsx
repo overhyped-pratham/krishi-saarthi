@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Stethoscope, Upload, AlertTriangle, Eye, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { api } from '../../lib/api';
@@ -41,59 +41,13 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
   const [modelChoice, setModelChoice] = useState<'ensemble' | 'yolov11' | 'yolov8' | 'cnn'>('ensemble');
   const [viewMode, setViewMode] = useState<'mask' | 'bbox' | 'heatmap' | 'comparison'>('comparison');
   const [analyzing, setAnalyzing] = useState(false);
-  const [diagnosis, setDiagnosis] = useState<any>({
-    crop: 'Wheat',
-    disease: 'Yellow Rust (Puccinia striiformis)',
-    confidence: 0.94,
-    severity: 'Moderate',
-    detection_mode: 'yolo11m_seg_ensemble',
-    active_models: [
-      'Nick-Maximillien/Agrosight-YOLOv11-Crop-Disease',
-      'iamnotpalak/yolov8-transfpn-crop-disease-detection'
-    ],
-    visually_affected_area_pct: 18.7,
-    healthy_vegetation_pct: 81.3,
-    segmentation_masks: [
-      {
-        id: 'mask_01',
-        label: 'Active Foliar Sporulation',
-        points: '28,38 32,35 48,34 68,41 72,55 64,63 42,60 30,52',
-        area_pct: 12.4,
-        color: 'rgba(239, 68, 68, 0.45)'
-      },
-      {
-        id: 'mask_02',
-        label: 'Chlorotic Margin Halo',
-        points: '55,62 68,60 85,68 82,80 70,84 58,76',
-        area_pct: 6.3,
-        color: 'rgba(245, 158, 11, 0.40)'
-      }
-    ],
-    gradcam_bounding_boxes: [
-      { x: 28, y: 35, width: 44, height: 28, intensity: 0.92, label: 'Yellow Rust Stripe' },
-      { x: 55, y: 62, width: 30, height: 22, intensity: 0.84, label: 'Secondary Spore Cluster' }
-    ],
-    advisory_disclaimer: 'Visually affected foliar area is 18.7%. This denotes proximal foliar symptom coverage, not direct yield loss. Correlated with Sentinel-2 for agronomic impact.',
-    organic_remedies: [
-      'Apply fermented buttermilk spray (50 ml/L water)',
-      'Foliar spray of Trichoderma harzianum @ 5g/L',
-      'Neem kernel extract (5%) as preventive barrier'
-    ],
-    chemical_treatment: 'Propiconazole 25% EC (Tilt) @ 1ml/L or Tebuconazole 25.9% EC @ 1.25ml/L.',
-    ipm_practices: [
-      'Avoid excessive early-stage urea top dressing which promotes soft succulence',
-      'Maintain field drainage to prevent high morning humidity spikes'
-    ],
-    dual_signal_risk: {
-      composite_field_risk_score: 74.2,
-      risk_label: 'High Agricultural Stress',
-      estimated_crop_impact: 'Moderate Potential Yield Impact (15-30%)',
-      signals: {
-        satellite_macro: { ndvi_baseline: 0.72, ndvi_current: 0.61, ndvi_decline_pct: 15.3 },
-        yolo_foliar_micro: { visually_affected_area_pct: 18.7, healthy_vegetation_pct: 81.3 }
-      }
-    }
-  });
+  const [diagnosis, setDiagnosis] = useState<any>(null);
+
+  // Auto-run diagnosis for the default preset on mount
+  useEffect(() => {
+    handleRunDiagnosis(SAMPLE_LEAF_PRESETS[0]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleRunDiagnosis = async (preset: typeof SAMPLE_LEAF_PRESETS[0], chosenModel = modelChoice) => {
     setSelectedPreset(preset);
@@ -309,7 +263,7 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
                   ORIGINAL LEAF
                 </div>
                 <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-md border border-white/20 text-[8px] font-mono text-emerald-400">
-                  {diagnosis.healthy_vegetation_pct || 63.5}% Healthy Lamina
+                  {diagnosis?.healthy_vegetation_pct ?? '—'}% Healthy Lamina
                 </div>
               </div>
 
@@ -357,10 +311,10 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
                 ))}
 
                 <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-red-600/90 backdrop-blur-md border border-red-400/50 text-[8px] font-mono text-white font-bold">
-                  DISEASE HEATMAP ({diagnosis.visually_affected_area_pct || 36.46}% AFFECTED)
+                  DISEASE HEATMAP ({diagnosis?.visually_affected_area_pct ?? '—'}% AFFECTED)
                 </div>
                 <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-md border border-white/20 text-[8px] font-mono text-amber-300">
-                  {diagnosis.pathogen_type ? diagnosis.pathogen_type.split(' ')[0] : 'Pathogen'} Detected
+                  {diagnosis?.pathogen_type ? diagnosis.pathogen_type.split(' ')[0] : 'Pathogen'} Detected
                 </div>
               </div>
             </div>
@@ -432,6 +386,18 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
 
         {/* Right: Diagnosis Details & Multi-Factor Impact Engine */}
         <div className="md:col-span-7 flex flex-col justify-between space-y-3">
+          {(!diagnosis && analyzing) ? (
+            <div className="flex flex-col items-center justify-center h-full min-h-[200px] gap-3">
+              <div className="w-7 h-7 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+              <span className="text-xs font-mono text-amber-300/70">Running OpenCV foliar decomposition...</span>
+            </div>
+          ) : !diagnosis ? (
+            <div className="flex flex-col items-center justify-center h-full min-h-[200px] gap-2 text-white/30">
+              <Eye className="w-6 h-6" />
+              <span className="text-xs font-mono">Select a leaf sample to begin diagnosis</span>
+            </div>
+          ) : (
+          <>
           <div>
             <div className="flex items-center justify-between">
               <div>
@@ -454,6 +420,8 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
                   diagnosis.severity === 'Critical'
                     ? 'bg-red-500/15 border-red-500/30 text-red-300'
+                    : diagnosis.severity === 'Mild' || diagnosis.severity === 'None'
+                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
                     : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
                 }`}>
                   Severity: {diagnosis.severity}
@@ -471,21 +439,21 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
                 <div className="flex items-center justify-between text-xs font-mono mb-1.5">
                   <span className="flex items-center gap-1.5 text-rose-400 font-semibold">
                     <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-                    Diseased Foliar Area: <strong>{diagnosis.visually_affected_area_pct || 0}%</strong>
+                    Diseased Foliar Area: <strong>{diagnosis.visually_affected_area_pct ?? 0}%</strong>
                   </span>
                   <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    Photosynthetic Lamina: <strong>{diagnosis.healthy_vegetation_pct || 100}%</strong>
+                    Photosynthetic Lamina: <strong>{diagnosis.healthy_vegetation_pct ?? 100}%</strong>
                   </span>
                 </div>
                 <div className="w-full h-2 rounded-full bg-neutral-900 overflow-hidden flex border border-white/10">
                   <div
-                    className="h-full bg-rose-500 transition-all duration-500"
-                    style={{ width: `${diagnosis.visually_affected_area_pct || 0}%` }}
+                    className="h-full bg-rose-500 transition-all duration-700"
+                    style={{ width: `${diagnosis.visually_affected_area_pct ?? 0}%` }}
                   />
                   <div
-                    className="h-full bg-emerald-500 transition-all duration-500"
-                    style={{ width: `${diagnosis.healthy_vegetation_pct || 100}%` }}
+                    className="h-full bg-emerald-500 transition-all duration-700"
+                    style={{ width: `${diagnosis.healthy_vegetation_pct ?? 100}%` }}
                   />
                 </div>
               </div>
@@ -495,19 +463,21 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
                 <div className="p-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
                   <span className="text-[9px] text-white/40 block uppercase">Total Leaf Lamina</span>
                   <span className="text-xs font-bold text-white mt-0.5 block">
-                    {diagnosis.total_lamina_pixels ? `${diagnosis.total_lamina_pixels.toLocaleString()} px²` : 'Calibrated'}
+                    {diagnosis.total_lamina_pixels ? `${diagnosis.total_lamina_pixels.toLocaleString()} px²` : '—'}
                   </span>
                 </div>
                 <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
                   <span className="text-[9px] text-rose-300 block uppercase">Lesion Area</span>
                   <span className="text-xs font-bold text-rose-400 mt-0.5 block">
-                    {diagnosis.diseased_pixels ? `${diagnosis.diseased_pixels.toLocaleString()} px²` : `${diagnosis.visually_affected_area_pct}%`}
+                    {diagnosis.diseased_pixels != null
+                      ? `${diagnosis.diseased_pixels.toLocaleString()} px²`
+                      : `${diagnosis.visually_affected_area_pct ?? 0}%`}
                   </span>
                 </div>
                 <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                   <span className="text-[9px] text-emerald-300 block uppercase">Healthy Tissue</span>
                   <span className="text-xs font-bold text-emerald-400 mt-0.5 block">
-                    {diagnosis.healthy_vegetation_pct || 100}%
+                    {diagnosis.healthy_vegetation_pct ?? 100}%
                   </span>
                 </div>
               </div>
@@ -552,12 +522,12 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
                 <span className="text-xs font-mono font-bold text-white">
                   Estimated Field Impact:{' '}
                   <span className="text-amber-400 font-semibold">
-                    {diagnosis.dual_signal_risk?.estimated_crop_impact || 'Moderate Potential Impact (15-30%)'}
+                    {diagnosis.dual_signal_risk?.estimated_crop_impact || 'Analysing...'}
                   </span>
                 </span>
               </div>
               <span className="text-[10px] font-mono px-2 py-1 rounded bg-white/10 text-white border border-white/20 shrink-0 font-bold">
-                Field Stress: {diagnosis.dual_signal_risk?.composite_field_risk_score || 74.2}/100
+                Field Stress: {diagnosis.dual_signal_risk?.composite_field_risk_score ?? '—'}/100
               </span>
             </div>
 
@@ -606,8 +576,11 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
               <strong>Mandatory Notice:</strong> {diagnosis.advisory_disclaimer} Avoid applying unverified high-potency chemical dosages without local diagnostic verification.
             </p>
           </div>
+          </>
+          )}
         </div>
       </div>
     </div>
   );
 };
+

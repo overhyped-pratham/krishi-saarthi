@@ -8,7 +8,7 @@ import L from 'leaflet';
 import { useLanguage } from '../contexts/LanguageContext';
 import { SoilIntelligencePanel, SoilData } from '../components/krishi-saarthi/SoilIntelligencePanel';
 import { CropRecommendationCard, CropRecommendation } from '../components/krishi-saarthi/CropRecommendationCard';
-import { CropDiseaseDiagnosisCard } from '../components/krishi-saarthi/CropDiseaseDiagnosisCard';
+import { CropDamageAnalyzer } from '../components/krishi-saarthi/CropDamageAnalyzer';
 import { KrishiSaarthiCopilot } from '../components/krishi-saarthi/KrishiSaarthiCopilot';
 import { api } from '../lib/api';
 
@@ -162,6 +162,29 @@ export default function KrishiSaarthiDashboardPage() {
               field.id === p.id ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 font-semibold' : 'bg-white/5 border-white/10 text-white/50 hover:text-white'
             )}>{p.state} · {p.crop}</button>
         ))}
+      </div>
+
+      {/* Dual-Signal Agriculture Architecture Indicator */}
+      <div className="rounded-xl p-3 bg-gradient-to-r from-cyan-950/40 via-black/80 to-emerald-950/40 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs font-mono">
+        <div className="flex items-center gap-2">
+          <Cpu className="w-4 h-4 text-cyan-400 shrink-0" />
+          <span className="font-bold text-white">Krishi Saarthi Dual-Signal Engine</span>
+          <span className="text-white/30 hidden md:inline">|</span>
+          <span className="text-white/60 hidden md:inline">Separate paths for macro satellite &amp; micro crop image analysis</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-[10px]">
+          <span className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+            Path 1: Sentinel-2 Macro
+          </span>
+          <span className="text-white/40">+</span>
+          <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+            Path 2: Foliar ML Micro
+          </span>
+          <span className="text-white/40">→</span>
+          <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold">
+            Unified Health
+          </span>
+        </div>
       </div>
 
       {/* Map + Satellite */}
@@ -373,9 +396,11 @@ export default function KrishiSaarthiDashboardPage() {
       <SoilIntelligencePanel soil={soil} onChange={setSoil} state={field.state} />
       <CropRecommendationCard recommendations={recommendations} activeCrop={field.crop} onSelectCrop={() => {}} />
 
-      {/* Crop Doctor + Copilot */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <CropDiseaseDiagnosisCard />
+      {/* Path 2: Crop Damage ML Analysis Engine */}
+      <CropDamageAnalyzer />
+
+      {/* AI Copilot & Voice Agro-Advisory */}
+      <div className="grid grid-cols-1 gap-5">
         <KrishiSaarthiCopilot fieldId={field.id} state={field.state} />
       </div>
     </div>

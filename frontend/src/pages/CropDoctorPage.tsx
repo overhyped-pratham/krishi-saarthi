@@ -61,6 +61,11 @@ export default function CropDoctorPage() {
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const [scanning, setScanning] = useState<boolean>(false);
   const [detectionResult, setDetectionResult] = useState<any>(null);
+  const [mlAnalysis, setMlAnalysis] = useState<any>(null);
+  const [mlLoading, setMlLoading] = useState<boolean>(false);
+  const [cropRecommendations, setCropRecommendations] = useState<any[]>([]);
+  const [loadingCropRec, setLoadingCropRec] = useState<boolean>(false);
+  void mlAnalysis; void cropRecommendations; void loadingCropRec; void scanning; void setScanning; void mlLoading; void setMlLoading;
 
   // Dosage Planner State
   const [farms, setFarms] = useState<any[]>([]);
@@ -174,20 +179,42 @@ export default function CropDoctorPage() {
     }
   };
 
-  // ── Run YOLO / Vision Damage Detection ──────────────────────────────────
+  // ── Run YOLO / Vision Damage Detection + ML Analysis ────────────────────
   const runDetection = async (filename?: string, imageBase64?: string) => {
     setScanning(true);
     setDetectionResult(null);
+    setMlAnalysis(null);
     try {
       const activeFilename = filename || selectedFilename;
       const activeB64 = imageBase64 || (selectedLeafImage.startsWith('data:') ? selectedLeafImage : undefined);
 
-      const res = await api.diagnostics.detectDamage({
-        filename: activeFilename,
-        image_base64: activeB64,
-        crop_hint: dosageCrop
-      });
-      setDetectionResult(res.data);
+      // Run detection + ML analysis in parallel
+      const [detectRes, mlRes] = await Promise.allSettled([
+        api.diagnostics.detectDamage({
+          filename: activeFilename,
+          image_base64: activeB64,
+          crop_hint: dosageCrop
+        }),
+        api.diagnostics.mlSnapshotAnalysis({
+          filename: activeFilename,
+          image_base64: activeB64,
+          crop_type: dosageCrop,
+          soil_n: soilN,
+          soil_p: soilP,
+          soil_k: soilK,
+          ndvi_current: 0.60,
+          ndvi_baseline: 0.72,
+          rainfall_mm: 30,
+          rainfall_anomaly_pct: -20,
+          temp_mean: 28,
+          humidity: 50,
+          area_hectares: dosageArea,
+          days_since_sowing: 90,
+        })
+      ]);
+
+      if (detectRes.status === 'fulfilled') setDetectionResult(detectRes.value.data);
+      if (mlRes.status === 'fulfilled') setMlAnalysis(mlRes.value.data?.ml_analysis || null);
     } catch (e) {
       console.error('Detection error:', e);
     } finally {
@@ -248,6 +275,33 @@ export default function CropDoctorPage() {
       setCalculatingDosage(false);
     }
   };
+
+  // ── Crop Recommendation from Soil NPK ──────────────────────────────────
+  const runCropRecommendation = async () => {
+    setLoadingCropRec(true);
+    try {
+      const res = await api.diagnostics.cropRecommendation({
+        soil_n: soilN,
+        soil_p: soilP,
+        soil_k: soilK,
+        soil_ph: activeSoilProfile?.ph || 7.0,
+        soil_oc: activeSoilProfile?.organic_carbon_pct || 0.5,
+        state: selectedState,
+        season: 'Kharif',
+        temp_mean: 28,
+        rainfall_seasonal_mm: 600,
+        humidity_mean: 55,
+      });
+      if (res.data?.rankings) {
+        setCropRecommendations(res.data.rankings);
+      }
+    } catch (e) {
+      console.error('Crop recommendation error:', e);
+    } finally {
+      setLoadingCropRec(false);
+    }
+  };
+  void runCropRecommendation;
 
   // ── Send Gemini Consultation ────────────────────────────────────────────
   const sendGeminiMessage = async (textToSend?: string) => {
@@ -319,6 +373,7 @@ export default function CropDoctorPage() {
               onClick={() => {
                 setActiveTab('dosage');
                 if (!dosageResult) runDosageCalculation();
+                if (cropRecommendations.length === 0) runCropRecommendation();
               }}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
                 activeTab === 'dosage'
@@ -560,6 +615,78 @@ export default function CropDoctorPage() {
                       <div>Inference: <span className="text-emerald-400 font-bold">{detectionResult.yolo_inference_time_ms || detectionResult.inference_latency_ms || 34}ms</span></div>
                     </div>
                   </div>
+
+                  {/* ML Model Analysis Panel (XGBoost + Risk) */}
+                  {mlLoading && (
+                    <div className="p-4 rounded-2xl border border-cyan-500/30 bg-cyan-950/20 flex items-center gap-3">
+                      <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
+                      <span className="text-xs font-mono text-cyan-300">Running XGBoost yield model & damage classifier...</span>
+                    </div>
+                  )}
+                  {mlAnalysis && !mlLoading && (
+                    <div className="p-4 rounded-2xl border border-cyan-500/20 bg-cyan-950/10 space-y-3">
+                      <div className="text-xs font-mono text-cyan-300 font-bold flex items-center gap-1.5">
+                        <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                        ML Model Analysis (XGBoost + Risk Engine)
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+                          <div className="text-[10px] font-mono text-white/50 uppercase">Yield Forecast</div>
+                          <div className="text-sm font-mono font-bold text-white mt-0.5">
+                            {mlAnalysis.expected_yield_t_ha} <span className="text-[10px] text-white/40">t/ha</span>
+                          </div>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-red-950/20 border border-red-500/20 text-center">
+                          <div className="text-[10px] font-mono text-red-400/80 uppercase">Expected Loss</div>
+                          <div className="text-sm font-mono font-bold text-red-300 mt-0.5">
+                            {mlAnalysis.expected_loss_pct}%
+                          </div>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-amber-950/20 border border-amber-500/20 text-center">
+                          <div className="text-[10px] font-mono text-amber-400/80 uppercase">Risk Score</div>
+                          <div className="text-sm font-mono font-bold text-amber-300 mt-0.5">
+                            {mlAnalysis.risk_score}/100
+                          </div>
+                          <div className="text-[9px] font-mono text-white/40">{mlAnalysis.risk_category}</div>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+                          <div className="text-[10px] font-mono text-white/50 uppercase">Stress Level</div>
+                          <div className={`text-sm font-mono font-bold mt-0.5 ${
+                            mlAnalysis.stress_level === 'CRITICAL' ? 'text-red-300' :
+                            mlAnalysis.stress_level === 'HIGH' ? 'text-amber-300' :
+                            'text-emerald-300'
+                          }`}>
+                            {mlAnalysis.stress_level}
+                          </div>
+                          <div className="text-[9px] font-mono text-white/40">{Math.round(mlAnalysis.damage_probability * 100)}% prob</div>
+                        </div>
+                      </div>
+
+                      {/* Risk Component Breakdown */}
+                      {mlAnalysis.risk_components && (
+                        <div className="grid grid-cols-3 gap-2 text-[10px] font-mono">
+                          <div className="flex justify-between bg-black/40 rounded px-2 py-1">
+                            <span className="text-white/50">Satellite</span>
+                            <span className="text-cyan-300 font-bold">{Math.round(mlAnalysis.risk_components.satellite_health_risk * 100)}%</span>
+                          </div>
+                          <div className="flex justify-between bg-black/40 rounded px-2 py-1">
+                            <span className="text-white/50">Weather</span>
+                            <span className="text-cyan-300 font-bold">{Math.round(mlAnalysis.risk_components.weather_risk * 100)}%</span>
+                          </div>
+                          <div className="flex justify-between bg-black/40 rounded px-2 py-1">
+                            <span className="text-white/50">Yield Loss</span>
+                            <span className="text-cyan-300 font-bold">{mlAnalysis.risk_components.yield_loss_pct}%</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between text-[10px] font-mono text-white/40">
+                        <span>Confidence: {Math.round(mlAnalysis.yield_confidence * 100)}%</span>
+                        <span>Health Index: {mlAnalysis.crop_health_index}</span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Quantitative Lamina Decomposition (No Hardcoding) */}
                   <div className="p-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] space-y-3">
@@ -907,6 +1034,73 @@ export default function CropDoctorPage() {
                   {calculatingDosage ? <Loader2 className="w-4 h-4 animate-spin" /> : <FlaskConical className="w-4 h-4" />}
                   <span>RECALCULATE FERTILIZER DOSAGE</span>
                 </button>
+
+                {/* Soil-Based Crop Recommendations */}
+                <div className="mt-4 pt-4 border-t border-white/[0.08] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs font-mono text-cyan-300 font-bold flex items-center gap-1.5">
+                      <Leaf className="w-3.5 h-3.5 text-cyan-400" />
+                      Soil-Based Crop Recommendations
+                    </div>
+                    <button
+                      onClick={runCropRecommendation}
+                      disabled={loadingCropRec}
+                      className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/30 transition-all disabled:opacity-50"
+                    >
+                      {loadingCropRec ? <Loader2 className="w-3 h-3 animate-spin inline" /> : 'Analyze Soil'}
+                    </button>
+                  </div>
+
+                  {cropRecommendations.length > 0 ? (
+                    <div className="space-y-2">
+                      {cropRecommendations.slice(0, 5).map((rec, i) => (
+                        <div key={i} className={`p-3 rounded-xl border transition-all ${
+                          i === 0 ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-white/[0.06] bg-white/[0.02]'
+                        }`}>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-white/50">#{rec.rank}</span>
+                              <span className="text-xs font-mono font-bold text-white">{rec.crop}</span>
+                              {rec.season_fit && <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300">{rec.season_fit ? '✓ Season' : ''}</span>}
+                              {rec.state_recommended && <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300">✓ Regional</span>}
+                            </div>
+                            <div className="text-right">
+                              <span className={`text-sm font-mono font-black ${
+                                rec.suitability_pct >= 85 ? 'text-emerald-300' :
+                                rec.suitability_pct >= 70 ? 'text-cyan-300' :
+                                'text-amber-300'
+                              }`}>{rec.suitability_pct}%</span>
+                            </div>
+                          </div>
+                          {/* Suitability Bar */}
+                          <div className="h-1.5 w-full rounded-full bg-white/[0.06] overflow-hidden mb-1.5">
+                            <div
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                rec.suitability_pct >= 85 ? 'bg-emerald-400' :
+                                rec.suitability_pct >= 70 ? 'bg-cyan-400' :
+                                'bg-amber-400'
+                              }`}
+                              style={{ width: `${rec.suitability_pct}%` }}
+                            />
+                          </div>
+                          <div className="text-[10px] font-sans text-white/50 leading-relaxed">{rec.rationale}</div>
+                          {/* Breakdown */}
+                          {rec.breakdown && (
+                            <div className="flex flex-wrap gap-1.5 mt-1.5">
+                              <span className="text-[9px] font-mono text-white/40 bg-black/30 rounded px-1.5 py-0.5">Soil {rec.breakdown.soil_suitability}%</span>
+                              <span className="text-[9px] font-mono text-white/40 bg-black/30 rounded px-1.5 py-0.5">Rain {rec.breakdown.rainfall_suitability}%</span>
+                              <span className="text-[9px] font-mono text-white/40 bg-black/30 rounded px-1.5 py-0.5">Temp {rec.breakdown.temperature_suitability}%</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-[11px] font-mono text-white/40 text-center py-3">
+                      Click "Analyze Soil" to get AI-powered crop recommendations for your soil NPK profile.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

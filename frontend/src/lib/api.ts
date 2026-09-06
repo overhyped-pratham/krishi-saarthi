@@ -368,6 +368,20 @@ export const api = {
   diagnostics: {
     detectDamage: (data: { image_base64?: string; crop_hint?: string; filename?: string }) =>
       client.post('/api/diagnostics/detect-damage', data),
+    mlSnapshotAnalysis: (data: {
+      image_base64?: string; filename?: string; crop_type?: string;
+      soil_n?: number; soil_p?: number; soil_k?: number; soil_ph?: number;
+      ndvi_current?: number; ndvi_baseline?: number;
+      rainfall_mm?: number; rainfall_anomaly_pct?: number;
+      temp_mean?: number; humidity?: number;
+      area_hectares?: number; days_since_sowing?: number;
+    }) => client.post('/api/diagnostics/ml-snapshot-analysis', data),
+    cropRecommendation: (data: {
+      soil_n: number; soil_p: number; soil_k: number; soil_ph?: number;
+      soil_oc?: number; state?: string; season?: string;
+      temp_mean?: number; rainfall_seasonal_mm?: number; humidity_mean?: number;
+      ndvi_current?: number; ndmi_current?: number;
+    }) => client.post<{ status: string; rankings: any[] }>('/api/diagnostics/crop-recommendation', data),
     calculateDosage: (data: { crop: string; area: number; unit?: string; current_n?: number; current_p?: number; current_k?: number; growth_stage?: string }) =>
       client.post('/api/diagnostics/calculate-dosage', data),
     geminiConsult: (data: { prompt: string; crop?: string; disease?: string; area?: number; language?: string }) =>
