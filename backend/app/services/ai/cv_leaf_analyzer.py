@@ -14,7 +14,10 @@ def analyze_leaf_cv(img_input):
             img = cv2.imread(img_input)
         else:
             base_name = os.path.basename(img_input)
+            repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
             possible_paths = [
+                os.path.join(repo_root, 'frontend', 'public', 'sample_leaves', base_name),
+                os.path.join(repo_root, 'dist', 'sample_leaves', base_name),
                 os.path.join(os.getcwd(), 'frontend', 'public', 'sample_leaves', base_name),
                 os.path.join(os.getcwd(), '..', 'frontend', 'public', 'sample_leaves', base_name),
                 os.path.join(os.getcwd(), 'dist', 'sample_leaves', base_name),
@@ -116,3 +119,82 @@ def analyze_leaf_cv(img_input):
         'bboxes': bboxes,
         'svg_masks': svg_masks
     }
+
+
+def generate_heatmap_b64(img_input) -> str | None:
+    """
+    Generates a real OpenCV JET-colormap heatmap from the HSV disease mask,
+    blended onto the original image. Returns base64-encoded PNG string, or None on failure.
+
+    The heatmap IS the necrotic+chlorotic HSV pixel mask — not a synthetic overlay.
+    """
+    try:
+        # Resolve input to a BGR numpy array
+        if isinstance(img_input, str):
+            if 'base64,' in img_input:
+                raw = base64.b64decode(img_input.split('base64,')[1].strip())
+                arr = np.frombuffer(raw, np.uint8)
+                img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+            elif os.path.exists(img_input):
+                img = cv2.imread(img_input)
+            else:
+                base_name = os.path.basename(img_input)
+                repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
+                candidates = [
+                    os.path.join(repo_root, 'frontend', 'public', 'sample_leaves', base_name),
+                    os.path.join(repo_root, 'dist', 'sample_leaves', base_name),
+                    os.path.join(os.getcwd(), '..', 'frontend', 'public', 'sample_leaves', base_name),
+                ]
+                img = None
+                for p in candidates:
+                    if os.path.exists(p):
+                        img = cv2.imread(p)
+                        break
+                if img is None:
+                    try:
+                        arr = np.frombuffer(base64.b64decode(img_input.strip()), np.uint8)
+                        img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+                    except Exception:
+                        return None
+        elif isinstance(img_input, bytes):
+            arr = np.frombuffer(img_input, np.uint8)
+            img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+        else:
+            img = img_input
+
+        if img is None:
+            return None
+
+        h, w = img.shape[:2]
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+        # Same leaf + disease masks as analyze_leaf_cv
+        leaf_mask = ((hsv[:, :, 1] > 25) & (hsv[:, :, 2] > 25) & (hsv[:, :, 2] < 245)).astype(np.uint8) * 255
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        leaf_mask = cv2.morphologyEx(leaf_mask, cv2.MORPH_CLOSE, kernel)
+
+        necrosis = cv2.inRange(hsv, np.array([5, 40, 20]),  np.array([24, 255, 180]))
+        chlorosis = cv2.inRange(hsv, np.array([25, 60, 40]), np.array([42, 255, 230]))
+        disease_mask = cv2.bitwise_and(cv2.bitwise_or(necrosis, chlorosis), leaf_mask)
+        disease_mask = cv2.morphologyEx(disease_mask, cv2.MORPH_OPEN, kernel)
+
+        # Dilate slightly so the heatmap is visible at small display sizes
+        dilated = cv2.dilate(disease_mask, kernel, iterations=2)
+
+        # Apply JET colormap → vivid red/yellow for diseased, blue/dark for healthy
+        heat_jet = cv2.applyColorMap(dilated, cv2.COLORMAP_JET)
+
+        # Blend: show heatmap only where leaf tissue exists, keep background dark
+        leaf_3ch = cv2.cvtColor(leaf_mask, cv2.COLOR_GRAY2BGR)
+        background = (img * 0.25).astype(np.uint8)   # dim the original
+        blended = np.where(leaf_3ch > 0, cv2.addWeighted(img, 0.35, heat_jet, 0.65, 0), background)
+
+        # Encode to PNG → base64
+        ok, buf = cv2.imencode('.jpg', blended, [int(cv2.IMWRITE_JPEG_QUALITY), 88])
+        if not ok:
+            return None
+        return base64.b64encode(buf.tobytes()).decode('utf-8')
+
+    except Exception:
+        return None
+
