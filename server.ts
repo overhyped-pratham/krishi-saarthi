@@ -17,7 +17,7 @@ import {
   StateModelItem
 } from './krishiSaarthiService';
 
-const PORT = 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
 const HOST = '0.0.0.0';
 
 // Twilio SMS Client Lazy Initializer

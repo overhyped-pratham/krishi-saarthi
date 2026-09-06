@@ -19,7 +19,7 @@ WORKDIR /app
 
 # Install root dependencies
 COPY package*.json ./
-RUN npm ci || npm install
+RUN npm ci --ignore-scripts || npm install --ignore-scripts
 
 # Copy source and bundle server with esbuild
 COPY server.ts krishiSaarthiService.ts tsconfig.json ./
@@ -38,7 +38,7 @@ ENV HOST=0.0.0.0
 
 # Install production dependencies only
 COPY package*.json ./
-RUN npm install --omit=dev || npm install --production
+RUN npm install --omit=dev --ignore-scripts || npm install --production --ignore-scripts
 
 # Copy compiled backend bundle
 COPY --from=server-builder /app/dist/server.cjs ./dist/server.cjs
