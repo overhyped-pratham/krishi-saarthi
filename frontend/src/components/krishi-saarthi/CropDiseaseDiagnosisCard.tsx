@@ -9,7 +9,7 @@ const SAMPLE_LEAF_PRESETS = [
     name: 'Wheat Yellow Rust',
     crop: 'Wheat',
     filename: 'wheat_yellow_rust.jpg',
-    image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=400&auto=format&fit=crop'
+    image: '/sample_leaves/wheat_yellow_rust.jpg'
   },
   {
     id: 'potato_blight',
