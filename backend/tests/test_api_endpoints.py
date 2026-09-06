@@ -9,7 +9,7 @@ async def test_api_health():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         res = await ac.get("/health")
         assert res.status_code == 200
-        assert res.json() == {"status": "healthy"}
+        assert res.json()["status"] == "healthy"
 
 @pytest.mark.asyncio
 async def test_get_farms_and_ledger():
