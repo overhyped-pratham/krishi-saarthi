@@ -5,7 +5,7 @@ Soil telemetry, XGBoost recommendations, and State Model Registry.
 """
 
 from fastapi import APIRouter, HTTPException, Query, Body, File, UploadFile, Form
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 from pydantic import BaseModel
 
 from app.services.agri_intelligence.crop_recommender import rank_crops_for_field
@@ -23,6 +23,7 @@ from app.services.ai.damage_vision import detect_leaf_damage
 from app.services.ai.yolo_detector import detect_crop_disease_yolo
 from app.services.ai.plant_disease_cnn import classify_plant_disease
 from app.services.agri_intelligence.risk_engine import evaluate_dual_signal_field_risk
+from app.services.agri_intelligence.central_contract import build_central_intelligence_object
 
 router = APIRouter(prefix="", tags=["Krishi Saarthi Agricultural Intelligence"])
 
@@ -211,6 +212,7 @@ async def disease_diagnosis(body: Dict[str, Any] = Body(...)):
         )
 
     return {
+        "detected": res.get("detected", True),
         "status": res.get("status", "success"),
         "detection_mode": res.get("detection_mode", "yolo_deep_learning_live"),
         "model_source": res.get("model_source", ""),
@@ -303,18 +305,56 @@ async def evaluate_field_risk_endpoint(body: Dict[str, Any] = Body(...)):
       2. Micro YOLO11m-seg Foliar Vision (Visually Affected Area % vs Healthy Canopy)
       3. Weather & Edaphic Forcing (Heat stress, rainfall anomaly, soil VWC)
     """
-    return evaluate_dual_signal_field_risk(
+    affected_pct = body.get("visually_affected_area_pct")
+    if affected_pct is None:
+        affected_pct = body.get("yolo_visually_affected_pct", 18.7)
+
+    heat_score = body.get("heat_stress_score")
+    if heat_score is None:
+        heat_score = 78.0 if body.get("heat_anomaly") is True else 30.0
+
+    rain_anomaly = body.get("rainfall_anomaly_pct")
+    if rain_anomaly is None and body.get("rain_anomaly_mm") is not None:
+        rain_anomaly = -max(0.0, float(50.0 - float(body["rain_anomaly_mm"])))
+    elif rain_anomaly is None:
+        rain_anomaly = -48.0
+
+    soil_vwc = body.get("soil_moisture_vwc_pct")
+    if soil_vwc is None:
+        soil_vwc = body.get("soil_vwc_pct", 21.0)
+
+    crop = body.get("crop_type") or body.get("crop", "Wheat")
+
+    res = evaluate_dual_signal_field_risk(
         ndvi_baseline=float(body.get("ndvi_baseline", 0.72)),
         ndvi_current=float(body.get("ndvi_current", 0.61)),
         ndmi_current=float(body.get("ndmi_current", 0.32)),
-        visually_affected_area_pct=float(body.get("visually_affected_area_pct", 18.7)),
+        visually_affected_area_pct=float(affected_pct),
         detected_pathology=str(body.get("detected_pathology", "Yellow Rust (Puccinia striiformis)")),
-        heat_stress_score=float(body.get("heat_stress_score", 75.0)),
-        rainfall_anomaly_pct=float(body.get("rainfall_anomaly_pct", -48.0)),
-        soil_moisture_vwc_pct=float(body.get("soil_moisture_vwc_pct", 21.0)),
-        crop_type=str(body.get("crop_type", "Wheat")),
+        heat_stress_score=float(heat_score),
+        rainfall_anomaly_pct=float(rain_anomaly),
+        soil_moisture_vwc_pct=float(soil_vwc),
+        crop_type=str(crop),
         growth_stage=str(body.get("growth_stage", "Flowering / Grain Filling"))
     )
+
+    sat_score = res.get("signals", {}).get("satellite_macro", {}).get("partial_score")
+    yolo_score = res.get("signals", {}).get("yolo_foliar_micro", {}).get("partial_score")
+    weather_score = res.get("signals", {}).get("weather_environmental", {}).get("partial_score")
+    soil_score = res.get("signals", {}).get("soil_edaphic", {}).get("partial_score")
+
+    return {
+        **res,
+        "composite_risk_score": res.get("composite_field_risk_score"),
+        "ndvi_factor": sat_score,
+        "yolo_factor": yolo_score,
+        "factors": {
+            "ndvi": sat_score,
+            "yolo": yolo_score,
+            "weather": weather_score,
+            "soil": soil_score
+        }
+    }
 
 # ── Soil Intelligence ────────────────────────────────────────────────────────
 
