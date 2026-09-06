@@ -16,27 +16,28 @@ const SAMPLE_LEAF_PRESETS = [
     name: 'Potato Late Blight',
     crop: 'Potato',
     filename: 'potato_late_blight.jpg',
-    image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?q=80&w=400&auto=format&fit=crop'
+    image: '/sample_leaves/potato_late_blight.jpg'
   },
   {
     id: 'tomato_blight',
     name: 'Tomato Early Blight',
     crop: 'Tomato',
     filename: 'tomato_early_blight.jpg',
-    image: 'https://images.unsplash.com/photo-1592841200221-a6898f307baa?q=80&w=400&auto=format&fit=crop'
+    image: '/sample_leaves/tomato_early_blight.jpg'
   },
   {
-    id: 'soybean_spot',
-    name: 'Soybean Brown Spot',
-    crop: 'Soybean',
-    filename: 'soybean_early_blight.jpg',
-    image: 'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?q=80&w=400&auto=format&fit=crop'
+    id: 'tomato_healthy',
+    name: 'Healthy Tomato',
+    crop: 'Tomato',
+    filename: 'tomato_healthy.jpg',
+    image: '/sample_leaves/tomato_healthy.jpg'
   }
 ];
 
 export const CropDiseaseDiagnosisCard: React.FC = () => {
   const { t } = useLanguage();
   const [selectedPreset, setSelectedPreset] = useState(SAMPLE_LEAF_PRESETS[0]);
+  const [currentImage, setCurrentImage] = useState<string>(SAMPLE_LEAF_PRESETS[0].image);
   const [modelChoice, setModelChoice] = useState<'ensemble' | 'yolov11' | 'yolov8' | 'cnn'>('ensemble');
   const [viewMode, setViewMode] = useState<'mask' | 'bbox' | 'heatmap'>('mask');
   const [analyzing, setAnalyzing] = useState(false);
@@ -96,6 +97,7 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
 
   const handleRunDiagnosis = async (preset: typeof SAMPLE_LEAF_PRESETS[0], chosenModel = modelChoice) => {
     setSelectedPreset(preset);
+    setCurrentImage(preset.image);
     setAnalyzing(true);
     try {
       const res = await api.krishiSaarthi.diagnoseDisease({
@@ -123,6 +125,14 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
     const reader = new FileReader();
     reader.onload = async () => {
       const b64 = reader.result as string;
+      setCurrentImage(b64);
+      setSelectedPreset({
+        id: 'user_upload',
+        name: file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name,
+        crop: 'User Upload',
+        filename: file.name,
+        image: b64
+      });
       setAnalyzing(true);
       try {
         const res = await api.krishiSaarthi.diagnoseDisease({
@@ -244,7 +254,7 @@ export const CropDiseaseDiagnosisCard: React.FC = () => {
         {/* Left: Image with Grad-CAM Attention Heatmap & Segmentation Mask Overlay */}
         <div className="md:col-span-5 relative rounded-xl overflow-hidden border border-white/10 bg-black aspect-video md:aspect-square flex items-center justify-center">
           <img
-            src={selectedPreset.image}
+            src={currentImage}
             alt="Leaf inspection"
             className="w-full h-full object-cover"
           />
