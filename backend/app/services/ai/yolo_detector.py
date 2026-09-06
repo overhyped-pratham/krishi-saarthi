@@ -190,6 +190,11 @@ def _load_hf_model(model_name_or_repo: str) -> Optional[Any]:
     if model_name_or_repo in _LOADED_MODELS:
         return _LOADED_MODELS[model_name_or_repo]
 
+    if "transfpn" in model_name_or_repo.lower():
+        err = "TransFPN requires custom compiled modules; using Agrosight YOLOv11 & OpenCV decomposition"
+        _MODEL_LOAD_ERRORS[model_name_or_repo] = err
+        return None
+
     try:
         from ultralytics import YOLO
     except ImportError as e:
