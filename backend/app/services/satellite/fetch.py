@@ -29,16 +29,22 @@ class SatelliteDataFetcher:
 
     @staticmethod
     def _spatial_texture(size: int, seed: int, scale: float = 0.08) -> np.ndarray:
-        """Generate spatially coherent texture using smoothed noise."""
+        """Generate spatially coherent texture using smoothed noise.
+        
+        Args:
+            size: Output array size (size x size)
+            seed: Random seed for reproducibility
+            scale: Controls fine noise amplitude (0.0-1.0)
+        """
         rng = np.random.RandomState(seed)
         # Low-frequency base
         coarse = rng.uniform(0, 1, (size // 4, size // 4))
         # Upsample via bilinear-like repetition
         rows = np.repeat(coarse, 4, axis=0)[:size]
         cols = np.repeat(rows, 4, axis=1)[:, :size]
-        # Add finer noise
-        fine = rng.uniform(0, 1, (size, size)) * 0.3
-        return cols * 0.7 + fine
+        # Add finer noise using the scale parameter
+        fine = rng.uniform(0, 1, (size, size)) * scale
+        return cols * (1.0 - scale) + fine
 
     def _generate_mock_data(
         self,

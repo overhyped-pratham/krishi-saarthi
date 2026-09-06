@@ -143,12 +143,12 @@ class PlanetInsightsService:
                     }
                 })
 
-        if not obs_list:
-            # Fallback high-res time series
+        # Fill remaining points with fallback synthetic observations
+        if len(obs_list) < n_points:
             start = datetime.strptime(start_date, "%Y-%m-%d")
             end = datetime.strptime(end_date, "%Y-%m-%d")
             step = (end - start) / max(1, n_points - 1)
-            for i in range(n_points):
+            for i in range(len(obs_list), n_points):
                 obs_d = (start + step * i).strftime("%Y-%m-%d")
                 obs_list.append({
                     "date": obs_d,
@@ -164,7 +164,7 @@ class PlanetInsightsService:
                     }
                 })
 
-        return obs_list
+        return obs_list[:n_points]
 
     def _mock_planet_response(
         self,

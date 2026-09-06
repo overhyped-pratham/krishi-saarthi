@@ -4,9 +4,9 @@ from app.services.satellite.planet_service import PlanetInsightsService
 @pytest.mark.asyncio
 async def test_planet_insights_search():
     service = PlanetInsightsService()
-    assert service.api_key == "PLAK12bc61b3896a4b5fac1282d5cb8bb208"
-    assert service.user_id == "e3f35a9a-7155-4eed-9e38-0a590270e658"
-    
+    # Service initializes with or without API key (mock fallback)
+    assert service.base_url is not None
+
     res = await service.search_scenes(
         center_lat=30.3398,
         center_lon=76.3869,
@@ -16,6 +16,7 @@ async def test_planet_insights_search():
     assert res is not None
     assert "provider" in res
     assert "Planet" in res["provider"]
+    assert "features" in res
 
 @pytest.mark.asyncio
 async def test_planet_insights_time_series():

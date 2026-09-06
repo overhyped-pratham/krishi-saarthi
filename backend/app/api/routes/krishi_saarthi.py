@@ -24,6 +24,7 @@ from app.services.ai.yolo_detector import detect_crop_disease_yolo
 from app.services.ai.plant_disease_cnn import classify_plant_disease
 from app.services.agri_intelligence.risk_engine import evaluate_dual_signal_field_risk
 from app.services.agri_intelligence.central_contract import build_central_intelligence_object
+from app.services.ai.cv_leaf_analyzer import generate_heatmap_b64
 
 router = APIRouter(prefix="", tags=["Krishi Saarthi Agricultural Intelligence"])
 
@@ -211,42 +212,53 @@ async def disease_diagnosis(body: Dict[str, Any] = Body(...)):
             conf_threshold=conf
         )
 
+    # Generate real OpenCV HSV heatmap from the same image input
+    img_input_for_heatmap = img_b64 or filename
+    heatmap_b64 = generate_heatmap_b64(img_input_for_heatmap)
+
+    affected_pct = res.get("visually_affected_area_pct", 0)
+    health_score = round(max(0.0, 100.0 - float(affected_pct)), 1)
+
     return {
         "detected": res.get("detected", True),
         "status": res.get("status", "success"),
-        "detection_mode": res.get("detection_mode", "yolo_deep_learning_live"),
+        "analysis_path": "crop_image",
+        "detection_mode": res.get("detection_mode", "opencv_foliar_decomposition"),
+        "heatmap_type": "opencv_hsv_segmentation" if "opencv" in res.get("detection_mode", "") else "bbox_region",
         "model_source": res.get("model_source", ""),
-        "crop": res.get("crop", "Soybean"),
-        "disease": res.get("disease", "Early Blight"),
-        "pathogen_type": res.get("pathogen_type", "Fungal"),
-        "confidence": res.get("confidence", 0.94),
-        "severity": res.get("severity", "Moderate"),
+        "crop": res.get("crop", ""),
+        "disease": res.get("disease", ""),
+        "pathogen_type": res.get("pathogen_type", ""),
+        "confidence": res.get("confidence", 0.0),
+        "severity": res.get("severity", ""),
         "symptoms": res.get("symptoms", []),
         "detected_classes": res.get("detected_classes", []),
         "active_models": res.get("active_models", []),
         "top3_predictions": res.get("top3_predictions", []),
-        "visually_affected_area_pct": res.get("visually_affected_area_pct", 18.7),
-        "healthy_vegetation_pct": res.get("healthy_vegetation_pct", 81.3),
+        # Pixel-level damage metrics
+        "visually_affected_area_pct": affected_pct,
+        "healthy_vegetation_pct": res.get("healthy_vegetation_pct", 100.0),
+        "health_score": health_score,
+        "total_lamina_pixels": res.get("total_lamina_pixels"),
+        "diseased_pixels": res.get("diseased_pixels"),
+        "necrotic_pixels": res.get("necrotic_pixels"),
+        "chlorotic_pixels": res.get("chlorotic_pixels"),
+        # Spatial overlays
         "segmentation_masks": res.get("segmentation_masks", []),
         "gradcam_bounding_boxes": res.get("gradcam_bounding_boxes", []),
-        "visual_heatmap": res.get("gradcam_bounding_boxes", []),
-        "organic_remedies": res.get("organic_remedies", [
-            "Neem oil spray (5ml/L)",
-            "Bio-control Trichoderma application"
-        ]),
-        "chemical_treatment": res.get("chemical_treatment", "Consult local extension officer for chemical advisory."),
-        "ipm_practices": res.get("ipm_practices", [
-            "Avoid overhead watering",
-            "Ensure field aeration"
-        ]),
+        # Heatmap: real OpenCV JET colormap of disease mask, base64-encoded JPEG
+        "heatmap_b64": heatmap_b64,
+        # Advisory
+        "organic_remedies": res.get("organic_remedies", []),
+        "chemical_treatment": res.get("chemical_treatment", ""),
+        "ipm_practices": res.get("ipm_practices", []),
         "preventive_actions": res.get("ipm_practices", []),
-        "advisory_disclaimer": res.get(
-            "advisory_disclaimer",
-            "Visually affected foliar area represents canopy symptom coverage, not direct yield loss. Consult KVK."
-        ),
+        "advisory_disclaimer": res.get("advisory_disclaimer", ""),
         "dual_signal_risk": res.get("dual_signal_risk", {}),
-        "inference_latency_ms": res.get("inference_latency_ms", 45.0)
+        "inference_latency_ms": res.get("inference_latency_ms"),
     }
+
+
 
 
 @router.post("/api/disease-detect")

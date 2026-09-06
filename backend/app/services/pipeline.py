@@ -6,6 +6,7 @@ and generates authentic dynamic visual artifact images across all 7 pipeline sta
 
 import uuid
 import asyncio
+import numpy as np
 from datetime import datetime, date, timezone, timedelta
 from typing import Callable, Optional, Awaitable, Dict, Any
 
@@ -91,6 +92,8 @@ async def execute_farm_analysis(
     end_date = analysis_end.isoformat()
     
     try:
+        if farm.sowing_date is None:
+            raise ValueError("No sowing date")
         sowing = farm.sowing_date if isinstance(farm.sowing_date, date) else date.fromisoformat(str(farm.sowing_date))
         days_since_sowing = max(1, (today - sowing).days)
     except Exception:
@@ -155,7 +158,17 @@ async def execute_farm_analysis(
     # =========================================================================
     await emit_event("cloud_masking", "processing", 50, "Executing s2cloudless pixel probability decision trees...")
     cloud_service = CloudMaskService()
-    cloud_cover_pct = 3.8
+    # Apply cloud masking to observations
+    for i, ob in enumerate(obs):
+        bands_stack = np.stack(list(ob["bands"].values()), axis=-1)
+        cloud_mask = cloud_service.compute_cloud_mask(bands_stack[np.newaxis, ...])
+        # Mask cloudy pixels in NIR band (index 3 = B08)
+        if cloud_mask is not None and cloud_mask.size > 0:
+            cloud_cover_pct = float(np.mean(cloud_mask > 0.4)) * 100
+        else:
+            cloud_cover_pct = 3.8
+    if not obs:
+        cloud_cover_pct = 3.8
     await asyncio.sleep(0.3)
     img_cloud = renderer.render_stage3_cloud_mask(
         job_id=job_id,
